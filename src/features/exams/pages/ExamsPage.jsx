@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../../../components/common/PageHeader";
+import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+
 import Button from "../../../components/ui/Button";
 import Toast from "../../../components/ui/Toast";
-import ExamClassCard from "../components/ExamClassCard";
+import StudentGradeTable from "../components/StudentGradeTable";
 
 function ExamsPage() {
   const teacherClasses = [
@@ -11,35 +12,64 @@ function ExamsPage() {
   ];
 
   const students = [
-    { id: 1, firstName: "Ali", lastName: "Yıldız", className: "9-A", club: "Robotik" },
-    { id: 2, firstName: "Ayşe", lastName: "Kaya", className: "9-A", club: "Müzik" },
-    { id: 3, firstName: "Mehmet", lastName: "Can", className: "9-A", club: "Satranç" },
-    { id: 4, firstName: "Zeynep", lastName: "Kara", className: "9-A", club: "" },
-    { id: 5, firstName: "Ece", lastName: "Arslan", className: "10-B", club: "Tiyatro" },
+    {
+      id: 1,
+      firstName: "Ali",
+      lastName: "Yıldız",
+      className: "9-A",
+      club: "Robotik",
+    },
+    {
+      id: 2,
+      firstName: "Ayşe",
+      lastName: "Kaya",
+      className: "9-A",
+      club: "Müzik",
+    },
+    {
+      id: 3,
+      firstName: "Mehmet",
+      lastName: "Can",
+      className: "9-A",
+      club: "Satranç",
+    },
+    {
+      id: 4,
+      firstName: "Zeynep",
+      lastName: "Kara",
+      className: "9-A",
+      club: "",
+    },
+    {
+      id: 5,
+      firstName: "Ece",
+      lastName: "Arslan",
+      className: "10-B",
+      club: "Tiyatro",
+    },
   ];
 
   const [selectedClass, setSelectedClass] = useState("9-A");
-
   const [grades, setGrades] = useState({});
-
   const [toast, setToast] = useState({
     message: "",
     type: "success",
   });
 
   const selectedStudents = useMemo(() => {
-    return students.filter((s) => s.className === selectedClass);
+    return students.filter((student) => student.className === selectedClass);
   }, [selectedClass]);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
+
     setTimeout(() => {
       setToast({ message: "", type: "success" });
     }, 2500);
   };
 
   const handleChange = (studentId, field, value) => {
-    if (value && (value < 0 || value > 100)) {
+    if (value && (Number(value) < 0 || Number(value) > 100)) {
       showToast("Not 0-100 arasında olmalı", "error");
       return;
     }
@@ -54,145 +84,70 @@ function ExamsPage() {
   };
 
   const handleSave = () => {
-    console.log("KAYIT:", grades);
-    showToast("Notlar kaydedildi");
-  };
+    console.log("KAYIT:", {
+      selectedClass,
+      grades,
+    });
 
-  const getValue = (id, field) => {
-    return grades[id]?.[field] ?? "";
+    showToast(`${selectedClass} sınıfı notları kaydedildi.`);
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <PageHeader
-        title="Sınavlar"
-        description="Sınıf bazlı öğrenci not giriş sistemi"
-      >
-        <Button onClick={handleSave}>Kaydet</Button>
-      </PageHeader>
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">Not Yönetimi</p>
 
-      {/* SINIF SEÇİMİ */}
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {teacherClasses.map((c) => (
-          <ExamClassCard
-            key={c.id}
-            classItem={c}
-            isSelected={selectedClass === c.className}
-            onClick={setSelectedClass}
-          />
-        ))}
-      </div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+              Sınavlar
+            </h1>
 
-      {/* TABLO */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead className="bg-base-200/70">
-              <tr>
-                <th>Öğrenci</th>
-                <th>Sınıf</th>
+            <p className="mt-1 text-sm text-gray-500">
+              Sınıf bazlı öğrenci not giriş sistemini yönetin
+            </p>
+          </div>
 
-                <th>1. Sınav</th>
-                <th>2. Sınav</th>
-                <th>Proje</th>
+          <Button onClick={handleSave}>
+            <ClipboardDocumentCheckIcon className="h-5 w-5" />
+            Kaydet
+          </Button>
+        </div>
+      </section>
 
-                <th>Sınıf İçi 1</th>
-                <th>Sınıf İçi 2</th>
-                <th>Sınıf İçi 3</th>
-              </tr>
-            </thead>
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+              Not Girişi
+            </h2>
 
-            <tbody>
-              {selectedStudents.map((s) => (
-                <tr key={s.id} className="hover:bg-base-200/60">
-                  <td>
-                    {s.firstName} {s.lastName}
-                  </td>
+            <p className="mt-1 text-sm text-gray-500">
+              Sınıf seçip öğrenci notlarını girin
+            </p>
+          </div>
 
-                  <td>
-                    <span className="badge badge-primary">{s.className}</span>
-                  </td>
-
-                  {/* NOT ALANLARI */}
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "exam1")}
-                      onChange={(e) =>
-                        handleChange(s.id, "exam1", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "exam2")}
-                      onChange={(e) =>
-                        handleChange(s.id, "exam2", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "project")}
-                      onChange={(e) =>
-                        handleChange(s.id, "project", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "class1")}
-                      onChange={(e) =>
-                        handleChange(s.id, "class1", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "class2")}
-                      onChange={(e) =>
-                        handleChange(s.id, "class2", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="text"
-                      className="input input-bordered w-20"
-                      value={getValue(s.id, "class3")}
-                      onChange={(e) =>
-                        handleChange(s.id, "class3", e.target.value)
-                      }
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <select
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-60"
+          >
+            {teacherClasses.map((classItem) => (
+              <option key={classItem.id} value={classItem.className}>
+                {classItem.className} ({classItem.studentCount} öğrenci)
+              </option>
+            ))}
+          </select>
         </div>
 
-        {selectedStudents.length === 0 && (
-          <div className="p-6 text-center text-sm">
-            Bu sınıfta öğrenci yok
-          </div>
-        )}
-      </div>
+        <StudentGradeTable
+          students={selectedStudents}
+          grades={grades}
+          onGradeChange={handleChange}
+        />
+      </section>
     </div>
   );
 }

@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../../../components/common/PageHeader";
+import {
+  ClipboardDocumentCheckIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+
 import Button from "../../../components/ui/Button";
 import Toast from "../../../components/ui/Toast";
 import TrialExamResultTable from "../components/TrialExamResultTable";
@@ -85,45 +89,59 @@ function TrialExamsPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <PageHeader
-        title="Deneme Sınavları"
-        description="Öğretmen sadece kendi sınıfına ait deneme sınavı netlerini girer"
-      >
-        <Button onClick={handleSave}>Deneme Sonuçlarını Kaydet</Button>
-      </PageHeader>
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Deneme Yönetimi
+            </p>
 
-      <div className="mb-6 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-        <label className="label">
-          <span className="label-text font-semibold">Deneme Sınavı Adı</span>
-        </label>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+              Deneme Sınavları
+            </h1>
 
-        <input
-          type="text"
-          className="input input-bordered w-full rounded-xl md:max-w-md"
-          value={trialExamName}
-          onChange={(e) => setTrialExamName(e.target.value)}
-          placeholder="Örn: TYT Deneme 1"
-        />
-      </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Kendi sınıfınıza ait deneme sınavı netlerini girin
+            </p>
+          </div>
 
-      <div className="mt-6 card border border-base-300 bg-base-100 shadow-sm">
-        <div className="card-body">
-          <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-            <div>
-              <h2 className="card-title">
-                {selectedClass} - {trialExamName}
-              </h2>
-              <p className="text-sm text-base-content/50">
-                Öğrencilerin ders bazlı netlerini girin.
-              </p>
-            </div>
+          <Button onClick={handleSave}>
+            <ClipboardDocumentCheckIcon className="h-5 w-5" />
+            Sonuçları Kaydet
+          </Button>
+        </div>
+      </section>
 
-            <div className="badge badge-primary rounded-lg p-4">
-              {selectedStudents.length} Öğrenci
-            </div>
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-md">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+            <input
+              type="text"
+              value={trialExamName}
+              onChange={(e) => setTrialExamName(e.target.value)}
+              placeholder="Örn: TYT Deneme 1"
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+            />
+          </div>
+
+          <div className="inline-flex h-11 items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-600">
+            {selectedClass} / {selectedStudents.length} Öğrenci
+          </div>
+        </div>
+
+        <div className="p-5">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+              {selectedClass} - {trialExamName}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Öğrencilerin ders bazlı netlerini girin.
+            </p>
           </div>
 
           <TrialExamResultTable
@@ -132,7 +150,7 @@ function TrialExamsPage() {
             onResultChange={handleResultChange}
           />
         </div>
-      </div>
+      </section>
     </div>
   );
 }
