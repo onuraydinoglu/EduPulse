@@ -1,4 +1,4 @@
-function StatCard({ title, value, icon, description, color = "primary" }) {
+function StatCard({ title, value, icon: Icon, description, color = "primary" }) {
   const colorClasses = {
     primary: "bg-blue-50 text-blue-600",
     success: "bg-emerald-50 text-emerald-600",
@@ -24,11 +24,14 @@ function StatCard({ title, value, icon, description, color = "primary" }) {
           )}
         </div>
 
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${colorClasses[color]}`}
-        >
-          {icon}
-        </div>
+        {Icon && (
+          <div
+            className={`flex h-11 w-11 items-center justify-center rounded-xl ${colorClasses[color] || colorClasses.primary
+              }`}
+          >
+            <Icon className="h-5 w-5" />
+          </div>
+        )}
       </div>
     </div>
   );

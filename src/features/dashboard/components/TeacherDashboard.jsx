@@ -87,7 +87,7 @@ function TeacherDashboard() {
         <StatCard
           title="Sorumlu Sınıf"
           value="9-A"
-          icon={<HomeModernIcon className="h-5 w-5" />}
+          icon={HomeModernIcon}
           description="Öğretmenin sınıfı"
           color="primary"
         />
@@ -95,7 +95,7 @@ function TeacherDashboard() {
         <StatCard
           title="Toplam Öğrenci"
           value="32"
-          icon={<UserGroupIcon className="h-5 w-5" />}
+          icon={UserGroupIcon}
           description="Sınıftaki öğrenci sayısı"
           color="info"
         />
@@ -103,7 +103,7 @@ function TeacherDashboard() {
         <StatCard
           title="Sınıf Ortalaması"
           value="%74"
-          icon={<ChartBarIcon className="h-5 w-5" />}
+          icon={ChartBarIcon}
           description="Ders başarı ortalaması"
           color="success"
         />
@@ -111,7 +111,7 @@ function TeacherDashboard() {
         <StatCard
           title="Takip Öğrencisi"
           value="2"
-          icon={<ExclamationTriangleIcon className="h-5 w-5" />}
+          icon={ExclamationTriangleIcon}
           description="Yakından takip gereken öğrenci"
           color="warning"
         />

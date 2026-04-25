@@ -92,7 +92,7 @@ function AdminDashboard() {
           value="12"
           description="Kayıtlı okul"
           color="primary"
-          icon={<BuildingOffice2Icon className="h-5 w-5" />}
+          icon={BuildingOffice2Icon}
         />
 
         <StatCard
@@ -100,7 +100,7 @@ function AdminDashboard() {
           value="1.284"
           description="Aktif öğrenci"
           color="info"
-          icon={<UserGroupIcon className="h-5 w-5" />}
+          icon={UserGroupIcon}
         />
 
         <StatCard
@@ -108,7 +108,7 @@ function AdminDashboard() {
           value="86"
           description="Aktif öğretmen"
           color="success"
-          icon={<AcademicCapIcon className="h-5 w-5" />}
+          icon={AcademicCapIcon}
         />
 
         <StatCard
@@ -116,7 +116,7 @@ function AdminDashboard() {
           value="Aktif"
           description="Sistem çalışıyor"
           color="warning"
-          icon={<CheckCircleIcon className="h-5 w-5" />}
+          icon={CheckCircleIcon}
         />
       </div>
 
