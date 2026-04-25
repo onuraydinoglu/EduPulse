@@ -1,12 +1,16 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 
-function CreateButton({ children, onClick }) {
+function CreateButton({
+  children,
+  onClick,
+  icon: Icon = PlusIcon, // default PlusIcon
+}) {
   return (
     <button
       onClick={onClick}
-      className="btn btn-primary rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      className="btn-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-semibold transition-all duration-200 cursor-pointer"
     >
-      <PlusIcon className="h-5 w-5" />
+      {Icon && <Icon className="h-5 w-5" />}
       {children}
     </button>
   );

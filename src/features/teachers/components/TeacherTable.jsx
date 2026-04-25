@@ -2,14 +2,14 @@ import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({ teachers, onEdit, onDelete }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
             <tr>
               <th className="text-sm">Öğretmen</th>
               <th className="text-sm">Branşı</th>
-              <th className="text-sm">Sorumlu Sınıf</th>
+              <th className="text-sm">Sınıfı</th>
               <th className="text-sm">Durum</th>
               <th className="text-right text-sm">İşlemler</th>
             </tr>

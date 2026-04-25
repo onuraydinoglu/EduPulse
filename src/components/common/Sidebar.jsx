@@ -1,8 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { menuItems } from "../../constants/menuItems";
 import { authStorage } from "../../features/auth/services/authStorage";
+import {
+  AcademicCapIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 
-function Sidebar() {
+function Sidebar({ collapsed }) {
   const navigate = useNavigate();
   const user = authStorage.getUser();
 
@@ -16,17 +20,31 @@ function Sidebar() {
   };
 
   return (
-    <aside className="flex min-h-full w-72 flex-col border-r border-base-300 bg-base-100">
-      <div className="border-b border-base-300 px-6 py-5">
-        <h1 className="text-2xl font-bold tracking-tight text-primary">
-          OkulPro
-        </h1>
-        <p className="text-sm text-base-content/60">
-          Okul Yönetim Sistemi
-        </p>
+    <aside
+      className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "w-20" : "w-68"
+        }`}
+    >
+      <div className={`${collapsed ? "px-3" : "px-6"} py-6`}>
+        <div
+          className={`flex items-center ${collapsed ? "justify-center" : "gap-3"
+            }`}
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <AcademicCapIcon className="h-6 w-6" />
+          </div>
+
+          {!collapsed && (
+            <div>
+              <h1 className="text-lg font-bold leading-tight">EduPulse</h1>
+              <p className="text-xs text-base-content/50">
+                Okul Yönetim Sistemi
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-4 py-6">
+      <nav className="flex-1 space-y-1 px-3 pb-6 pt-3">
         {filteredMenuItems.map((item) => {
           const Icon = item.icon;
 
@@ -36,26 +54,72 @@ function Sidebar() {
               to={item.path}
               end={item.path === "/dashboard"}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
-                  ? "bg-primary text-primary-content shadow-md"
-                  : "text-base-content/70 hover:bg-base-200 hover:text-base-content"
+                `group relative flex items-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? "justify-center px-2" : "gap-3 px-3"
+                } ${isActive
+                  ? "bg-base-200 text-base-content"
+                  : "text-base-content/55 hover:bg-base-200/60 hover:text-base-content"
                 }`
               }
             >
-              <Icon className="h-5 w-5" />
-              <span>{item.title}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive && !collapsed && (
+                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+                  )}
+
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 ${isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-base-content/45 group-hover:bg-base-300/50 group-hover:text-base-content"
+                      }`}
+                  >
+                    <Icon className="h-[18px] w-[18px]" />
+                  </span>
+
+                  {!collapsed && (
+                    <span className="tracking-tight">{item.title}</span>
+                  )}
+
+                  {collapsed && (
+                    <span className="pointer-events-none absolute left-16 z-50 whitespace-nowrap rounded-lg bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100">
+                      {item.title}
+                    </span>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
-      <div className="border-t border-base-300 p-4">
-        <button
-          onClick={handleLogout}
-          className="btn btn-error btn-outline w-full rounded-xl"
-        >
-          Çıkış Yap
-        </button>
+      <div className="border-t border-base-300/70 p-4">
+        {!collapsed ? (
+          <>
+            <div className="mb-3 rounded-2xl bg-base-200/70 p-3">
+              <p className="text-sm font-bold">
+                {user?.fullName || "Kullanıcı"}
+              </p>
+              <p className="text-xs capitalize text-base-content/50">
+                {user?.role || "Rol yok"}
+              </p>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="btn btn-error btn-outline w-full rounded-2xl font-semibold"
+            >
+              Çıkış Yap
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleLogout}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-error transition hover:bg-error/10"
+            title="Çıkış Yap"
+          >
+            <ArrowRightOnRectangleIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </aside>
   );
