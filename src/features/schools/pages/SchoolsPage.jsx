@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../../../components/common/PageHeader";
-import PageToolbar from "../../../components/common/PageToolbar";
+import {
+  BuildingOffice2Icon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
@@ -23,10 +26,7 @@ function SchoolsPage() {
   const [formData, setFormData] = useState(emptySchoolForm);
   const [editingSchoolId, setEditingSchoolId] = useState(null);
   const [deletingSchoolId, setDeletingSchoolId] = useState(null);
-  const [toast, setToast] = useState({
-    message: "",
-    type: "success",
-  });
+  const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
@@ -34,10 +34,7 @@ function SchoolsPage() {
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
-
-    setTimeout(() => {
-      setToast({ message: "", type: "success" });
-    }, 2500);
+    setTimeout(() => setToast({ message: "", type: "success" }), 2500);
   };
 
   const filteredSchools = useMemo(() => {
@@ -61,6 +58,7 @@ function SchoolsPage() {
 
   const handleOpenEditModal = (school) => {
     setEditingSchoolId(school.id);
+
     setFormData({
       name: school.name,
       city: school.city,
@@ -132,36 +130,62 @@ function SchoolsPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <PageHeader
-        title="Okullar"
-        description="Sisteme kayıtlı okulları görüntüleyin ve yönetin"
-      >
-        <CreateButton onClick={handleOpenCreateModal}>
-          Yeni Okul
-        </CreateButton>
-      </PageHeader>
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Okul Yönetimi
+            </p>
 
-      <PageToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Okul, şehir veya müdür ara..."
-        filterValue={status}
-        onFilterChange={setStatus}
-        filterOptions={[
-          { label: "Tüm Durumlar", value: "all" },
-          { label: "Aktif", value: "Aktif" },
-          { label: "Pasif", value: "Pasif" },
-        ]}
-      />
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+              Okullar
+            </h1>
 
-      <SchoolTable
-        schools={filteredSchools}
-        onEdit={handleOpenEditModal}
-        onDelete={handleOpenDeleteModal}
-      />
+            <p className="mt-1 text-sm text-gray-500">
+              Sisteme kayıtlı okulları görüntüleyin ve yönetin
+            </p>
+          </div>
+
+          <CreateButton icon={BuildingOffice2Icon} onClick={handleOpenCreateModal}>
+            Yeni Okul
+          </CreateButton>
+        </div>
+      </section>
+
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-md">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Okul, şehir veya müdür ara..."
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+            />
+          </div>
+
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-52"
+          >
+            <option value="all">Tüm Durumlar</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Pasif">Pasif</option>
+          </select>
+        </div>
+
+        <SchoolTable
+          schools={filteredSchools}
+          onEdit={handleOpenEditModal}
+          onDelete={handleOpenDeleteModal}
+        />
+      </section>
 
       <Modal
         id="school_modal"

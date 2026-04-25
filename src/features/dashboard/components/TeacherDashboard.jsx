@@ -1,4 +1,11 @@
-import PageHeader from "../../../components/common/PageHeader";
+import {
+  AcademicCapIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  HomeModernIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
+
 import StatCard from "../../../components/ui/StatCard";
 import DataTable from "../../../components/ui/DataTable";
 
@@ -10,23 +17,48 @@ function TeacherDashboard() {
     { id: 4, fullName: "Zeynep Kara", average: 48, examAverage: 42, status: "Riskli" },
   ];
 
+  const getStatusClass = (status) => {
+    if (status === "Çok Başarılı") return "bg-emerald-50 text-emerald-600";
+    if (status === "Başarılı") return "bg-blue-50 text-blue-600";
+    if (status === "Takip Edilmeli") return "bg-amber-50 text-amber-600";
+    return "bg-rose-50 text-rose-600";
+  };
+
   const columns = [
-    { key: "fullName", title: "Öğrenci" },
+    {
+      key: "fullName",
+      title: "Öğrenci",
+      render: (row) => (
+        <p className="font-medium text-gray-900">{row.fullName}</p>
+      ),
+    },
     {
       key: "average",
       title: "Ders Ort.",
-      render: (row) => <span className="font-semibold">%{row.average}</span>,
+      render: (row) => (
+        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+          %{row.average}
+        </span>
+      ),
     },
     {
       key: "examAverage",
       title: "Sınav Ort.",
-      render: (row) => <span className="font-semibold">%{row.examAverage}</span>,
+      render: (row) => (
+        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+          %{row.examAverage}
+        </span>
+      ),
     },
     {
       key: "status",
       title: "Durum",
       render: (row) => (
-        <span className="badge badge-info rounded-lg">
+        <span
+          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusClass(
+            row.status
+          )}`}
+        >
           {row.status}
         </span>
       ),
@@ -34,17 +66,28 @@ function TeacherDashboard() {
   ];
 
   return (
-    <div>
-      <PageHeader
-        title="Öğretmen Ana Sayfa"
-        description="Sorumlu olduğunuz sınıfın öğrenci ve başarı özeti"
-      />
+    <div className="space-y-6">
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div>
+          <p className="text-sm font-medium text-blue-600">
+            Öğretmen Paneli
+          </p>
+
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+            Öğretmen Ana Sayfa
+          </h1>
+
+          <p className="mt-1 text-sm text-gray-500">
+            Sorumlu olduğunuz sınıfın öğrenci ve başarı özetini takip edin
+          </p>
+        </div>
+      </section>
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Sorumlu Sınıf"
           value="9-A"
-          icon="🏫"
+          icon={<HomeModernIcon className="h-5 w-5" />}
           description="Öğretmenin sınıfı"
           color="primary"
         />
@@ -52,7 +95,7 @@ function TeacherDashboard() {
         <StatCard
           title="Toplam Öğrenci"
           value="32"
-          icon="🎓"
+          icon={<UserGroupIcon className="h-5 w-5" />}
           description="Sınıftaki öğrenci sayısı"
           color="info"
         />
@@ -60,7 +103,7 @@ function TeacherDashboard() {
         <StatCard
           title="Sınıf Ortalaması"
           value="%74"
-          icon="📊"
+          icon={<ChartBarIcon className="h-5 w-5" />}
           description="Ders başarı ortalaması"
           color="success"
         />
@@ -68,22 +111,29 @@ function TeacherDashboard() {
         <StatCard
           title="Takip Öğrencisi"
           value="2"
-          icon="⚠️"
+          icon={<ExclamationTriangleIcon className="h-5 w-5" />}
           description="Yakından takip gereken öğrenci"
           color="warning"
         />
       </div>
 
-      <div className="mt-6 card border border-base-300 bg-base-100 shadow-sm">
-        <div className="card-body">
-          <h2 className="card-title">Sınıf Öğrenci Özeti</h2>
-          <p className="mb-4 text-sm text-base-content/50">
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <AcademicCapIcon className="h-5 w-5 text-blue-600" />
+
+            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+              Sınıf Öğrenci Özeti
+            </h2>
+          </div>
+
+          <p className="mt-1 text-sm text-gray-500">
             Sorumlu olduğunuz sınıftaki öğrencilerin son durumu
           </p>
-
-          <DataTable columns={columns} data={students} />
         </div>
-      </div>
+
+        <DataTable columns={columns} data={students} />
+      </section>
     </div>
   );
 }
