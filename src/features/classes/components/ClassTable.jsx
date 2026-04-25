@@ -2,7 +2,7 @@ import ClassTableRow from "./ClassTableRow";
 
 function ClassTable({ classes, onEdit, onDelete }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">

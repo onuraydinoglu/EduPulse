@@ -1,4 +1,3 @@
-import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
 function StudentTableRow({ student, onDetail, onEdit, onDelete }) {
@@ -16,7 +15,7 @@ function StudentTableRow({ student, onDetail, onEdit, onDelete }) {
       </td>
 
       <td>
-        <span className="badge badge-primary rounded-lg">
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
           {student.className}
         </span>
       </td>
@@ -24,7 +23,14 @@ function StudentTableRow({ student, onDetail, onEdit, onDelete }) {
       <td>{student.club || "Yok"}</td>
 
       <td>
-        <StatusBadge status={student.status} />
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${student.status === "Aktif"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-rose-50 text-rose-600"
+            }`}
+        >
+          {student.status}
+        </span>
       </td>
 
       <td className="text-right">

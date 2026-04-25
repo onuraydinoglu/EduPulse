@@ -4,7 +4,7 @@ function ClassTableRow({ classItem, onEdit, onDelete }) {
   return (
     <tr className="hover:bg-base-200/60">
       <td>
-        <span className="badge badge-primary rounded-lg">
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
           {classItem.className}
         </span>
       </td>

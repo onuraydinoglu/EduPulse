@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../../../components/common/PageHeader";
-import PageToolbar from "../../../components/common/PageToolbar";
-import CreateButton from "../../../components/ui/CreateButton";
+import {
+  MagnifyingGlassIcon,
+  AcademicCapIcon,
+} from "@heroicons/react/24/outline";
+
+import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
-import ClassTable from "../components/ClassTable";
+import CreateButton from "../../../components/ui/CreateButton";
 import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
 import ClassForm from "../components/ClassForm";
+import ClassTable from "../components/ClassTable";
 
 const emptyClassForm = {
   grade: "",
@@ -38,6 +42,7 @@ function ClassesPage() {
   const [formData, setFormData] = useState(emptyClassForm);
   const [editingClassId, setEditingClassId] = useState(null);
   const [deletingClassId, setDeletingClassId] = useState(null);
+
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
 
@@ -50,10 +55,7 @@ function ClassesPage() {
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
-
-    setTimeout(() => {
-      setToast({ message: "", type: "success" });
-    }, 2500);
+    setTimeout(() => setToast({ message: "", type: "success" }), 2500);
   };
 
   const filteredClasses = useMemo(() => {
@@ -82,7 +84,6 @@ function ClassesPage() {
       branch: classItem.branch,
       teacher: classItem.teacher,
     });
-
     document.getElementById("class_modal").showModal();
   };
 
@@ -101,7 +102,7 @@ function ClassesPage() {
 
   const handleSubmit = () => {
     if (!formData.grade || !formData.branch || !formData.teacher) {
-      showToast("Lütfen sınıf seviyesi, şube ve sınıf öğretmeni seçin.", "error");
+      showToast("Lütfen tüm alanları doldurun.", "error");
       return;
     }
 
@@ -109,28 +110,24 @@ function ClassesPage() {
 
     if (isEditing) {
       setClasses((prev) =>
-        prev.map((classItem) =>
-          classItem.id === editingClassId
-            ? {
-              ...classItem,
-              ...formData,
-              className,
-            }
-            : classItem
+        prev.map((item) =>
+          item.id === editingClassId
+            ? { ...item, ...formData, className }
+            : item
         )
       );
-
-      showToast("Sınıf bilgileri başarıyla güncellendi.");
+      showToast("Sınıf güncellendi");
     } else {
-      const newClass = {
-        id: Date.now(),
-        ...formData,
-        className,
-        studentCount: 0,
-      };
-
-      setClasses((prev) => [newClass, ...prev]);
-      showToast("Yeni sınıf başarıyla eklendi.");
+      setClasses((prev) => [
+        {
+          id: Date.now(),
+          ...formData,
+          className,
+          studentCount: 0,
+        },
+        ...prev,
+      ]);
+      showToast("Sınıf eklendi");
     }
 
     setFormData(emptyClassForm);
@@ -140,65 +137,91 @@ function ClassesPage() {
 
   const handleDelete = () => {
     setClasses((prev) =>
-      prev.filter((classItem) => classItem.id !== deletingClassId)
+      prev.filter((item) => item.id !== deletingClassId)
     );
 
     setDeletingClassId(null);
     handleCloseDeleteModal();
-    showToast("Sınıf başarıyla silindi.");
+    showToast("Sınıf silindi");
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <PageHeader
-        title="Sınıflar"
-        description="Okulunuzdaki sınıfları oluşturun ve sınıf öğretmeni atayın"
-      >
-        <CreateButton onClick={handleOpenCreateModal}>
-          Yeni Sınıf
-        </CreateButton>
-      </PageHeader>
+      {/* HEADER CARD */}
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Sınıf Yönetimi
+            </p>
 
-      <PageToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Sınıf veya öğretmen ara..."
-        filterValue={gradeFilter}
-        onFilterChange={setGradeFilter}
-        filterOptions={[
-          { label: "Tüm Sınıflar", value: "all" },
-          { label: "9. Sınıflar", value: "9" },
-          { label: "10. Sınıflar", value: "10" },
-          { label: "11. Sınıflar", value: "11" },
-          { label: "12. Sınıflar", value: "12" },
-        ]}
-      />
+            <h1 className="mt-1 text-2xl font-semibold text-gray-950">
+              Sınıflar
+            </h1>
 
-      <ClassTable
-        classes={filteredClasses}
-        onEdit={handleOpenEditModal}
-        onDelete={handleOpenDeleteModal}
-      />
+            <p className="mt-1 text-sm text-gray-500">
+              Sınıfları oluşturun ve öğretmen atayın
+            </p>
+          </div>
 
+          <CreateButton
+            icon={AcademicCapIcon}
+            onClick={handleOpenCreateModal}
+          >
+            Yeni Sınıf
+          </CreateButton>
+        </div>
+      </section>
+
+      {/* TABLE CARD */}
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:justify-between md:items-center">
+          <div className="relative w-full md:max-w-md">
+            <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Sınıf veya öğretmen ara..."
+              className="h-11 w-full rounded-xl border border-gray-200 pl-11 pr-4 text-sm focus:ring-4 focus:ring-blue-50"
+            />
+          </div>
+
+          <select
+            value={gradeFilter}
+            onChange={(e) => setGradeFilter(e.target.value)}
+            className="h-11 rounded-xl border border-gray-200 px-4 text-sm"
+          >
+            <option value="all">Tüm Sınıflar</option>
+            <option value="9">9. Sınıflar</option>
+            <option value="10">10. Sınıflar</option>
+            <option value="11">11. Sınıflar</option>
+            <option value="12">12. Sınıflar</option>
+          </select>
+        </div>
+
+        <ClassTable
+          classes={filteredClasses}
+          onEdit={handleOpenEditModal}
+          onDelete={handleOpenDeleteModal}
+        />
+      </section>
+
+      {/* MODAL */}
       <Modal
         id="class_modal"
-        title={isEditing ? "Sınıf Bilgilerini Düzenle" : "Yeni Sınıf Ekle"}
+        title={isEditing ? "Sınıf Düzenle" : "Yeni Sınıf"}
         footer={
           <>
             <form method="dialog">
-              <button className="btn btn-ghost rounded-xl">
-                Vazgeç
-              </button>
+              <Button variant="ghost">Vazgeç</Button>
             </form>
 
-            <button
-              onClick={handleSubmit}
-              className="btn btn-primary rounded-xl"
-            >
+            <Button onClick={handleSubmit}>
               {isEditing ? "Güncelle" : "Kaydet"}
-            </button>
+            </Button>
           </>
         }
       >
@@ -208,9 +231,7 @@ function ClassesPage() {
       <ConfirmModal
         id="class_delete_modal"
         title="Sınıfı Sil"
-        description="Bu sınıf kaydı kalıcı olarak silinecek. Devam etmek istediğinize emin misiniz?"
-        confirmText="Evet, Sil"
-        cancelText="Vazgeç"
+        description="Bu işlem geri alınamaz."
         onConfirm={handleDelete}
       />
     </div>

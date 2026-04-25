@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../../../components/common/PageHeader";
-import PageToolbar from "../../../components/common/PageToolbar";
+import {
+  MagnifyingGlassIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
+
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import CreateButton from "../../../components/ui/CreateButton";
@@ -166,37 +169,63 @@ function StudentsPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <PageHeader
-        title="Öğrenciler"
-        description="Öğrenci akademik ve sosyal gelişim kayıtlarını yönetin"
-      >
-        <CreateButton onClick={handleOpenCreateModal}>
-          Yeni Öğrenci
-        </CreateButton>
-      </PageHeader>
+      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Öğrenci Yönetimi
+            </p>
 
-      <PageToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Öğrenci, sınıf veya kulüp ara..."
-        filterValue={status}
-        onFilterChange={setStatus}
-        filterOptions={[
-          { label: "Tüm Durumlar", value: "all" },
-          { label: "Aktif", value: "Aktif" },
-          { label: "Pasif", value: "Pasif" },
-        ]}
-      />
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+              Öğrenciler
+            </h1>
 
-      <StudentTable
-        students={filteredStudents}
-        onDetail={(student) => console.log("Öğrenci detayı:", student)}
-        onEdit={handleOpenEditModal}
-        onDelete={handleOpenDeleteModal}
-      />
+            <p className="mt-1 text-sm text-gray-500">
+              Öğrenci akademik ve sosyal gelişim kayıtlarını yönetin
+            </p>
+          </div>
+
+          <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
+            Yeni Öğrenci
+          </CreateButton>
+        </div>
+      </section>
+
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-md">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Öğrenci, sınıf veya kulüp ara..."
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+            />
+          </div>
+
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-52"
+          >
+            <option value="all">Tüm Durumlar</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Pasif">Pasif</option>
+          </select>
+        </div>
+
+        <StudentTable
+          students={filteredStudents}
+          onDetail={(student) => console.log("Öğrenci detayı:", student)}
+          onEdit={handleOpenEditModal}
+          onDelete={handleOpenDeleteModal}
+        />
+      </section>
 
       <Modal
         id="student_modal"
