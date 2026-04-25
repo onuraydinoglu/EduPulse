@@ -1,4 +1,3 @@
-import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
 function TeacherTableRow({ teacher, onEdit, onDelete }) {
@@ -15,13 +14,20 @@ function TeacherTableRow({ teacher, onEdit, onDelete }) {
       </td>
 
       <td>
-        <span className="badge badge-primary rounded-lg">
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
           {teacher.className || "Sınıf Atanmadı"}
         </span>
       </td>
 
       <td>
-        <StatusBadge status={teacher.status} />
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${teacher.status === "Aktif"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-rose-50 text-rose-600"
+            }`}
+        >
+          {teacher.status}
+        </span>
       </td>
 
       <td className="text-right">
