@@ -10,8 +10,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 import StatCard from "../../../components/ui/StatCard";
-import DataTable from "../../../components/ui/DataTable";
 import Button from "../../../components/ui/Button";
+import TeacherStudentReportTable from "../components/TeacherStudentReportTable";
 
 function TeacherReportsPage() {
   const teacherClass = {
@@ -80,78 +80,6 @@ function TeacherReportsPage() {
     });
   }, [studentSearch, studentStatus]);
 
-  const getStatusClass = (status) => {
-    if (status === "Çok Başarılı") return "bg-emerald-50 text-emerald-600";
-    if (status === "Başarılı") return "bg-blue-50 text-blue-600";
-    if (status === "Takip Edilmeli") return "bg-amber-50 text-amber-600";
-    if (status === "Riskli") return "bg-rose-50 text-rose-600";
-    return "bg-gray-100 text-gray-600";
-  };
-
-  const studentColumns = [
-    {
-      key: "fullName",
-      title: "Öğrenci",
-      render: (row) => (
-        <div>
-          <p className="font-medium text-gray-900">{row.fullName}</p>
-          <p className="text-xs text-gray-400">
-            {teacherClass.className} · {row.club}
-          </p>
-        </div>
-      ),
-    },
-    {
-      key: "average",
-      title: "Ders Ort.",
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-100">
-            <div
-              className="h-full rounded-full bg-gradient-premium"
-              style={{ width: `${row.average}%` }}
-            />
-          </div>
-
-          <span className="text-sm font-semibold text-gray-700">
-            %{row.average}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: "examAverage",
-      title: "Sınav Ort.",
-      render: (row) => (
-        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
-          %{row.examAverage}
-        </span>
-      ),
-    },
-    {
-      key: "projectCount",
-      title: "Proje",
-      render: (row) => (
-        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-          {row.projectCount}
-        </span>
-      ),
-    },
-    {
-      key: "status",
-      title: "Durum",
-      render: (row) => (
-        <span
-          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusClass(
-            row.status
-          )}`}
-        >
-          {row.status}
-        </span>
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
@@ -181,7 +109,7 @@ function TeacherReportsPage() {
         <StatCard
           title="Sorumlu Sınıf"
           value={teacherClass.className}
-          icon={<HomeModernIcon className="h-5 w-5" />}
+          icon={HomeModernIcon}
           description="Öğretmenin kendi sınıfı"
           color="primary"
         />
@@ -189,7 +117,7 @@ function TeacherReportsPage() {
         <StatCard
           title="Toplam Öğrenci"
           value={teacherClass.studentCount}
-          icon={<UserGroupIcon className="h-5 w-5" />}
+          icon={UserGroupIcon}
           description="Sınıftaki öğrenci sayısı"
           color="info"
         />
@@ -197,7 +125,7 @@ function TeacherReportsPage() {
         <StatCard
           title="Sınıf Ortalaması"
           value={`%${teacherClass.average}`}
-          icon={<ChartBarIcon className="h-5 w-5" />}
+          icon={ChartBarIcon}
           description="Ders başarı ortalaması"
           color="success"
         />
@@ -205,7 +133,7 @@ function TeacherReportsPage() {
         <StatCard
           title="Başarı Oranı"
           value={`%${teacherClass.successRate}`}
-          icon={<CheckCircleIcon className="h-5 w-5" />}
+          icon={CheckCircleIcon}
           description="Genel başarı yüzdesi"
           color="warning"
         />
@@ -258,20 +186,9 @@ function TeacherReportsPage() {
           </select>
         </div>
 
-        <DataTable
-          columns={studentColumns}
-          data={filteredStudents}
-          actions={() => (
-            <div className="flex justify-end gap-2">
-              <Button size="sm" variant="outline">
-                Detay
-              </Button>
-
-              <Button size="sm" variant="ghost">
-                Rapor
-              </Button>
-            </div>
-          )}
+        <TeacherStudentReportTable
+          students={filteredStudents}
+          className={teacherClass.className}
         />
       </section>
     </div>
