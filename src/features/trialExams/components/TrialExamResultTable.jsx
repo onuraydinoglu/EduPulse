@@ -55,7 +55,8 @@ function TrialExamResultTable({ students, results, onResultChange }) {
                     <td key={field.key} className="px-5 py-4">
                       <input
                         type="text"
-                        inputMode="decimal"
+                        min="0"
+                        step="0.25"
                         value={getValue(student.id, field.key)}
                         onChange={(e) =>
                           onResultChange(student.id, field.key, e.target.value)

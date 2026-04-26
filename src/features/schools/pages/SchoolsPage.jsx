@@ -4,11 +4,11 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
-import { schools as initialSchools } from "../../../data/mockData";
 import SchoolForm from "../components/SchoolForm";
 import CreateButton from "../../../components/ui/CreateButton";
 import SchoolTable from "../components/SchoolTable";
@@ -22,7 +22,7 @@ const emptySchoolForm = {
 };
 
 function SchoolsPage() {
-  const [schools, setSchools] = useState(initialSchools);
+  const [schools, setSchools] = useState(() => mockApi.getSchools());
   const [formData, setFormData] = useState(emptySchoolForm);
   const [editingSchoolId, setEditingSchoolId] = useState(null);
   const [deletingSchoolId, setDeletingSchoolId] = useState(null);
@@ -34,15 +34,19 @@ function SchoolsPage() {
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
-    setTimeout(() => setToast({ message: "", type: "success" }), 2500);
+    setTimeout(() => {
+      setToast({ message: "", type: "success" });
+    }, 2500);
   };
 
   const filteredSchools = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     return schools.filter((school) => {
       const matchesSearch =
-        school.name.toLowerCase().includes(search.toLowerCase()) ||
-        school.city.toLowerCase().includes(search.toLowerCase()) ||
-        school.principal.toLowerCase().includes(search.toLowerCase());
+        school.name.toLowerCase().includes(normalizedSearch) ||
+        school.city.toLowerCase().includes(normalizedSearch) ||
+        school.principal.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus = status === "all" || school.status === status;
 
@@ -90,14 +94,22 @@ function SchoolsPage() {
 
     setDeletingSchoolId(null);
     handleCloseDeleteModal();
-    showToast("Okul başarıyla silindi.", "success");
+    showToast("Okul başarıyla silindi.");
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.city || !formData.principal) {
+    if (!formData.name.trim() || !formData.city.trim() || !formData.principal.trim()) {
       showToast("Lütfen okul adı, şehir ve müdür alanlarını doldurun.", "error");
       return;
     }
+
+    const preparedSchool = {
+      name: formData.name.trim(),
+      city: formData.city.trim(),
+      principal: formData.principal.trim(),
+      studentCount: Number(formData.studentCount || 0),
+      status: formData.status,
+    };
 
     if (isEditing) {
       setSchools((prev) =>
@@ -105,23 +117,21 @@ function SchoolsPage() {
           school.id === editingSchoolId
             ? {
               ...school,
-              ...formData,
-              studentCount: Number(formData.studentCount || 0),
+              ...preparedSchool,
             }
             : school
         )
       );
 
-      showToast("Okul bilgileri başarıyla güncellendi.", "success");
+      showToast("Okul bilgileri başarıyla güncellendi.");
     } else {
       const newSchool = {
         id: Date.now(),
-        ...formData,
-        studentCount: Number(formData.studentCount || 0),
+        ...preparedSchool,
       };
 
       setSchools((prev) => [newSchool, ...prev]);
-      showToast("Yeni okul başarıyla eklendi.", "success");
+      showToast("Yeni okul başarıyla eklendi.");
     }
 
     setFormData(emptySchoolForm);
@@ -136,9 +146,7 @@ function SchoolsPage() {
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-blue-600">
-              Okul Yönetimi
-            </p>
+            <p className="text-sm font-medium text-blue-600">Okul Yönetimi</p>
 
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
               Okullar
@@ -149,7 +157,10 @@ function SchoolsPage() {
             </p>
           </div>
 
-          <CreateButton icon={BuildingOffice2Icon} onClick={handleOpenCreateModal}>
+          <CreateButton
+            icon={BuildingOffice2Icon}
+            onClick={handleOpenCreateModal}
+          >
             Yeni Okul
           </CreateButton>
         </div>

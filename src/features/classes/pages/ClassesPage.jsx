@@ -4,6 +4,7 @@ import {
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import CreateButton from "../../../components/ui/CreateButton";
@@ -18,38 +19,14 @@ const emptyClassForm = {
   teacher: "",
 };
 
-const initialClasses = [
-  {
-    id: 1,
-    className: "9-A",
-    grade: "9",
-    branch: "A",
-    teacher: "Ayşe Demir",
-    studentCount: 32,
-  },
-  {
-    id: 2,
-    className: "10-B",
-    grade: "10",
-    branch: "B",
-    teacher: "Murat Çelik",
-    studentCount: 28,
-  },
-];
-
 function ClassesPage() {
-  const [classes, setClasses] = useState(initialClasses);
+  const [classes, setClasses] = useState(() => mockApi.getClasses());
   const [formData, setFormData] = useState(emptyClassForm);
   const [editingClassId, setEditingClassId] = useState(null);
   const [deletingClassId, setDeletingClassId] = useState(null);
-
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
-
-  const [toast, setToast] = useState({
-    message: "",
-    type: "success",
-  });
+  const [toast, setToast] = useState({ message: "", type: "success" });
 
   const isEditing = editingClassId !== null;
 
@@ -59,10 +36,15 @@ function ClassesPage() {
   };
 
   const filteredClasses = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     return classes.filter((classItem) => {
+      const className = classItem.className || classItem.name || "";
+
       const matchesSearch =
-        classItem.className.toLowerCase().includes(search.toLowerCase()) ||
-        classItem.teacher.toLowerCase().includes(search.toLowerCase());
+        className.toLowerCase().includes(normalizedSearch) ||
+        classItem.teacher?.toLowerCase().includes(normalizedSearch) ||
+        classItem.school?.toLowerCase().includes(normalizedSearch);
 
       const matchesGrade =
         gradeFilter === "all" || classItem.grade === gradeFilter;
@@ -78,12 +60,17 @@ function ClassesPage() {
   };
 
   const handleOpenEditModal = (classItem) => {
+    const className = classItem.className || classItem.name || "";
+    const [, branch = ""] = className.split("-");
+
     setEditingClassId(classItem.id);
+
     setFormData({
-      grade: classItem.grade,
-      branch: classItem.branch,
-      teacher: classItem.teacher,
+      grade: classItem.grade || "",
+      branch: classItem.branch || branch,
+      teacher: classItem.teacher || "",
     });
+
     document.getElementById("class_modal").showModal();
   };
 
@@ -101,33 +88,48 @@ function ClassesPage() {
   };
 
   const handleSubmit = () => {
-    if (!formData.grade || !formData.branch || !formData.teacher) {
+    if (
+      !formData.grade.trim() ||
+      !formData.branch.trim() ||
+      !formData.teacher.trim()
+    ) {
       showToast("Lütfen tüm alanları doldurun.", "error");
       return;
     }
 
-    const className = `${formData.grade}-${formData.branch}`;
+    const preparedClass = {
+      grade: formData.grade.trim(),
+      branch: formData.branch.trim().toUpperCase(),
+      teacher: formData.teacher.trim(),
+      className: `${formData.grade.trim()}-${formData.branch
+        .trim()
+        .toUpperCase()}`,
+    };
 
     if (isEditing) {
       setClasses((prev) =>
         prev.map((item) =>
           item.id === editingClassId
-            ? { ...item, ...formData, className }
+            ? {
+              ...item,
+              ...preparedClass,
+            }
             : item
         )
       );
-      showToast("Sınıf güncellendi");
+
+      showToast("Sınıf güncellendi.");
     } else {
-      setClasses((prev) => [
-        {
-          id: Date.now(),
-          ...formData,
-          className,
-          studentCount: 0,
-        },
-        ...prev,
-      ]);
-      showToast("Sınıf eklendi");
+      const newClass = {
+        id: Date.now(),
+        ...preparedClass,
+        school: "Atatürk Anadolu Lisesi",
+        studentCount: 0,
+        average: 0,
+      };
+
+      setClasses((prev) => [newClass, ...prev]);
+      showToast("Sınıf eklendi.");
     }
 
     setFormData(emptyClassForm);
@@ -136,26 +138,21 @@ function ClassesPage() {
   };
 
   const handleDelete = () => {
-    setClasses((prev) =>
-      prev.filter((item) => item.id !== deletingClassId)
-    );
+    setClasses((prev) => prev.filter((item) => item.id !== deletingClassId));
 
     setDeletingClassId(null);
     handleCloseDeleteModal();
-    showToast("Sınıf silindi");
+    showToast("Sınıf silindi.");
   };
 
   return (
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      {/* HEADER CARD */}
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-blue-600">
-              Sınıf Yönetimi
-            </p>
+            <p className="text-sm font-medium text-blue-600">Sınıf Yönetimi</p>
 
             <h1 className="mt-1 text-2xl font-semibold text-gray-950">
               Sınıflar
@@ -175,24 +172,23 @@ function ClassesPage() {
         </div>
       </section>
 
-      {/* TABLE CARD */}
       <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:justify-between md:items-center">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full md:max-w-md">
-            <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sınıf veya öğretmen ara..."
-              className="h-11 w-full rounded-xl border border-gray-200 pl-11 pr-4 text-sm focus:ring-4 focus:ring-blue-50"
+              placeholder="Sınıf, okul veya öğretmen ara..."
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
 
           <select
             value={gradeFilter}
             onChange={(e) => setGradeFilter(e.target.value)}
-            className="h-11 rounded-xl border border-gray-200 px-4 text-sm"
+            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-52"
           >
             <option value="all">Tüm Sınıflar</option>
             <option value="9">9. Sınıflar</option>
@@ -209,7 +205,6 @@ function ClassesPage() {
         />
       </section>
 
-      {/* MODAL */}
       <Modal
         id="class_modal"
         title={isEditing ? "Sınıf Düzenle" : "Yeni Sınıf"}
@@ -232,6 +227,8 @@ function ClassesPage() {
         id="class_delete_modal"
         title="Sınıfı Sil"
         description="Bu işlem geri alınamaz."
+        confirmText="Evet, Sil"
+        cancelText="Vazgeç"
         onConfirm={handleDelete}
       />
     </div>

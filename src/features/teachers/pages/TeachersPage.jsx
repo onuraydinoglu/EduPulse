@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import {
   MagnifyingGlassIcon,
-  UserPlusIcon
+  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import CreateButton from "../../../components/ui/CreateButton";
@@ -20,50 +21,12 @@ const emptyTeacherForm = {
   status: "Aktif",
 };
 
-const initialTeachers = [
-  {
-    id: 1,
-    firstName: "Ayşe",
-    lastName: "Demir",
-    age: 35,
-    branch: "Matematik",
-    className: "9-A",
-    school: "Müdürün Okulu",
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    firstName: "Murat",
-    lastName: "Çelik",
-    age: 41,
-    branch: "Türk Dili ve Edebiyatı",
-    className: "10-B",
-    school: "Müdürün Okulu",
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    firstName: "Elif",
-    lastName: "Şahin",
-    age: 38,
-    branch: "Fizik",
-    className: "",
-    school: "Müdürün Okulu",
-    status: "Pasif",
-  },
-];
-
 function TeachersPage() {
-  const [teachers, setTeachers] = useState(initialTeachers);
+  const [teachers, setTeachers] = useState(() => mockApi.getTeachers());
   const [formData, setFormData] = useState(emptyTeacherForm);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [deletingTeacherId, setDeletingTeacherId] = useState(null);
-
-  const [toast, setToast] = useState({
-    message: "",
-    type: "success",
-  });
-
+  const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
@@ -78,13 +41,18 @@ function TeachersPage() {
   };
 
   const filteredTeachers = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     return teachers.filter((teacher) => {
-      const fullName = `${teacher.firstName} ${teacher.lastName}`.toLowerCase();
+      const fullName =
+        teacher.fullName ||
+        `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim();
 
       const matchesSearch =
-        fullName.includes(search.toLowerCase()) ||
-        teacher.branch.toLowerCase().includes(search.toLowerCase()) ||
-        teacher.className?.toLowerCase().includes(search.toLowerCase());
+        fullName.toLowerCase().includes(normalizedSearch) ||
+        teacher.branch.toLowerCase().includes(normalizedSearch) ||
+        teacher.className?.toLowerCase().includes(normalizedSearch) ||
+        teacher.school?.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus = status === "all" || teacher.status === status;
 
@@ -99,12 +67,16 @@ function TeachersPage() {
   };
 
   const handleOpenEditModal = (teacher) => {
+    const [firstName = "", ...lastNameParts] = teacher.fullName
+      ? teacher.fullName.split(" ")
+      : [teacher.firstName || "", teacher.lastName || ""];
+
     setEditingTeacherId(teacher.id);
 
     setFormData({
-      firstName: teacher.firstName,
-      lastName: teacher.lastName,
-      age: teacher.age,
+      firstName: teacher.firstName || firstName,
+      lastName: teacher.lastName || lastNameParts.join(" "),
+      age: teacher.age || "",
       branch: teacher.branch,
       status: teacher.status,
     });
@@ -132,15 +104,15 @@ function TeachersPage() {
 
     setDeletingTeacherId(null);
     handleCloseDeleteModal();
-    showToast("Öğretmen başarıyla silindi.", "success");
+    showToast("Öğretmen başarıyla silindi.");
   };
 
   const handleSubmit = () => {
     if (
-      !formData.firstName ||
-      !formData.lastName ||
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
       !formData.age ||
-      !formData.branch
+      !formData.branch.trim()
     ) {
       showToast("Lütfen ad, soyad, yaş ve branş alanlarını doldurun.", "error");
       return;
@@ -151,32 +123,39 @@ function TeachersPage() {
       return;
     }
 
+    const preparedTeacher = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      fullName: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
+      age: Number(formData.age),
+      branch: formData.branch.trim(),
+      status: formData.status,
+    };
+
     if (isEditing) {
       setTeachers((prev) =>
         prev.map((teacher) =>
           teacher.id === editingTeacherId
             ? {
               ...teacher,
-              ...formData,
-              age: Number(formData.age),
-              school: teacher.school || "Müdürün Okulu",
+              ...preparedTeacher,
             }
             : teacher
         )
       );
 
-      showToast("Öğretmen bilgileri başarıyla güncellendi.", "success");
+      showToast("Öğretmen bilgileri başarıyla güncellendi.");
     } else {
       const newTeacher = {
         id: Date.now(),
-        ...formData,
-        age: Number(formData.age),
-        school: "Müdürün Okulu",
-        className: "",
+        ...preparedTeacher,
+        school: "Atatürk Anadolu Lisesi",
+        className: "-",
+        classCount: 0,
       };
 
       setTeachers((prev) => [newTeacher, ...prev]);
-      showToast("Yeni öğretmen başarıyla eklendi.", "success");
+      showToast("Yeni öğretmen başarıyla eklendi.");
     }
 
     setFormData(emptyTeacherForm);
@@ -188,7 +167,6 @@ function TeachersPage() {
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      {/* Page Header Card */}
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
@@ -211,7 +189,6 @@ function TeachersPage() {
         </div>
       </section>
 
-      {/* Table Card */}
       <section className="radius-card overflow-hidden border border-gray-200 bg-white">
         <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full md:max-w-md">
@@ -221,7 +198,7 @@ function TeachersPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Öğretmen, branş veya sınıf ara..."
+              placeholder="Öğretmen, branş, okul veya sınıf ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>

@@ -5,7 +5,7 @@ function TeacherTableRow({ teacher, onEdit, onDelete }) {
     <tr className="hover:bg-base-200/60">
       <td>
         <div>
-          <p className="font-semibold">{teacher.firstName + " " + teacher.lastName}</p>
+          <p className="font-semibold">{teacher.fullName}</p>
         </div>
       </td>
 

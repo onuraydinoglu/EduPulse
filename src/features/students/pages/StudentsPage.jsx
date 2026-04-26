@@ -4,6 +4,7 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import CreateButton from "../../../components/ui/CreateButton";
@@ -20,47 +21,12 @@ const emptyStudentForm = {
   status: "Aktif",
 };
 
-const initialStudents = [
-  {
-    id: 1,
-    firstName: "Ali",
-    lastName: "Yıldız",
-    school: "Müdürün Okulu",
-    className: "9-A",
-    club: "Robotik",
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    firstName: "Ece",
-    lastName: "Arslan",
-    school: "Müdürün Okulu",
-    className: "10-B",
-    club: "Müzik",
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    firstName: "Kerem",
-    lastName: "Aksoy",
-    school: "Müdürün Okulu",
-    className: "12-B",
-    club: "Tiyatro",
-    status: "Pasif",
-  },
-];
-
 function StudentsPage() {
-  const [students, setStudents] = useState(initialStudents);
+  const [students, setStudents] = useState(() => mockApi.getStudents());
   const [formData, setFormData] = useState(emptyStudentForm);
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [deletingStudentId, setDeletingStudentId] = useState(null);
-
-  const [toast, setToast] = useState({
-    message: "",
-    type: "success",
-  });
-
+  const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
@@ -75,13 +41,18 @@ function StudentsPage() {
   };
 
   const filteredStudents = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     return students.filter((student) => {
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+      const fullName =
+        student.fullName ||
+        `${student.firstName || ""} ${student.lastName || ""}`.trim();
 
       const matchesSearch =
-        fullName.includes(search.toLowerCase()) ||
-        student.className.toLowerCase().includes(search.toLowerCase()) ||
-        student.club.toLowerCase().includes(search.toLowerCase());
+        fullName.toLowerCase().includes(normalizedSearch) ||
+        student.className?.toLowerCase().includes(normalizedSearch) ||
+        student.club?.toLowerCase().includes(normalizedSearch) ||
+        student.school?.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus = status === "all" || student.status === status;
 
@@ -99,10 +70,10 @@ function StudentsPage() {
     setEditingStudentId(student.id);
 
     setFormData({
-      firstName: student.firstName,
-      lastName: student.lastName,
-      className: student.className,
-      club: student.club,
+      firstName: student.firstName || "",
+      lastName: student.lastName || "",
+      className: student.className || "",
+      club: student.club || "",
       status: student.status,
     });
 
@@ -129,14 +100,27 @@ function StudentsPage() {
 
     setDeletingStudentId(null);
     handleCloseDeleteModal();
-    showToast("Öğrenci başarıyla silindi.", "success");
+    showToast("Öğrenci başarıyla silindi.");
   };
 
   const handleSubmit = () => {
-    if (!formData.firstName || !formData.lastName || !formData.className) {
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.className.trim()
+    ) {
       showToast("Lütfen ad, soyad ve sınıf alanlarını doldurun.", "error");
       return;
     }
+
+    const preparedStudent = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      fullName: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
+      className: formData.className.trim(),
+      club: formData.club.trim() || "-",
+      status: formData.status,
+    };
 
     if (isEditing) {
       setStudents((prev) =>
@@ -144,23 +128,22 @@ function StudentsPage() {
           student.id === editingStudentId
             ? {
               ...student,
-              ...formData,
-              school: student.school || "Müdürün Okulu",
+              ...preparedStudent,
             }
             : student
         )
       );
 
-      showToast("Öğrenci bilgileri başarıyla güncellendi.", "success");
+      showToast("Öğrenci bilgileri başarıyla güncellendi.");
     } else {
       const newStudent = {
         id: Date.now(),
-        ...formData,
-        school: "Müdürün Okulu",
+        ...preparedStudent,
+        school: "Atatürk Anadolu Lisesi",
       };
 
       setStudents((prev) => [newStudent, ...prev]);
-      showToast("Yeni öğrenci başarıyla eklendi.", "success");
+      showToast("Yeni öğrenci başarıyla eklendi.");
     }
 
     setFormData(emptyStudentForm);
@@ -203,7 +186,7 @@ function StudentsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Öğrenci, sınıf veya kulüp ara..."
+              placeholder="Öğrenci, sınıf, okul veya kulüp ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>

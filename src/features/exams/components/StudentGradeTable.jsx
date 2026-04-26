@@ -18,7 +18,6 @@ function StudentGradeTable({ students, grades, onGradeChange }) {
         <thead className="bg-gray-50 text-gray-500">
           <tr>
             <th className="px-5 py-4 font-medium">Öğrenci</th>
-            <th className="px-5 py-4 font-medium">Sınıf</th>
 
             {gradeFields.map((field) => (
               <th key={field.key} className="px-5 py-4 font-medium">
@@ -37,16 +36,10 @@ function StudentGradeTable({ students, grades, onGradeChange }) {
                 </p>
               </td>
 
-              <td className="px-5 py-4">
-                <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
-                  {student.className}
-                </span>
-              </td>
-
               {gradeFields.map((field) => (
                 <td key={field.key} className="px-5 py-4">
                   <input
-                    type="number"
+                    type="text"
                     min="0"
                     max="100"
                     placeholder="0-100"
