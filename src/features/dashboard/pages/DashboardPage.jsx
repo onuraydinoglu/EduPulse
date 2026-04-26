@@ -1,21 +1,21 @@
 import { authStorage } from "../../auth/services/authStorage";
-import AdminDashboard from "../components/AdminDashboard";
-import PrincipalDashboard from "../components/PrincipalDashboard";
-import TeacherDashboard from "../components/TeacherDashboard";
+import AdminDashboardPage from "./AdminDashboardPage";
+import PrincipalDashboardPage from "./PrincipalDashboardPage";
+import TeacherDashboardPage from "./TeacherDashboardPage";
 
 function DashboardPage() {
   const user = authStorage.getUser();
 
   if (user?.role === "admin") {
-    return <AdminDashboard />;
+    return <AdminDashboardPage />;
   }
 
   if (user?.role === "principal") {
-    return <PrincipalDashboard />;
+    return <PrincipalDashboardPage />;
   }
 
   if (user?.role === "teacher") {
-    return <TeacherDashboard />;
+    return <TeacherDashboardPage />;
   }
 
   return null;

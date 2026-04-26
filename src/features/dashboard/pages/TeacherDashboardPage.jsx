@@ -9,7 +9,7 @@ import {
 import StatCard from "../../../components/ui/StatCard";
 import DataTable from "../../../components/ui/DataTable";
 
-function TeacherDashboard() {
+function TeacherDashboardPage() {
   const students = [
     { id: 1, fullName: "Ali Yıldız", average: 84, examAverage: 78, status: "Başarılı" },
     { id: 2, fullName: "Ayşe Kaya", average: 67, examAverage: 61, status: "Takip Edilmeli" },
@@ -138,4 +138,4 @@ function TeacherDashboard() {
   );
 }
 
-export default TeacherDashboard;
+export default TeacherDashboardPage;

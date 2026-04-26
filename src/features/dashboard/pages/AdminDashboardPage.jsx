@@ -11,7 +11,7 @@ import StatCard from "../../../components/ui/StatCard";
 import DataTable from "../../../components/ui/DataTable";
 import Button from "../../../components/ui/Button";
 
-function AdminDashboard() {
+function AdminDashboardPage() {
   const schools = [
     { id: 1, name: "Atatürk Anadolu Lisesi", city: "Samsun", plan: "Satın Alındı", status: "Aktif" },
     { id: 2, name: "Cumhuriyet Fen Lisesi", city: "Ankara", plan: "Deneme Sürümü", status: "Aktif" },
@@ -141,4 +141,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default AdminDashboardPage;
