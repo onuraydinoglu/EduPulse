@@ -12,6 +12,7 @@ import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
 import StudentForm from "../components/StudentForm";
 import StudentTable from "../components/StudentTable";
+import StudentDetailModal from "../components/StudentDetailModal";
 
 const emptyStudentForm = {
   firstName: "",
@@ -19,6 +20,10 @@ const emptyStudentForm = {
   className: "",
   club: "",
   status: "Aktif",
+  schoolNumber: "",
+  studentPhone: "",
+  parentName: "",
+  parentPhone: "",
 };
 
 function StudentsPage() {
@@ -26,6 +31,7 @@ function StudentsPage() {
   const [formData, setFormData] = useState(emptyStudentForm);
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [deletingStudentId, setDeletingStudentId] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -75,6 +81,11 @@ function StudentsPage() {
       className: student.className || "",
       club: student.club || "",
       status: student.status,
+
+      schoolNumber: student.schoolNumber || "",
+      studentPhone: student.studentPhone || "",
+      parentName: student.parentName || "",
+      parentPhone: student.parentPhone || "",
     });
 
     document.getElementById("student_modal").showModal();
@@ -120,6 +131,11 @@ function StudentsPage() {
       className: formData.className.trim(),
       club: formData.club.trim() || "-",
       status: formData.status,
+
+      schoolNumber: formData.schoolNumber,
+      studentPhone: formData.studentPhone,
+      parentName: formData.parentName,
+      parentPhone: formData.parentPhone,
     };
 
     if (isEditing) {
@@ -149,6 +165,16 @@ function StudentsPage() {
     setFormData(emptyStudentForm);
     setEditingStudentId(null);
     handleCloseModal();
+  };
+
+  const handleOpenDetailModal = (student) => {
+    setSelectedStudent(student);
+    document.getElementById("student_detail_modal").showModal();
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedStudent(null);
+    document.getElementById("student_detail_modal").close();
   };
 
   return (
@@ -204,7 +230,7 @@ function StudentsPage() {
 
         <StudentTable
           students={filteredStudents}
-          onDetail={(student) => console.log("Öğrenci detayı:", student)}
+          onDetail={handleOpenDetailModal}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteModal}
         />
@@ -228,6 +254,20 @@ function StudentsPage() {
         }
       >
         <StudentForm formData={formData} setFormData={setFormData} />
+      </Modal>
+
+      <Modal
+        id="student_detail_modal"
+        title="Öğrenci Detayları"
+        footer={
+          <form method="dialog">
+            <Button variant="ghost" onClick={handleCloseDetailModal}>
+              Kapat
+            </Button>
+          </form>
+        }
+      >
+        <StudentDetailModal student={selectedStudent} />
       </Modal>
 
       <ConfirmModal

@@ -3,6 +3,8 @@ import TableActions from "../../../components/ui/TableActions";
 function StudentTableRow({ student, onDetail, onEdit, onDelete }) {
   return (
     <tr className="hover:bg-base-200/60">
+      <td>{student.schoolNumber || "-"}</td>
+
       <td>
         <div>
           <p className="font-semibold">
@@ -21,6 +23,12 @@ function StudentTableRow({ student, onDetail, onEdit, onDelete }) {
       </td>
 
       <td>{student.club || "Yok"}</td>
+
+      <td>{student.studentPhone || "-"}</td>
+
+      <td>{student.parentName || "-"}</td>
+
+      <td>{student.parentPhone || "-"}</td>
 
       <td>
         <span

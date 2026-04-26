@@ -12,73 +12,104 @@ import {
 import StatCard from "../../../components/ui/StatCard";
 import Button from "../../../components/ui/Button";
 import TeacherStudentReportTable from "../components/TeacherStudentReportTable";
+import { mockDb } from "../../../data/mockData";
 
 function TeacherReportsPage() {
   const teacherClass = {
+    id: 1,
     className: "9-A",
-    studentCount: 32,
-    average: 74,
-    successRate: 68,
   };
 
   const [studentSearch, setStudentSearch] = useState("");
   const [studentStatus, setStudentStatus] = useState("all");
 
-  const students = [
-    {
-      id: 1,
-      fullName: "Ali Yıldız",
-      className: "9-A",
-      average: 84,
-      examAverage: 78,
-      projectCount: 3,
-      club: "Robotik",
-      status: "Başarılı",
-    },
-    {
-      id: 2,
-      fullName: "Ayşe Kaya",
-      className: "9-A",
-      average: 67,
-      examAverage: 61,
-      projectCount: 1,
-      club: "Müzik",
-      status: "Takip Edilmeli",
-    },
-    {
-      id: 3,
-      fullName: "Mehmet Can",
-      className: "9-A",
-      average: 92,
-      examAverage: 89,
-      projectCount: 4,
-      club: "Satranç",
-      status: "Çok Başarılı",
-    },
-    {
-      id: 4,
-      fullName: "Zeynep Kara",
-      className: "9-A",
-      average: 48,
-      examAverage: 42,
-      projectCount: 0,
-      club: "Yok",
-      status: "Riskli",
-    },
-  ];
+  const students = useMemo(() => {
+    return mockDb.students
+      .filter((student) => student.classId === teacherClass.id)
+      .map((student) => {
+        const classItem = mockDb.classes.find(
+          (classData) => classData.id === student.classId
+        );
+
+        const teacher = mockDb.teachers.find(
+          (teacherData) => teacherData.id === classItem?.teacherId
+        );
+
+        const club = mockDb.clubs.find(
+          (clubData) => clubData.id === student.clubId
+        );
+
+        const studentStatus =
+          student.average >= 90
+            ? "Çok Başarılı"
+            : student.average >= 75
+              ? "Başarılı"
+              : student.average >= 60
+                ? "Takip Edilmeli"
+                : "Riskli";
+
+        return {
+          ...student,
+          fullName: `${student.firstName} ${student.lastName}`,
+          className: classItem?.name || "-",
+          classTeacher: teacher?.fullName || "-",
+          club: club?.name || "-",
+          status: studentStatus,
+          lessonAverage: student.lessonAverage ?? student.average,
+          examAverage: student.examAverage ?? student.average,
+          trialExamAverage: student.trialExamAverage ?? 0,
+          projectCount: student.projectCount ?? 0,
+          schoolRank: student.schoolRank || "-",
+          teacherNote: student.teacherNote || "Öğretmen notu bulunmuyor.",
+          lessons: student.lessons || [],
+          trialExams: student.trialExams || [],
+        };
+      });
+  }, []);
+
+  const teacherClassStats = useMemo(() => {
+    const studentCount = students.length;
+
+    const average =
+      studentCount > 0
+        ? Math.round(
+          students.reduce((total, student) => total + student.average, 0) /
+          studentCount
+        )
+        : 0;
+
+    const successCount = students.filter(
+      (student) =>
+        student.status === "Çok Başarılı" || student.status === "Başarılı"
+    ).length;
+
+    const successRate =
+      studentCount > 0 ? Math.round((successCount / studentCount) * 100) : 0;
+
+    return {
+      studentCount,
+      average,
+      successRate,
+    };
+  }, [students]);
 
   const filteredStudents = useMemo(() => {
+    const normalizedSearch = studentSearch.toLowerCase().trim();
+
     return students.filter((student) => {
       const matchesSearch =
-        student.fullName.toLowerCase().includes(studentSearch.toLowerCase()) ||
-        student.club.toLowerCase().includes(studentSearch.toLowerCase());
+        student.fullName.toLowerCase().includes(normalizedSearch) ||
+        student.club.toLowerCase().includes(normalizedSearch) ||
+        student.className.toLowerCase().includes(normalizedSearch) ||
+        student.schoolNumber?.toLowerCase().includes(normalizedSearch) ||
+        student.parentName?.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus =
         studentStatus === "all" || student.status === studentStatus;
 
       return matchesSearch && matchesStatus;
     });
-  }, [studentSearch, studentStatus]);
+  }, [students, studentSearch, studentStatus]);
 
   return (
     <div className="space-y-6">
@@ -116,7 +147,7 @@ function TeacherReportsPage() {
 
         <StatCard
           title="Toplam Öğrenci"
-          value={teacherClass.studentCount}
+          value={teacherClassStats.studentCount}
           icon={UserGroupIcon}
           description="Sınıftaki öğrenci sayısı"
           color="info"
@@ -124,7 +155,7 @@ function TeacherReportsPage() {
 
         <StatCard
           title="Sınıf Ortalaması"
-          value={`%${teacherClass.average}`}
+          value={`%${teacherClassStats.average}`}
           icon={ChartBarIcon}
           description="Ders başarı ortalaması"
           color="success"
@@ -132,7 +163,7 @@ function TeacherReportsPage() {
 
         <StatCard
           title="Başarı Oranı"
-          value={`%${teacherClass.successRate}`}
+          value={`%${teacherClassStats.successRate}`}
           icon={CheckCircleIcon}
           description="Genel başarı yüzdesi"
           color="warning"
@@ -168,7 +199,7 @@ function TeacherReportsPage() {
               type="text"
               value={studentSearch}
               onChange={(e) => setStudentSearch(e.target.value)}
-              placeholder="Öğrenci veya kulüp ara..."
+              placeholder="Öğrenci, kulüp, okul no veya veli ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>

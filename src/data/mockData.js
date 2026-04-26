@@ -84,7 +84,51 @@ export const students = [
     average: 84,
     clubId: 1,
     status: "Aktif",
+
+    schoolNumber: "1001",
+    studentPhone: "05001234567",
+    parentName: "Ahmet Yıldız",
+    parentPhone: "05551234567",
+
+    // 🔥 EKLENEN RAPOR ALANLARI
+    lessonAverage: 84,
+    examAverage: 78,
+    trialExamAverage: 74.5,
+    projectCount: 3,
+    schoolRank: "24 / 320",
+    teacherNote:
+      "Genel performansı iyi. Deneme sınavlarında düzenli artış var.",
+
+    lessons: [
+      {
+        name: "Matematik",
+        examGrades: [84, 88],
+        projectGrade: 90,
+        activityGrade: 86,
+        average: 88,
+      },
+      {
+        name: "Türkçe",
+        examGrades: [80, 84],
+        projectGrade: 85,
+        activityGrade: 82,
+        average: 82,
+      },
+    ],
+
+    trialExams: [
+      {
+        name: "1. Deneme Sınavı",
+        correct: 72,
+        wrong: 18,
+        empty: 10,
+        net: 67.5,
+        classRank: "6 / 32",
+        schoolRank: "42 / 320",
+      },
+    ],
   },
+
   {
     id: 2,
     firstName: "Ayşe",
@@ -94,7 +138,23 @@ export const students = [
     average: 91,
     clubId: 2,
     status: "Aktif",
+
+    schoolNumber: "1002",
+    studentPhone: "05002345678",
+    parentName: "Fatma Kaya",
+    parentPhone: "05552345678",
+
+    lessonAverage: 91,
+    examAverage: 88,
+    trialExamAverage: 86,
+    projectCount: 2,
+    schoolRank: "10 / 320",
+    teacherNote: "Başarılı ve düzenli.",
+
+    lessons: [],
+    trialExams: [],
   },
+
   {
     id: 3,
     firstName: "Mehmet",
@@ -104,7 +164,23 @@ export const students = [
     average: 76,
     clubId: 3,
     status: "Aktif",
+
+    schoolNumber: "1003",
+    studentPhone: "05003456789",
+    parentName: "Hasan Can",
+    parentPhone: "05553456789",
+
+    lessonAverage: 76,
+    examAverage: 72,
+    trialExamAverage: 70,
+    projectCount: 1,
+    schoolRank: "120 / 320",
+    teacherNote: "Orta seviyede.",
+
+    lessons: [],
+    trialExams: [],
   },
+
   {
     id: 4,
     firstName: "Zeynep",
@@ -114,7 +190,23 @@ export const students = [
     average: 88,
     clubId: 1,
     status: "Aktif",
+
+    schoolNumber: "2001",
+    studentPhone: "05004567890",
+    parentName: "Ayşe Kara",
+    parentPhone: "05554567890",
+
+    lessonAverage: 88,
+    examAverage: 85,
+    trialExamAverage: 83,
+    projectCount: 2,
+    schoolRank: "30 / 320",
+    teacherNote: "Başarılı öğrenci.",
+
+    lessons: [],
+    trialExams: [],
   },
+
   {
     id: 5,
     firstName: "Ece",
@@ -124,7 +216,23 @@ export const students = [
     average: 94,
     clubId: 2,
     status: "Aktif",
+
+    schoolNumber: "2002",
+    studentPhone: "05005678901",
+    parentName: "Mehmet Arslan",
+    parentPhone: "05555678901",
+
+    lessonAverage: 94,
+    examAverage: 92,
+    trialExamAverage: 90,
+    projectCount: 4,
+    schoolRank: "5 / 320",
+    teacherNote: "Çok başarılı.",
+
+    lessons: [],
+    trialExams: [],
   },
+
   {
     id: 6,
     firstName: "Kerem",
@@ -134,6 +242,21 @@ export const students = [
     average: 69,
     clubId: 3,
     status: "Pasif",
+
+    schoolNumber: "3001",
+    studentPhone: "05006789012",
+    parentName: "Ali Aksoy",
+    parentPhone: "05556789012",
+
+    lessonAverage: 69,
+    examAverage: 65,
+    trialExamAverage: 60,
+    projectCount: 0,
+    schoolRank: "200 / 320",
+    teacherNote: "Takip edilmeli.",
+
+    lessons: [],
+    trialExams: [],
   },
 ];
 

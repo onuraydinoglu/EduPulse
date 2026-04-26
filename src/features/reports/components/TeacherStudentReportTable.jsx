@@ -10,6 +10,7 @@ function TeacherStudentReportTable({ students, className }) {
               <th className="px-5 py-4 font-medium">Öğrenci</th>
               <th className="px-5 py-4 font-medium">Ders Ort.</th>
               <th className="px-5 py-4 font-medium">Sınav Ort.</th>
+              <th className="px-5 py-4 font-medium">Deneme Ort.</th>
               <th className="px-5 py-4 font-medium">Proje</th>
               <th className="px-5 py-4 font-medium">Durum</th>
               <th className="px-5 py-4 text-right font-medium">İşlemler</th>

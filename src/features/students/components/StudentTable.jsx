@@ -7,9 +7,13 @@ function StudentTable({ students, onDetail, onEdit, onDelete }) {
         <table className="table">
           <thead className="bg-base-200/70">
             <tr>
+              <th className="text-sm">No</th>
               <th className="text-sm">Öğrenci</th>
               <th className="text-sm">Sınıf</th>
               <th className="text-sm">Kulüp</th>
+              <th className="text-sm">Öğrenci Tel</th>
+              <th className="text-sm">Veli</th>
+              <th className="text-sm">Veli Tel</th>
               <th className="text-sm">Durum</th>
               <th className="text-right text-sm">İşlemler</th>
             </tr>
