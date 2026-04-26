@@ -4,11 +4,11 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
-import { clubs as initialClubs } from "../../../data/mockData";
 import ClubForm from "../components/ClubForm";
 import CreateButton from "../../../components/ui/CreateButton";
 import ClubTable from "../components/ClubTable";
@@ -21,17 +21,13 @@ const emptyClubForm = {
 };
 
 function ClubsPage() {
-  const [clubs, setClubs] = useState(initialClubs);
+  const [clubs, setClubs] = useState(() => mockApi.getClubs());
   const [formData, setFormData] = useState(emptyClubForm);
   const [editingClubId, setEditingClubId] = useState(null);
   const [deletingClubId, setDeletingClubId] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-
-  const [toast, setToast] = useState({
-    message: "",
-    type: "success",
-  });
+  const [toast, setToast] = useState({ message: "", type: "success" });
 
   const isEditing = editingClubId !== null;
 
@@ -44,10 +40,12 @@ function ClubsPage() {
   };
 
   const filteredClubs = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     return clubs.filter((club) => {
       const matchesSearch =
-        club.name.toLowerCase().includes(search.toLowerCase()) ||
-        club.teacher.toLowerCase().includes(search.toLowerCase());
+        club.name.toLowerCase().includes(normalizedSearch) ||
+        club.teacher?.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus = status === "all" || club.status === status;
 
@@ -63,10 +61,11 @@ function ClubsPage() {
 
   const handleOpenEditModal = (club) => {
     setEditingClubId(club.id);
+
     setFormData({
-      name: club.name,
-      teacher: club.teacher,
-      studentCount: club.studentCount,
+      name: club.name || "",
+      teacher: club.teacher || "",
+      studentCount: club.studentCount || "",
       status: club.status,
     });
 
@@ -95,7 +94,7 @@ function ClubsPage() {
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.teacher) {
+    if (!formData.name.trim() || !formData.teacher.trim()) {
       showToast(
         "Lütfen kulüp adı ve sorumlu öğretmen alanlarını doldurun.",
         "error"
@@ -103,10 +102,17 @@ function ClubsPage() {
       return;
     }
 
-    if (Number(formData.studentCount) < 0) {
+    if (Number(formData.studentCount || 0) < 0) {
       showToast("Öğrenci sayısı negatif olamaz.", "error");
       return;
     }
+
+    const preparedClub = {
+      name: formData.name.trim(),
+      teacher: formData.teacher.trim(),
+      studentCount: Number(formData.studentCount || 0),
+      status: formData.status,
+    };
 
     if (isEditing) {
       setClubs((prev) =>
@@ -114,8 +120,7 @@ function ClubsPage() {
           club.id === editingClubId
             ? {
               ...club,
-              ...formData,
-              studentCount: Number(formData.studentCount || 0),
+              ...preparedClub,
             }
             : club
         )
@@ -125,8 +130,7 @@ function ClubsPage() {
     } else {
       const newClub = {
         id: Date.now(),
-        ...formData,
-        studentCount: Number(formData.studentCount || 0),
+        ...preparedClub,
       };
 
       setClubs((prev) => [newClub, ...prev]);
@@ -145,9 +149,7 @@ function ClubsPage() {
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-blue-600">
-              Kulüp Yönetimi
-            </p>
+            <p className="text-sm font-medium text-blue-600">Kulüp Yönetimi</p>
 
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
               Kulüpler

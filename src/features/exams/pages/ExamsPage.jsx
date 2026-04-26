@@ -1,55 +1,19 @@
 import { useMemo, useState } from "react";
 import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 
+import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import Toast from "../../../components/ui/Toast";
 import StudentGradeTable from "../components/StudentGradeTable";
 
 function ExamsPage() {
-  const teacherClasses = [
-    { id: 1, className: "9-A", studentCount: 4 },
-    { id: 2, className: "10-B", studentCount: 3 },
-  ];
+  const teacherClasses = useMemo(() => mockApi.getClasses(), []);
+  const students = useMemo(() => mockApi.getStudents(), []);
 
-  const students = [
-    {
-      id: 1,
-      firstName: "Ali",
-      lastName: "Yıldız",
-      className: "9-A",
-      club: "Robotik",
-    },
-    {
-      id: 2,
-      firstName: "Ayşe",
-      lastName: "Kaya",
-      className: "9-A",
-      club: "Müzik",
-    },
-    {
-      id: 3,
-      firstName: "Mehmet",
-      lastName: "Can",
-      className: "9-A",
-      club: "Satranç",
-    },
-    {
-      id: 4,
-      firstName: "Zeynep",
-      lastName: "Kara",
-      className: "9-A",
-      club: "",
-    },
-    {
-      id: 5,
-      firstName: "Ece",
-      lastName: "Arslan",
-      className: "10-B",
-      club: "Tiyatro",
-    },
-  ];
+  const [selectedClass, setSelectedClass] = useState(
+    teacherClasses[0]?.className || ""
+  );
 
-  const [selectedClass, setSelectedClass] = useState("9-A");
   const [grades, setGrades] = useState({});
   const [toast, setToast] = useState({
     message: "",
@@ -58,7 +22,7 @@ function ExamsPage() {
 
   const selectedStudents = useMemo(() => {
     return students.filter((student) => student.className === selectedClass);
-  }, [selectedClass]);
+  }, [students, selectedClass]);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });

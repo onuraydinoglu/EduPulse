@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   ClipboardDocumentCheckIcon,
-  MagnifyingGlassIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 
 import Button from "../../../components/ui/Button";
@@ -15,8 +15,6 @@ function TrialExamsPage() {
     studentCount: 4,
   };
 
-  const selectedClass = teacherClass.className;
-
   const students = [
     { id: 1, firstName: "Ali", lastName: "Yıldız", className: "9-A" },
     { id: 2, firstName: "Ayşe", lastName: "Kaya", className: "9-A" },
@@ -27,22 +25,29 @@ function TrialExamsPage() {
     { id: 7, firstName: "Deniz", lastName: "Şahin", className: "10-B" },
   ];
 
-  const [trialExamName, setTrialExamName] = useState("TYT Deneme 1");
+  const [trialExams, setTrialExams] = useState([
+    { id: 1, name: "TYT Deneme 1", className: teacherClass.className },
+  ]);
+
+  const [selectedTrialExamId, setSelectedTrialExamId] = useState(1);
+  const [newTrialExamName, setNewTrialExamName] = useState("");
 
   const [results, setResults] = useState({
     1: {
-      turkish: "25",
-      math: "18",
-      science: "12",
-      social: "14",
-      english: "8",
-    },
-    2: {
-      turkish: "20",
-      math: "15",
-      science: "10",
-      social: "11",
-      english: "7",
+      1: {
+        turkish: "25",
+        math: "18",
+        science: "12",
+        social: "14",
+        english: "8",
+      },
+      2: {
+        turkish: "20",
+        math: "15",
+        science: "10",
+        social: "11",
+        english: "7",
+      },
     },
   });
 
@@ -51,9 +56,17 @@ function TrialExamsPage() {
     type: "success",
   });
 
+  const selectedTrialExam = trialExams.find(
+    (exam) => exam.id === Number(selectedTrialExamId)
+  );
+
   const selectedStudents = useMemo(() => {
-    return students.filter((student) => student.className === selectedClass);
-  }, [selectedClass]);
+    return students.filter(
+      (student) => student.className === teacherClass.className
+    );
+  }, []);
+
+  const currentResults = results[selectedTrialExamId] || {};
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -61,6 +74,25 @@ function TrialExamsPage() {
     setTimeout(() => {
       setToast({ message: "", type: "success" });
     }, 2500);
+  };
+
+  const handleCreateTrialExam = () => {
+    if (!newTrialExamName.trim()) {
+      showToast("Lütfen deneme sınavı adı girin.", "error");
+      return;
+    }
+
+    const newExam = {
+      id: Date.now(),
+      name: newTrialExamName.trim(),
+      className: teacherClass.className,
+    };
+
+    setTrialExams((prev) => [newExam, ...prev]);
+    setSelectedTrialExamId(newExam.id);
+    setNewTrialExamName("");
+
+    showToast("Yeni deneme sınavı oluşturuldu.");
   };
 
   const handleResultChange = (studentId, field, value) => {
@@ -71,21 +103,29 @@ function TrialExamsPage() {
 
     setResults((prev) => ({
       ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [field]: value,
+      [selectedTrialExamId]: {
+        ...prev[selectedTrialExamId],
+        [studentId]: {
+          ...prev[selectedTrialExamId]?.[studentId],
+          [field]: value,
+        },
       },
     }));
   };
 
   const handleSave = () => {
+    if (!selectedTrialExam) {
+      showToast("Lütfen önce deneme sınavı seçin.", "error");
+      return;
+    }
+
     console.log("Deneme sınavı kaydı:", {
-      trialExamName,
-      selectedClass,
-      results,
+      trialExam: selectedTrialExam,
+      className: teacherClass.className,
+      results: currentResults,
     });
 
-    showToast(`${selectedClass} sınıfı deneme sonuçları kaydedildi.`);
+    showToast(`${selectedTrialExam.name} sonuçları kaydedildi.`);
   };
 
   return (
@@ -104,7 +144,8 @@ function TrialExamsPage() {
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Kendi sınıfınıza ait deneme sınavı netlerini girin
+              Önce deneme sınavı oluşturun, ardından kendi sınıfınıza ait
+              netleri girin.
             </p>
           </div>
 
@@ -115,30 +156,66 @@ function TrialExamsPage() {
         </div>
       </section>
 
-      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-md">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+      <section className="radius-card border border-gray-200 bg-white p-5">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Yeni Deneme Sınavı
+            </label>
 
             <input
               type="text"
-              value={trialExamName}
-              onChange={(e) => setTrialExamName(e.target.value)}
-              placeholder="Örn: TYT Deneme 1"
-              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+              value={newTrialExamName}
+              onChange={(e) => setNewTrialExamName(e.target.value)}
+              placeholder="Örn: TYT Deneme 2"
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
 
-          <div className="inline-flex h-11 items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-600">
-            {selectedClass} / {selectedStudents.length} Öğrenci
+          <Button onClick={handleCreateTrialExam}>
+            <PlusIcon className="h-5 w-5" />
+            Deneme Ekle
+          </Button>
+        </div>
+      </section>
+
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+              Sonuç Girişi
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Seçili deneme sınavına göre öğrenci netlerini girin.
+            </p>
+          </div>
+
+          <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+            <select
+              value={selectedTrialExamId}
+              onChange={(e) => setSelectedTrialExamId(Number(e.target.value))}
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-64"
+            >
+              {trialExams.map((exam) => (
+                <option key={exam.id} value={exam.id}>
+                  {exam.name}
+                </option>
+              ))}
+            </select>
+
+            <div className="inline-flex h-11 items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-600">
+              {teacherClass.className} / {selectedStudents.length} Öğrenci
+            </div>
           </div>
         </div>
 
         <div className="p-5">
           <div className="mb-5">
             <h2 className="text-lg font-semibold tracking-tight text-gray-950">
-              {selectedClass} - {trialExamName}
+              {teacherClass.className} - {selectedTrialExam?.name}
             </h2>
+
             <p className="mt-1 text-sm text-gray-500">
               Öğrencilerin ders bazlı netlerini girin.
             </p>
@@ -146,7 +223,7 @@ function TrialExamsPage() {
 
           <TrialExamResultTable
             students={selectedStudents}
-            results={results}
+            results={currentResults}
             onResultChange={handleResultChange}
           />
         </div>
