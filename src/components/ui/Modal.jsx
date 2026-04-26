@@ -1,4 +1,4 @@
-function Modal({ id, title, children, footer }) {
+function Modal({ id, title, children, description, footer }) {
   return (
     <dialog id={id} className="modal">
       <div className="modal-box max-w-2xl rounded-2xl">
@@ -6,7 +6,8 @@ function Modal({ id, title, children, footer }) {
           <div>
             <h3 className="text-xl font-bold">{title}</h3>
             <p className="mt-1 text-sm text-base-content/50">
-              Gerekli bilgileri doldurup kaydı oluşturabilirsiniz.
+              {description}
+              {/* Gerekli bilgileri doldurup kaydı oluşturabilirsiniz. */}
             </p>
           </div>
 

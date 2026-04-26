@@ -48,6 +48,34 @@ function StudentForm({ formData, setFormData }) {
         onChange={(value) => updateField("club", value)}
       />
 
+      <FormInput
+        label="Okul Numarası"
+        placeholder="Örn: 1234"
+        value={formData.schoolNumber}
+        onChange={(value) => updateField("schoolNumber", value)}
+      />
+
+      <FormInput
+        label="Öğrenci Telefonu"
+        placeholder="Örn: 05xx xxx xx xx"
+        value={formData.studentPhone}
+        onChange={(value) => updateField("studentPhone", value)}
+      />
+
+      <FormInput
+        label="Veli Ad Soyad"
+        placeholder="Örn: Ahmet Yıldız"
+        value={formData.parentName}
+        onChange={(value) => updateField("parentName", value)}
+      />
+
+      <FormInput
+        label="Veli Telefonu"
+        placeholder="Örn: 05xx xxx xx xx"
+        value={formData.parentPhone}
+        onChange={(value) => updateField("parentPhone", value)}
+      />
+
       <FormSelect
         label="Durum"
         value={formData.status}
