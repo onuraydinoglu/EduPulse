@@ -1,9 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  Bars3Icon,
+  Bars3BottomLeftIcon,
   BellIcon,
   ChevronDownIcon,
-  ArrowRightOnRectangleIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { authStorage } from "../../features/auth/services/authStorage";
@@ -26,13 +25,13 @@ function Navbar({ collapsed, setCollapsed }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-16 items-center justify-between px-4 lg:px-8">
+      <div className="flex h-16 items-center justify-between px-3 lg:px-6">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 cursor-pointer"
           >
-            <Bars3Icon className="h-5 w-5" />
+            <Bars3BottomLeftIcon className="h-5 w-5" />
           </button>
 
           <div>
@@ -109,7 +108,6 @@ function Navbar({ collapsed, setCollapsed }) {
                   onClick={handleLogout}
                   className="rounded-xl text-red-500 hover:bg-red-50"
                 >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
                   Çıkış Yap
                 </button>
               </li>

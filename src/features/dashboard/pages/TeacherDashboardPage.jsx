@@ -1,139 +1,223 @@
-import {
-  AcademicCapIcon,
-  ChartBarIcon,
-  ExclamationTriangleIcon,
-  HomeModernIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
-
-import StatCard from "../../../components/ui/StatCard";
-import DataTable from "../../../components/ui/DataTable";
+import { useState } from "react";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import Button from "../../../components/ui/Button";
+import ConfirmModal from "../../../components/ui/ConfirmModal";
+import Modal from "../../../components/ui/Modal";
+import TableActions from "../../../components/ui/TableActions";
+import CreateButton from "../../../components/ui/CreateButton";
 
 function TeacherDashboardPage() {
-  const students = [
-    { id: 1, fullName: "Ali Yıldız", average: 84, examAverage: 78, status: "Başarılı" },
-    { id: 2, fullName: "Ayşe Kaya", average: 67, examAverage: 61, status: "Takip Edilmeli" },
-    { id: 3, fullName: "Mehmet Can", average: 92, examAverage: 89, status: "Çok Başarılı" },
-    { id: 4, fullName: "Zeynep Kara", average: 48, examAverage: 42, status: "Riskli" },
-  ];
-
-  const getStatusClass = (status) => {
-    if (status === "Çok Başarılı") return "bg-emerald-50 text-emerald-600";
-    if (status === "Başarılı") return "bg-blue-50 text-blue-600";
-    if (status === "Takip Edilmeli") return "bg-amber-50 text-amber-600";
-    return "bg-rose-50 text-rose-600";
+  const teacherInfo = {
+    fullName: "Ayşe Demir",
+    branch: "Matematik",
+    className: "9-A",
+    school: "Müdürün Okulu",
   };
 
-  const columns = [
+  const principalMessages = [
     {
-      key: "fullName",
-      title: "Öğrenci",
-      render: (row) => (
-        <p className="font-medium text-gray-900">{row.fullName}</p>
-      ),
+      id: 1,
+      sender: "Okul Müdürü",
+      text: "Cuma günü yapılacak öğretmenler toplantısına katılım sağlayınız.",
+      date: "26.04.2026",
     },
     {
-      key: "average",
-      title: "Ders Ort.",
-      render: (row) => (
-        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-          %{row.average}
-        </span>
-      ),
-    },
-    {
-      key: "examAverage",
-      title: "Sınav Ort.",
-      render: (row) => (
-        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
-          %{row.examAverage}
-        </span>
-      ),
-    },
-    {
-      key: "status",
-      title: "Durum",
-      render: (row) => (
-        <span
-          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusClass(
-            row.status
-          )}`}
-        >
-          {row.status}
-        </span>
-      ),
+      id: 2,
+      sender: "Okul Müdürü",
+      text: "9-A sınıfının deneme sınavı sonuçları hafta sonuna kadar sisteme girilmelidir.",
+      date: "25.04.2026",
     },
   ];
+
+  const [noteText, setNoteText] = useState("");
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [deletingNoteId, setDeletingNoteId] = useState(null);
+
+  const [notes, setNotes] = useState([
+    { id: 1, text: "9-A sınıfında riskli öğrencilerle birebir görüşme yapılacak." },
+    { id: 2, text: "Matematik yazılı sonuçları sisteme işlenecek." },
+  ]);
+
+  const isEditingNote = editingNoteId !== null;
+
+  const handleOpenNoteModal = () => {
+    setEditingNoteId(null);
+    setNoteText("");
+    document.getElementById("teacher_note_modal").showModal();
+  };
+
+  const handleCloseNoteModal = () => {
+    document.getElementById("teacher_note_modal").close();
+    setEditingNoteId(null);
+    setNoteText("");
+  };
+
+  const handleSaveNote = () => {
+    if (!noteText.trim()) return;
+
+    if (isEditingNote) {
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.id === editingNoteId ? { ...note, text: noteText } : note
+        )
+      );
+    } else {
+      setNotes((prev) => [{ id: Date.now(), text: noteText }, ...prev]);
+    }
+
+    handleCloseNoteModal();
+  };
+
+  const handleEditNote = (note) => {
+    setEditingNoteId(note.id);
+    setNoteText(note.text);
+    document.getElementById("teacher_note_modal").showModal();
+  };
+
+  const handleOpenNoteDeleteModal = (id) => {
+    setDeletingNoteId(id);
+    document.getElementById("teacher_note_delete_modal").showModal();
+  };
+
+  const handleDeleteNote = () => {
+    setNotes((prev) => prev.filter((note) => note.id !== deletingNoteId));
+
+    if (editingNoteId === deletingNoteId) {
+      handleCloseNoteModal();
+    }
+
+    setDeletingNoteId(null);
+    document.getElementById("teacher_note_delete_modal").close();
+  };
 
   return (
     <div className="space-y-6">
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
-        <div>
-          <p className="text-sm font-medium text-blue-600">
-            Öğretmen Paneli
-          </p>
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Öğretmen Paneli
+            </p>
 
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
-            Öğretmen Ana Sayfa
-          </h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+              {teacherInfo.fullName}
+            </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Sorumlu olduğunuz sınıfın öğrenci ve başarı özetini takip edin
-          </p>
-        </div>
-      </section>
-
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title="Sorumlu Sınıf"
-          value="9-A"
-          icon={HomeModernIcon}
-          description="Öğretmenin sınıfı"
-          color="primary"
-        />
-
-        <StatCard
-          title="Toplam Öğrenci"
-          value="32"
-          icon={UserGroupIcon}
-          description="Sınıftaki öğrenci sayısı"
-          color="info"
-        />
-
-        <StatCard
-          title="Sınıf Ortalaması"
-          value="%74"
-          icon={ChartBarIcon}
-          description="Ders başarı ortalaması"
-          color="success"
-        />
-
-        <StatCard
-          title="Takip Öğrencisi"
-          value="2"
-          icon={ExclamationTriangleIcon}
-          description="Yakından takip gereken öğrenci"
-          color="warning"
-        />
-      </div>
-
-      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <AcademicCapIcon className="h-5 w-5 text-blue-600" />
-
-            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
-              Sınıf Öğrenci Özeti
-            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {teacherInfo.school} okulundaki {teacherInfo.className} sınıfı
+              yönetim paneli
+            </p>
           </div>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Sorumlu olduğunuz sınıftaki öğrencilerin son durumu
-          </p>
+          <div className="rounded-2xl bg-blue-50 px-5 py-3 text-sm font-medium text-blue-600">
+            {teacherInfo.branch} Öğretmeni
+          </div>
         </div>
-
-        <DataTable columns={columns} data={students} />
       </section>
+
+      <div className="grid gap-5 xl:grid-cols-[1.4fr_0.9fr]">
+        <section className="radius-card border border-gray-200 bg-white p-6">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+              Müdür Mesajları
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Müdür tarafından size veya öğretmenlere gönderilen duyurular
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {principalMessages.map((message) => (
+              <div
+                key={message.id}
+                className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3"
+              >
+                <div className="mb-1 flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {message.sender}
+                  </p>
+
+                  <span className="text-xs text-gray-400">
+                    {message.date}
+                  </span>
+                </div>
+
+                <p className="text-sm text-gray-600">{message.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="radius-card border border-gray-200 bg-white p-6">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-950">
+                Kendime Notlar
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Öğretmen paneline özel kişisel takip notları
+              </p>
+            </div>
+
+            <CreateButton icon={PencilSquareIcon} onClick={handleOpenNoteModal}>
+              Not Ekle
+            </CreateButton>
+          </div>
+
+          <div className="space-y-3">
+            {notes.map((note) => (
+              <div
+                key={note.id}
+                className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3"
+              >
+                <p className="text-sm text-gray-600">{note.text}</p>
+
+                <div className="mt-3 flex justify-end">
+                  <TableActions
+                    onEdit={() => handleEditNote(note)}
+                    onDelete={() => handleOpenNoteDeleteModal(note.id)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <Modal
+        id="teacher_note_modal"
+        title={isEditingNote ? "Notu Güncelle" : "Not Ekle"}
+        footer={
+          <>
+            <form method="dialog">
+              <Button variant="ghost">Vazgeç</Button>
+            </form>
+
+            <Button onClick={handleSaveNote}>
+              {isEditingNote ? "Güncelle" : "Kaydet"}
+            </Button>
+          </>
+        }
+      >
+        <textarea
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
+          rows="5"
+          placeholder="Kendiniz için kısa bir not yazın..."
+          className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+        />
+      </Modal>
+
+      <ConfirmModal
+        id="teacher_note_delete_modal"
+        title="Notu Sil"
+        description="Bu not kalıcı olarak silinecek. Devam etmek istediğinize emin misiniz?"
+        confirmText="Evet, Sil"
+        cancelText="Vazgeç"
+        onConfirm={handleDeleteNote}
+      />
     </div>
   );
 }
