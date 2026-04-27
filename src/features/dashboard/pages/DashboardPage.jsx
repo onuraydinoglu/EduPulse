@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom";
+
 import { authStorage } from "../../auth/services/authStorage";
 import AdminDashboardPage from "./AdminDashboardPage";
 import PrincipalDashboardPage from "./PrincipalDashboardPage";
@@ -6,19 +8,25 @@ import TeacherDashboardPage from "./TeacherDashboardPage";
 function DashboardPage() {
   const user = authStorage.getUser();
 
-  if (user?.role === "admin") {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const role = (user?.role || user?.roleName || "").toLowerCase();
+
+  if (role === "superadmin" || role === "admin") {
     return <AdminDashboardPage />;
   }
 
-  if (user?.role === "principal") {
+  if (role === "schooladmin") {
     return <PrincipalDashboardPage />;
   }
 
-  if (user?.role === "teacher") {
+  if (role === "teacher") {
     return <TeacherDashboardPage />;
   }
 
-  return null;
+  return <Navigate to="/login" replace />;
 }
 
 export default DashboardPage;

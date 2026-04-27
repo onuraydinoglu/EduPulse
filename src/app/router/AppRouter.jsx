@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import RegisterSchoolPage from "../../features/auth/pages/RegisterSchoolPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
 import DashboardLayout from "../layout/DashboardLayout";
 import DashboardPage from "../../features/dashboard/pages/DashboardPage";
@@ -18,6 +19,7 @@ function AppRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
 
+        <Route path="/register-school" element={<RegisterSchoolPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
