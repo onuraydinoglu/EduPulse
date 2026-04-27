@@ -1,5 +1,4 @@
 import FormInput from "../../../components/ui/FormInput";
-import FormSelect from "../../../components/ui/FormSelect";
 
 function TeacherForm({ formData, setFormData }) {
   const updateField = (field, value) => {
@@ -26,28 +25,25 @@ function TeacherForm({ formData, setFormData }) {
       />
 
       <FormInput
-        label="Yaş"
-        type="text"
-        placeholder="Örn: 35"
-        value={formData.age}
-        onChange={(value) => updateField("age", value)}
+        label="Telefon"
+        placeholder="Örn: 0555 555 55 55"
+        value={formData.phoneNumber}
+        onChange={(value) => updateField("phoneNumber", value)}
       />
 
       <FormInput
-        label="Branş"
-        placeholder="Örn: Matematik"
-        value={formData.branch}
-        onChange={(value) => updateField("branch", value)}
+        label="Email"
+        type="email"
+        placeholder="Örn: ayse.demir@mail.com"
+        value={formData.email}
+        onChange={(value) => updateField("email", value)}
       />
 
-      <FormSelect
-        label="Durum"
-        value={formData.status}
-        onChange={(value) => updateField("status", value)}
-        options={[
-          { label: "Aktif", value: "Aktif" },
-          { label: "Pasif", value: "Pasif" },
-        ]}
+      <FormInput
+        label="Okul Id"
+        placeholder="SchoolId giriniz"
+        value={formData.schoolId}
+        onChange={(value) => updateField("schoolId", value)}
         className="md:col-span-2"
       />
     </div>
