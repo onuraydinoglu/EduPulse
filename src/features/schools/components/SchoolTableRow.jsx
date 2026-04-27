@@ -9,28 +9,33 @@ function SchoolTableRow({ school, onEdit, onDelete }) {
       <td className="px-5 py-4">
         <div>
           <p className="font-medium text-gray-900">{school.name}</p>
-          <p className="text-xs text-gray-400">{school.city}</p>
+          <p className="text-xs text-gray-400">{school.email || "Email yok"}</p>
+        </div>
+      </td>
+
+      <td className="px-5 py-4">
+        <div>
+          <p className="text-gray-700">{school.city}</p>
+          <p className="text-xs text-gray-400">{school.district}</p>
         </div>
       </td>
 
       <td className="px-5 py-4 text-gray-600">
-        {school.principal}
+        {school.principalName || "-"}
       </td>
 
-      <td className="px-5 py-4">
-        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
-          {school.studentCount} Öğrenci
-        </span>
+      <td className="px-5 py-4 text-gray-600">
+        {school.phoneNumber}
       </td>
 
       <td className="px-5 py-4">
         <span
-          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${school.status === "Aktif"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-rose-50 text-rose-600"
+          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${school.isActive
+              ? "bg-emerald-50 text-emerald-600"
+              : "bg-rose-50 text-rose-600"
             }`}
         >
-          {school.status}
+          {school.isActive ? "Aktif" : "Pasif"}
         </span>
       </td>
 

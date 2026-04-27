@@ -7,8 +7,9 @@ function SchoolTable({ schools, onEdit, onDelete }) {
         <thead className="bg-gray-50 text-gray-500">
           <tr>
             <th className="px-5 py-4 font-medium">Okul Adı</th>
+            <th className="px-5 py-4 font-medium">Konum</th>
             <th className="px-5 py-4 font-medium">Müdür</th>
-            <th className="px-5 py-4 font-medium">Öğrenci Sayısı</th>
+            <th className="px-5 py-4 font-medium">Telefon</th>
             <th className="px-5 py-4 font-medium">Durum</th>
             <th className="px-5 py-4 text-right font-medium">İşlemler</th>
           </tr>
