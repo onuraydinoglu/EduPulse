@@ -1,4 +1,4 @@
-const AUTH_USER_KEY = "okulpro_user";
+const AUTH_USER_KEY = "edupulse_user";
 
 export const authStorage = {
   setUser: (user) => {
@@ -7,7 +7,14 @@ export const authStorage = {
 
   getUser: () => {
     const user = localStorage.getItem(AUTH_USER_KEY);
-    return user ? JSON.parse(user) : null;
+
+    if (!user) return null;
+
+    try {
+      return JSON.parse(user);
+    } catch {
+      return null;
+    }
   },
 
   removeUser: () => {

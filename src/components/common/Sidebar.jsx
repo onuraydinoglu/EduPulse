@@ -10,8 +10,12 @@ function Sidebar({ collapsed }) {
   const navigate = useNavigate();
   const user = authStorage.getUser();
 
+  const displayName = user?.fullName || user?.email || "Kullanıcı";
+  const displayRole = user?.roleName || user?.role || "Rol yok";
+  const userRole = displayRole.toLowerCase();
+
   const filteredMenuItems = menuItems.filter((item) =>
-    item.roles.includes(user?.role)
+    item.roles.map((role) => role.toLowerCase()).includes(userRole)
   );
 
   const handleLogout = () => {
@@ -21,7 +25,7 @@ function Sidebar({ collapsed }) {
 
   return (
     <aside
-      className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "w-20" : "w-68"
+      className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "w-20" : "w-72"
         }`}
     >
       <div className={`${collapsed ? "px-3" : "px-6"} py-6`}>
@@ -69,8 +73,8 @@ function Sidebar({ collapsed }) {
 
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 ${isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-base-content/45 group-hover:bg-base-300/50 group-hover:text-base-content"
+                        ? "bg-primary/10 text-primary"
+                        : "text-base-content/45 group-hover:bg-base-300/50 group-hover:text-base-content"
                       }`}
                   >
                     <Icon className="h-[18px] w-[18px]" />
@@ -96,11 +100,9 @@ function Sidebar({ collapsed }) {
         {!collapsed ? (
           <>
             <div className="mb-3 rounded-2xl bg-base-200/70 p-3">
-              <p className="text-sm font-bold">
-                {user?.fullName || "Kullanıcı"}
-              </p>
+              <p className="text-sm font-bold">{displayName}</p>
               <p className="text-xs capitalize text-base-content/50">
-                {user?.role || "Rol yok"}
+                {displayRole}
               </p>
             </div>
 

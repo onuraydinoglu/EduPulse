@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { staticUsers } from "../../../data/staticUsers";
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+
+import { authService } from "../services/authService";
 import { authStorage } from "../services/authStorage";
 
 function LoginPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "admin@okulpro.com",
-    password: "123456",
+    email: "",
+    password: "",
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -20,24 +23,38 @@ function LoginPage() {
     }));
   };
 
-  const handleLogin = (e) => {
+  const getErrorMessage = (err) => {
+    return (
+      err?.response?.data?.message ||
+      err?.response?.data?.Message ||
+      err?.response?.data?.error ||
+      "Giriş yapılırken bir hata oluştu."
+    );
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const foundUser = staticUsers.find(
-      (user) =>
-        user.email === formData.email &&
-        user.password === formData.password
-    );
+    setError("");
+    setLoading(true);
 
-    if (!foundUser) {
-      setError("E-posta veya şifre hatalı.");
-      return;
+    try {
+      const result = await authService.login(formData);
+
+      if (result?.isSuccess === false) {
+        setError(result.message || "E-posta veya şifre hatalı.");
+        return;
+      }
+
+      const user = result?.data || result;
+
+      authStorage.setUser(user);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    const { password, ...safeUser } = foundUser;
-
-    authStorage.setUser(safeUser);
-    navigate("/dashboard");
   };
 
   return (
@@ -45,11 +62,11 @@ function LoginPage() {
       <div className="card w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
         <div className="card-body">
           <h1 className="text-center text-3xl font-bold text-primary">
-            OkulPro
+            EduPulse
           </h1>
 
           <p className="text-center text-sm text-base-content/60">
-            Role göre statik giriş ekranı
+            Yönetim paneline giriş yap
           </p>
 
           {error && (
@@ -63,36 +80,57 @@ function LoginPage() {
               <label className="label">
                 <span className="label-text">E-posta</span>
               </label>
-              <input
-                type="email"
-                className="input input-bordered w-full rounded-xl"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-              />
+
+              <div className="relative">
+                <EnvelopeIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/40" />
+
+                <input
+                  type="email"
+                  className="input input-bordered w-full rounded-xl pl-12"
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  placeholder="admin@edupulse.com"
+                  required
+                />
+              </div>
             </div>
 
             <div>
               <label className="label">
                 <span className="label-text">Şifre</span>
               </label>
-              <input
-                type="password"
-                className="input input-bordered w-full rounded-xl"
-                value={formData.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-              />
+
+              <div className="relative">
+                <LockClosedIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/40" />
+
+                <input
+                  type="password"
+                  className="input input-bordered w-full rounded-xl pl-12"
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
             </div>
 
-            <button className="btn btn-primary w-full rounded-xl">
-              Giriş Yap
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full rounded-xl"
+            >
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
             </button>
           </form>
 
-          <div className="mt-6 rounded-2xl bg-base-200 p-4 text-sm">
-            <p className="font-semibold">Test Kullanıcıları</p>
-            <p>Admin: admin@okulpro.com / 123456</p>
-            <p>Müdür: mudur@okulpro.com / 123456</p>
-            <p>Öğretmen: ogretmen@okulpro.com / 123456</p>
+          <div className="mt-6 text-center text-sm">
+            <button
+              type="button"
+              onClick={() => navigate("/register-school")}
+              className="font-semibold text-primary hover:underline"
+            >
+              Okul hesabı oluştur
+            </button>
           </div>
         </div>
       </div>
