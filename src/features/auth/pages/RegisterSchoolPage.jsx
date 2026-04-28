@@ -67,10 +67,23 @@ function RegisterPage() {
 
     setError("");
     setSuccessMessage("");
+
+    if (formData.schoolCode.length !== 6) {
+      setError("Okul kodu 6 haneli olmalıdır.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const result = await authService.register(formData);
+      const payload = {
+        ...formData,
+        schoolCode: `EDU-${formData.schoolCode}`,
+      };
+
+      console.log("REGISTER PAYLOAD:", payload);
+
+      const result = await authService.register(payload);
 
       if (result?.isSuccess === false) {
         setError(result.message || "Kayıt oluşturulamadı.");
@@ -94,10 +107,37 @@ function RegisterPage() {
     }
   };
 
+  const handleCodeChange = (index, rawValue) => {
+    const value = rawValue.replace(/\D/g, "");
+
+    if (!value) return;
+
+    const newCode = formData.schoolCode.split("");
+    newCode[index] = value[0];
+
+    updateField("schoolCode", newCode.join(""));
+
+    const next = document.getElementById(`code-${index + 1}`);
+    if (next) next.focus();
+  };
+
+  const handleCodeBackspace = (index, e) => {
+    if (e.key !== "Backspace") return;
+
+    e.preventDefault();
+
+    const newCode = formData.schoolCode.split("");
+    newCode[index] = "";
+
+    updateField("schoolCode", newCode.join(""));
+
+    const prev = document.getElementById(`code-${index - 1}`);
+    if (prev) prev.focus();
+  };
+
   return (
     <div className="h-screen overflow-hidden bg-slate-50">
       <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
-        {/* SOL FORM */}
         <section className="flex h-full items-center justify-center px-6 py-8">
           <div className="w-full max-w-2xl">
             <button
@@ -138,19 +178,16 @@ function RegisterPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* OKUL KODU */}
                 <div>
                   <label className="mb-3 block text-sm font-medium text-slate-700">
                     Okul Kodu
                   </label>
 
                   <div className="flex items-center gap-4">
-                    {/* EDU */}
                     <span className="text-lg font-bold tracking-widest text-indigo-600">
                       EDU-
                     </span>
 
-                    {/* KUTULAR */}
                     <div className="flex gap-2">
                       {Array.from({ length: 6 }).map((_, index) => (
                         <input
@@ -160,28 +197,11 @@ function RegisterPage() {
                           maxLength={1}
                           inputMode="numeric"
                           value={formData.schoolCode[index] || ""}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, "");
-                            if (!value) return;
-
-                            const newCode = formData.schoolCode.split("");
-                            newCode[index] = value;
-                            updateField("schoolCode", newCode.join(""));
-
-                            const next = document.getElementById(`code-${index + 1}`);
-                            if (next) next.focus();
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Backspace") {
-                              const newCode = formData.schoolCode.split("");
-                              newCode[index] = "";
-                              updateField("schoolCode", newCode.join(""));
-
-                              const prev = document.getElementById(`code-${index - 1}`);
-                              if (prev) prev.focus();
-                            }
-                          }}
-                          className="h-12 w-12 rounded-xl border border-slate-200 text-center text-lg font-semibold text-slate-900 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none"
+                          onChange={(e) =>
+                            handleCodeChange(index, e.target.value)
+                          }
+                          onKeyDown={(e) => handleCodeBackspace(index, e)}
+                          className="h-12 w-12 rounded-xl border border-slate-200 text-center text-lg font-semibold text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                         />
                       ))}
                     </div>
@@ -189,104 +209,48 @@ function RegisterPage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  {/* AD */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Ad
-                    </label>
+                  <InputField
+                    label="Ad"
+                    icon={UserIcon}
+                    value={formData.firstName}
+                    onChange={(value) => updateField("firstName", value)}
+                    placeholder="Mehmet"
+                  />
 
-                    <div className="relative">
-                      <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <InputField
+                    label="Soyad"
+                    icon={UserIcon}
+                    value={formData.lastName}
+                    onChange={(value) => updateField("lastName", value)}
+                    placeholder="Demir"
+                  />
 
-                      <input
-                        type="text"
-                        value={formData.firstName}
-                        onChange={(e) => updateField("firstName", e.target.value)}
-                        placeholder="Mehmet"
-                        required
-                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
+                  <InputField
+                    label="E-posta"
+                    icon={EnvelopeIcon}
+                    type="email"
+                    value={formData.email}
+                    onChange={(value) => updateField("email", value)}
+                    placeholder="mehmet.demir@test.com"
+                  />
 
-                  {/* SOYAD */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Soyad
-                    </label>
+                  <InputField
+                    label="Telefon"
+                    icon={PhoneIcon}
+                    value={formData.phoneNumber}
+                    onChange={(value) => updateField("phoneNumber", value)}
+                    placeholder="05555555555"
+                  />
 
-                    <div className="relative">
-                      <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
-
-                      <input
-                        type="text"
-                        value={formData.lastName}
-                        onChange={(e) => updateField("lastName", e.target.value)}
-                        placeholder="Demir"
-                        required
-                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* E-POSTA */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      E-posta
-                    </label>
-
-                    <div className="relative">
-                      <EnvelopeIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
-
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        placeholder="mehmet.demir@test.com"
-                        required
-                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* TELEFON */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Telefon
-                    </label>
-
-                    <div className="relative">
-                      <PhoneIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
-
-                      <input
-                        type="text"
-                        value={formData.phoneNumber}
-                        onChange={(e) => updateField("phoneNumber", e.target.value)}
-                        placeholder="05555555555"
-                        required
-                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* ŞİFRE */}
                   <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Şifre
-                    </label>
-
-                    <div className="relative">
-                      <LockClosedIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
-
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => updateField("password", e.target.value)}
-                        placeholder="Şifrenizi girin"
-                        required
-                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
+                    <InputField
+                      label="Şifre"
+                      icon={LockClosedIcon}
+                      type="password"
+                      value={formData.password}
+                      onChange={(value) => updateField("password", value)}
+                      placeholder="Şifrenizi girin"
+                    />
                   </div>
                 </div>
 
@@ -313,7 +277,6 @@ function RegisterPage() {
           </div>
         </section>
 
-        {/* SAĞ TANITIM */}
         <section className="relative hidden h-full overflow-hidden bg-gradient-to-br from-indigo-700 via-violet-600 to-sky-500 px-12 py-8 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/20 blur-3xl" />
           <div className="absolute -bottom-28 -right-20 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl" />
@@ -376,7 +339,6 @@ function RegisterPage() {
             </div>
           </div>
 
-
           <div className="relative z-10 flex items-center justify-end text-xs font-semibold text-white/65">
             <span>© 2026 EduPulse</span>
           </div>
@@ -386,7 +348,35 @@ function RegisterPage() {
   );
 }
 
+function InputField({
+  label,
+  icon: Icon,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        {label}
+      </label>
 
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+        />
+      </div>
+    </div>
+  );
+}
 
 function FeatureItem({ icon: Icon, title, description }) {
   return (

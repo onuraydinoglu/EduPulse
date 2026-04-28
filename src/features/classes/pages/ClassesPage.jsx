@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MagnifyingGlassIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 
-import { mockApi } from "../../../services/mockApi";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import CreateButton from "../../../components/ui/CreateButton";
@@ -12,15 +11,18 @@ import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
 import ClassForm from "../components/ClassForm";
 import ClassTable from "../components/ClassTable";
+import { classService } from "../services/classService";
+import { teacherService } from "../../teachers/services/teacherService";
 
 const emptyClassForm = {
   grade: "",
-  branch: "",
-  teacher: "",
+  section: "",
+  teacherId: "",
 };
 
 function ClassesPage() {
-  const [classes, setClasses] = useState(() => mockApi.getClasses());
+  const [classes, setClasses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [formData, setFormData] = useState(emptyClassForm);
   const [editingClassId, setEditingClassId] = useState(null);
   const [deletingClassId, setDeletingClassId] = useState(null);
@@ -35,23 +37,57 @@ function ClassesPage() {
     setTimeout(() => setToast({ message: "", type: "success" }), 2500);
   };
 
+  const loadClasses = async () => {
+    try {
+      const result = await classService.getAll();
+      setClasses(result.data || []);
+    } catch {
+      showToast("Sınıflar yüklenirken hata oluştu.", "error");
+    }
+  };
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [classResult, teacherResult] = await Promise.all([
+          classService.getAll(),
+          teacherService.getAll(),
+        ]);
+
+        setClasses(classResult.data || []);
+        setTeachers(teacherResult.data || []);
+      } catch {
+        setToast({
+          message: "Veriler yüklenirken hata oluştu.",
+          type: "error",
+        });
+      }
+    };
+
+    loadInitialData();
+  }, []);
+
   const filteredClasses = useMemo(() => {
     const normalizedSearch = search.toLowerCase().trim();
 
     return classes.filter((classItem) => {
-      const className = classItem.className || classItem.name || "";
+      const className = classItem.name || `${classItem.grade}-${classItem.section}`;
+
+      const teacher = teachers.find((x) => x.id === classItem.teacherId);
+      const teacherName =
+        teacher?.fullName ||
+        `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim();
 
       const matchesSearch =
         className.toLowerCase().includes(normalizedSearch) ||
-        classItem.teacher?.toLowerCase().includes(normalizedSearch) ||
-        classItem.school?.toLowerCase().includes(normalizedSearch);
+        teacherName.toLowerCase().includes(normalizedSearch);
 
       const matchesGrade =
-        gradeFilter === "all" || classItem.grade === gradeFilter;
+        gradeFilter === "all" || String(classItem.grade) === gradeFilter;
 
       return matchesSearch && matchesGrade;
     });
-  }, [classes, search, gradeFilter]);
+  }, [classes, teachers, search, gradeFilter]);
 
   const handleOpenCreateModal = () => {
     setEditingClassId(null);
@@ -60,15 +96,12 @@ function ClassesPage() {
   };
 
   const handleOpenEditModal = (classItem) => {
-    const className = classItem.className || classItem.name || "";
-    const [, branch = ""] = className.split("-");
-
     setEditingClassId(classItem.id);
 
     setFormData({
-      grade: classItem.grade || "",
-      branch: classItem.branch || branch,
-      teacher: classItem.teacher || "",
+      grade: String(classItem.grade || ""),
+      section: classItem.section || "",
+      teacherId: classItem.teacherId || "",
     });
 
     document.getElementById("class_modal").showModal();
@@ -87,62 +120,51 @@ function ClassesPage() {
     document.getElementById("class_delete_modal").close();
   };
 
-  const handleSubmit = () => {
-    if (
-      !formData.grade.trim() ||
-      !formData.branch.trim() ||
-      !formData.teacher.trim()
-    ) {
-      showToast("Lütfen tüm alanları doldurun.", "error");
+  const handleSubmit = async () => {
+    if (!formData.grade || !formData.section.trim()) {
+      showToast("Sınıf seviyesi ve şube alanı zorunludur.", "error");
       return;
     }
 
-    const preparedClass = {
-      grade: formData.grade.trim(),
-      branch: formData.branch.trim().toUpperCase(),
-      teacher: formData.teacher.trim(),
-      className: `${formData.grade.trim()}-${formData.branch
-        .trim()
-        .toUpperCase()}`,
+    const preparedData = {
+      grade: Number(formData.grade),
+      section: formData.section.trim().toUpperCase(),
+      teacherId: formData.teacherId || null,
     };
 
-    if (isEditing) {
-      setClasses((prev) =>
-        prev.map((item) =>
-          item.id === editingClassId
-            ? {
-              ...item,
-              ...preparedClass,
-            }
-            : item
-        )
-      );
+    try {
+      if (isEditing) {
+        await classService.update({
+          id: editingClassId,
+          ...preparedData,
+        });
 
-      showToast("Sınıf güncellendi.");
-    } else {
-      const newClass = {
-        id: Date.now(),
-        ...preparedClass,
-        school: "Atatürk Anadolu Lisesi",
-        studentCount: 0,
-        average: 0,
-      };
+        showToast("Sınıf güncellendi.");
+      } else {
+        await classService.create(preparedData);
+        showToast("Sınıf eklendi.");
+      }
 
-      setClasses((prev) => [newClass, ...prev]);
-      showToast("Sınıf eklendi.");
+      setFormData(emptyClassForm);
+      setEditingClassId(null);
+      handleCloseModal();
+      loadClasses();
+    } catch {
+      showToast("İşlem sırasında hata oluştu.", "error");
     }
-
-    setFormData(emptyClassForm);
-    setEditingClassId(null);
-    handleCloseModal();
   };
 
-  const handleDelete = () => {
-    setClasses((prev) => prev.filter((item) => item.id !== deletingClassId));
+  const handleDelete = async () => {
+    try {
+      await classService.delete(deletingClassId);
 
-    setDeletingClassId(null);
-    handleCloseDeleteModal();
-    showToast("Sınıf silindi.");
+      setDeletingClassId(null);
+      handleCloseDeleteModal();
+      showToast("Sınıf silindi.");
+      loadClasses();
+    } catch {
+      showToast("Sınıf silinirken hata oluştu.", "error");
+    }
   };
 
   return (
@@ -163,10 +185,7 @@ function ClassesPage() {
             </p>
           </div>
 
-          <CreateButton
-            icon={AcademicCapIcon}
-            onClick={handleOpenCreateModal}
-          >
+          <CreateButton icon={AcademicCapIcon} onClick={handleOpenCreateModal}>
             Yeni Sınıf
           </CreateButton>
         </div>
@@ -180,7 +199,7 @@ function ClassesPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sınıf, okul veya öğretmen ara..."
+              placeholder="Sınıf veya öğretmen ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
@@ -200,6 +219,7 @@ function ClassesPage() {
 
         <ClassTable
           classes={filteredClasses}
+          teachers={teachers}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteModal}
         />
@@ -220,7 +240,11 @@ function ClassesPage() {
           </>
         }
       >
-        <ClassForm formData={formData} setFormData={setFormData} />
+        <ClassForm
+          formData={formData}
+          setFormData={setFormData}
+          teachers={teachers}
+        />
       </Modal>
 
       <ConfirmModal
