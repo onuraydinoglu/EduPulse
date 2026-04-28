@@ -6,7 +6,10 @@ import {
   LockClosedIcon,
   PhoneIcon,
   UserIcon,
-  KeyIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 import Button from "../../../components/ui/Button";
@@ -41,39 +44,20 @@ function RegisterPage() {
 
     console.log("REGISTER ERROR:", data);
 
-    if (!data) {
-      return "Sunucuya ulaşılamadı.";
-    }
-
-    if (typeof data === "string") {
-      return data;
-    }
-
-    if (data.message) {
-      return data.message;
-    }
-
-    if (data.Message) {
-      return data.Message;
-    }
-
-    if (data.error) {
-      return data.error;
-    }
+    if (!data) return "Sunucuya ulaşılamadı.";
+    if (typeof data === "string") return data;
+    if (data.message) return data.message;
+    if (data.Message) return data.Message;
+    if (data.error) return data.error;
 
     if (data.errors) {
-      if (Array.isArray(data.errors)) {
-        return data.errors.join(" ");
-      }
-
+      if (Array.isArray(data.errors)) return data.errors.join(" ");
       if (typeof data.errors === "object") {
         return Object.values(data.errors).flat().join(" ");
       }
     }
 
-    if (data.title) {
-      return data.title;
-    }
+    if (data.title) return data.title;
 
     return "Kayıt oluşturulurken hata oluştu.";
   };
@@ -111,163 +95,311 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 px-4 py-8">
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-5xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-3xl bg-base-100 shadow-xl lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="hidden bg-gradient-to-br from-primary to-secondary p-10 text-primary-content lg:flex lg:flex-col lg:justify-between">
-            <div>
-              <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
-                <AcademicCapIcon className="h-8 w-8" />
+    <div className="h-screen overflow-hidden bg-slate-50">
+      <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
+        {/* SOL FORM */}
+        <section className="flex h-full items-center justify-center px-6 py-8">
+          <div className="w-full max-w-2xl">
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-indigo-600"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Giriş sayfasına dön
+            </button>
+
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/80">
+              <div className="mb-7">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                  Yeni kayıt
+                </p>
+
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                  Müdür hesabı oluştur
+                </h2>
+
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
+                  Okulunuza ait okul kodu ile EduPulse yönetim paneline erişim
+                  sağlayacak hesabınızı oluşturun.
+                </p>
               </div>
 
-              <h1 className="text-4xl font-bold leading-tight">
-                EduPulse kayıt paneli
-              </h1>
+              {error && (
+                <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+                  {error}
+                </div>
+              )}
 
-              <p className="mt-5 max-w-md text-sm leading-6 text-primary-content/80">
-                Okul kodunuz ile müdür hesabınızı oluşturun ve okul yönetim
-                paneline giriş yapın.
-              </p>
-            </div>
+              {successMessage && (
+                <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-600">
+                  {successMessage}
+                </div>
+              )}
 
-            <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-              <p className="text-sm text-primary-content/80">
-                Okul kodu, sistemde daha önce oluşturulmuş okul kaydına ait
-                benzersiz koddur.
-              </p>
-            </div>
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* OKUL KODU */}
+                <div>
+                  <label className="mb-3 block text-sm font-medium text-slate-700">
+                    Okul Kodu
+                  </label>
 
-          <div className="p-6 sm:p-8 lg:p-10">
-            <div className="mb-8">
-              <p className="text-sm font-semibold text-primary">Yeni kayıt</p>
-              <h2 className="mt-2 text-3xl font-bold text-base-content">
-                Müdür hesabı oluştur
-              </h2>
-              <p className="mt-2 text-sm text-base-content/60">
-                Okulunuz için verilen okul kodunu girerek hesabınızı oluşturun.
-              </p>
-            </div>
+                  <div className="flex items-center gap-4">
+                    {/* EDU */}
+                    <span className="text-lg font-bold tracking-widest text-indigo-600">
+                      EDU-
+                    </span>
 
-            {error && (
-              <div className="mb-5 rounded-2xl border border-error/30 bg-error/10 px-4 py-3 text-sm font-medium text-error">
-                {error}
-              </div>
-            )}
+                    {/* KUTULAR */}
+                    <div className="flex gap-2">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <input
+                          key={index}
+                          id={`code-${index}`}
+                          type="text"
+                          maxLength={1}
+                          inputMode="numeric"
+                          value={formData.schoolCode[index] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            if (!value) return;
 
-            {successMessage && (
-              <div className="mb-5 rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
-                {successMessage}
-              </div>
-            )}
+                            const newCode = formData.schoolCode.split("");
+                            newCode[index] = value;
+                            updateField("schoolCode", newCode.join(""));
 
-            <form onSubmit={handleSubmit} className="space-y-7">
-              <section>
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-base-content/60">
-                  Kullanıcı Bilgileri
-                </h3>
+                            const next = document.getElementById(`code-${index + 1}`);
+                            if (next) next.focus();
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Backspace") {
+                              const newCode = formData.schoolCode.split("");
+                              newCode[index] = "";
+                              updateField("schoolCode", newCode.join(""));
+
+                              const prev = document.getElementById(`code-${index - 1}`);
+                              if (prev) prev.focus();
+                            }
+                          }}
+                          className="h-12 w-12 rounded-xl border border-slate-200 text-center text-lg font-semibold text-slate-900 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <InputField
-                    label="Ad"
-                    icon={UserIcon}
-                    value={formData.firstName}
-                    onChange={(value) => updateField("firstName", value)}
-                    placeholder="Mehmet"
-                  />
+                  {/* AD */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Ad
+                    </label>
 
-                  <InputField
-                    label="Soyad"
-                    icon={UserIcon}
-                    value={formData.lastName}
-                    onChange={(value) => updateField("lastName", value)}
-                    placeholder="Demir"
-                  />
+                    <div className="relative">
+                      <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
-                  <InputField
-                    label="E-posta"
-                    icon={EnvelopeIcon}
-                    type="email"
-                    value={formData.email}
-                    onChange={(value) => updateField("email", value)}
-                    placeholder="mehmet.demir@test.com"
-                  />
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => updateField("firstName", e.target.value)}
+                        placeholder="Mehmet"
+                        required
+                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
 
-                  <InputField
-                    label="Telefon"
-                    icon={PhoneIcon}
-                    value={formData.phoneNumber}
-                    onChange={(value) => updateField("phoneNumber", value)}
-                    placeholder="05555555555"
-                  />
+                  {/* SOYAD */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Soyad
+                    </label>
 
-                  <InputField
-                    label="Şifre"
-                    icon={LockClosedIcon}
-                    type="password"
-                    value={formData.password}
-                    onChange={(value) => updateField("password", value)}
-                    placeholder="••••••••"
-                  />
+                    <div className="relative">
+                      <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
-                  <InputField
-                    label="Okul Kodu"
-                    icon={KeyIcon}
-                    value={formData.schoolCode}
-                    onChange={(value) => updateField("schoolCode", value)}
-                    placeholder="EDU-116288"
-                  />
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => updateField("lastName", e.target.value)}
+                        placeholder="Demir"
+                        required
+                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* E-POSTA */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      E-posta
+                    </label>
+
+                    <div className="relative">
+                      <EnvelopeIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => updateField("email", e.target.value)}
+                        placeholder="mehmet.demir@test.com"
+                        required
+                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* TELEFON */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Telefon
+                    </label>
+
+                    <div className="relative">
+                      <PhoneIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                      <input
+                        type="text"
+                        value={formData.phoneNumber}
+                        onChange={(e) => updateField("phoneNumber", e.target.value)}
+                        placeholder="05555555555"
+                        required
+                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ŞİFRE */}
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Şifre
+                    </label>
+
+                    <div className="relative">
+                      <LockClosedIcon className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => updateField("password", e.target.value)}
+                        placeholder="Şifrenizi girin"
+                        required
+                        className="input input-bordered w-full rounded-xl border-slate-200 bg-white pl-12 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </section>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="text-sm font-semibold text-base-content/60 hover:text-primary"
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-700 hover:to-sky-600"
                 >
-                  Zaten hesabın var mı? Giriş yap
-                </button>
-
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Kaydediliyor..." : "Kayıt Ol"}
+                  {loading ? "Kayıt oluşturuluyor..." : "Kayıt Ol"}
                 </Button>
-              </div>
-            </form>
+
+                <div className="text-center text-sm text-slate-500">
+                  Zaten hesabın var mı?{" "}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="font-semibold text-indigo-600 underline-offset-4 transition hover:text-indigo-700 hover:underline"
+                  >
+                    Giriş yap
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* SAĞ TANITIM */}
+        <section className="relative hidden h-full overflow-hidden bg-gradient-to-br from-indigo-700 via-violet-600 to-sky-500 px-12 py-8 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/20 blur-3xl" />
+          <div className="absolute -bottom-28 -right-20 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur">
+                <AcademicCapIcon className="h-7 w-7" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black">EduPulse</h1>
+                <p className="text-xs text-white/70">Okul Yönetim Sistemi</p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-bold ring-1 ring-white/20 backdrop-blur">
+              <SparklesIcon className="h-4 w-4" />
+              Güvenli kayıt
+            </div>
+          </div>
+
+          <div className="relative z-10 mx-auto w-full max-w-xl">
+            <h2 className="text-4xl font-black leading-tight tracking-tight">
+              Okul yönetimine ilk adımı at.
+            </h2>
+
+            <p className="mt-4 text-sm leading-7 text-white/75">
+              EduPulse ile okul kullanıcılarını, sınıfları, öğrencileri ve
+              raporları tek bir modern panel üzerinden yönetmeye başlayın.
+            </p>
+
+            <div className="mt-8 space-y-4">
+              <FeatureItem
+                icon={ShieldCheckIcon}
+                title="Okul kodu ile güvenli kayıt"
+                description="Kayıt işlemi yalnızca geçerli okul kodu ile tamamlanır."
+              />
+
+              <FeatureItem
+                icon={CheckCircleIcon}
+                title="Müdür hesabı oluşturma"
+                description="Okul yöneticisi hesabı oluşturulduktan sonra panele giriş yapılabilir."
+              />
+
+              <FeatureItem
+                icon={AcademicCapIcon}
+                title="Tek panelden yönetim"
+                description="Öğretmen, öğrenci, veli ve akademik takip süreçleri aynı sistemde toplanır."
+              />
+            </div>
+
+            <div className="mt-8 rounded-[1.7rem] border border-white/20 bg-white/15 p-5 shadow-2xl backdrop-blur-xl">
+              <p className="text-sm font-semibold text-white/90">
+                Başlamadan önce
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/70">
+                Okul kodunuz yoksa sistem yöneticinizden okul kaydınızın
+                oluşturulmasını isteyin.
+              </p>
+            </div>
+          </div>
+
+
+          <div className="relative z-10 flex items-center justify-end text-xs font-semibold text-white/65">
+            <span>© 2026 EduPulse</span>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function InputField({
-  label,
-  icon: Icon,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
-}) {
+
+
+function FeatureItem({ icon: Icon, title, description }) {
   return (
-    <label className="form-control w-full">
-      <span className="label-text mb-2 font-semibold text-base-content/70">
-        {label}
-      </span>
-
-      <div className="relative">
-        <Icon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/40" />
-
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          required
-          className="input input-bordered w-full rounded-2xl pl-12"
-        />
+    <div className="flex gap-4 rounded-2xl bg-white/15 p-4 ring-1 ring-white/20 backdrop-blur">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+        <Icon className="h-6 w-6" />
       </div>
-    </label>
+
+      <div>
+        <h3 className="text-sm font-bold">{title}</h3>
+        <p className="mt-1 text-xs leading-5 text-white/70">{description}</p>
+      </div>
+    </div>
   );
 }
 
