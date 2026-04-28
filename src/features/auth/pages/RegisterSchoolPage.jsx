@@ -2,30 +2,26 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AcademicCapIcon,
-  BuildingLibraryIcon,
   EnvelopeIcon,
   LockClosedIcon,
-  MapPinIcon,
   PhoneIcon,
   UserIcon,
+  KeyIcon,
 } from "@heroicons/react/24/outline";
 
 import Button from "../../../components/ui/Button";
 import { authService } from "../services/authService";
 
 const initialFormData = {
-  schoolName: "",
-  city: "",
-  district: "",
-  address: "",
-  schoolPhoneNumber: "",
-  schoolEmail: "",
-  adminFullName: "",
-  adminEmail: "",
-  adminPassword: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  phoneNumber: "",
+  schoolCode: "",
 };
 
-function RegisterSchoolPage() {
+function RegisterPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState(initialFormData);
@@ -41,12 +37,45 @@ function RegisterSchoolPage() {
   };
 
   const getErrorMessage = (err) => {
-    return (
-      err?.response?.data?.message ||
-      err?.response?.data?.Message ||
-      err?.response?.data?.error ||
-      "Okul kaydı oluşturulurken hata oluştu."
-    );
+    const data = err?.response?.data;
+
+    console.log("REGISTER ERROR:", data);
+
+    if (!data) {
+      return "Sunucuya ulaşılamadı.";
+    }
+
+    if (typeof data === "string") {
+      return data;
+    }
+
+    if (data.message) {
+      return data.message;
+    }
+
+    if (data.Message) {
+      return data.Message;
+    }
+
+    if (data.error) {
+      return data.error;
+    }
+
+    if (data.errors) {
+      if (Array.isArray(data.errors)) {
+        return data.errors.join(" ");
+      }
+
+      if (typeof data.errors === "object") {
+        return Object.values(data.errors).flat().join(" ");
+      }
+    }
+
+    if (data.title) {
+      return data.title;
+    }
+
+    return "Kayıt oluşturulurken hata oluştu.";
   };
 
   const handleSubmit = async (e) => {
@@ -57,20 +86,24 @@ function RegisterSchoolPage() {
     setLoading(true);
 
     try {
-      const result = await authService.registerSchool(formData);
+      const result = await authService.register(formData);
 
       if (result?.isSuccess === false) {
-        setError(result.message || "Okul kaydı oluşturulamadı.");
+        setError(result.message || "Kayıt oluşturulamadı.");
         return;
       }
 
-      setSuccessMessage("Okul kaydı başarıyla oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz.");
+      setSuccessMessage(
+        "Müdür hesabı başarıyla oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz."
+      );
+
       setFormData(initialFormData);
 
       setTimeout(() => {
         navigate("/login");
       }, 1200);
     } catch (err) {
+      console.log("FULL ERROR:", err);
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
@@ -79,7 +112,7 @@ function RegisterSchoolPage() {
 
   return (
     <div className="min-h-screen bg-base-200 px-4 py-8">
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-6xl items-center justify-center">
+      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-5xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-3xl bg-base-100 shadow-xl lg:grid-cols-[0.9fr_1.1fr]">
           <div className="hidden bg-gradient-to-br from-primary to-secondary p-10 text-primary-content lg:flex lg:flex-col lg:justify-between">
             <div>
@@ -88,19 +121,19 @@ function RegisterSchoolPage() {
               </div>
 
               <h1 className="text-4xl font-bold leading-tight">
-                EduPulse okul kayıt paneli
+                EduPulse kayıt paneli
               </h1>
 
               <p className="mt-5 max-w-md text-sm leading-6 text-primary-content/80">
-                Okul hesabınızı oluşturun, yönetici kullanıcınızı tanımlayın ve
-                sistemi kullanmaya başlayın.
+                Okul kodunuz ile müdür hesabınızı oluşturun ve okul yönetim
+                paneline giriş yapın.
               </p>
             </div>
 
             <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
               <p className="text-sm text-primary-content/80">
-                Bu kayıt ekranı okul bilgileri ile birlikte ilk admin
-                kullanıcısını oluşturur.
+                Okul kodu, sistemde daha önce oluşturulmuş okul kaydına ait
+                benzersiz koddur.
               </p>
             </div>
           </div>
@@ -109,10 +142,10 @@ function RegisterSchoolPage() {
             <div className="mb-8">
               <p className="text-sm font-semibold text-primary">Yeni kayıt</p>
               <h2 className="mt-2 text-3xl font-bold text-base-content">
-                Okul hesabı oluştur
+                Müdür hesabı oluştur
               </h2>
               <p className="mt-2 text-sm text-base-content/60">
-                Sisteme giriş yapacak admin bilgilerini de bu alanda tanımlayın.
+                Okulunuz için verilen okul kodunu girerek hesabınızı oluşturun.
               </p>
             </div>
 
@@ -131,93 +164,58 @@ function RegisterSchoolPage() {
             <form onSubmit={handleSubmit} className="space-y-7">
               <section>
                 <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-base-content/60">
-                  Okul Bilgileri
+                  Kullanıcı Bilgileri
                 </h3>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <InputField
-                    label="Okul Adı"
-                    icon={BuildingLibraryIcon}
-                    value={formData.schoolName}
-                    onChange={(value) => updateField("schoolName", value)}
-                    placeholder="Atatürk Anadolu Lisesi"
-                  />
-
-                  <InputField
-                    label="Okul E-posta"
-                    icon={EnvelopeIcon}
-                    type="email"
-                    value={formData.schoolEmail}
-                    onChange={(value) => updateField("schoolEmail", value)}
-                    placeholder="okul@edupulse.com"
-                  />
-
-                  <InputField
-                    label="Şehir"
-                    icon={MapPinIcon}
-                    value={formData.city}
-                    onChange={(value) => updateField("city", value)}
-                    placeholder="Samsun"
-                  />
-
-                  <InputField
-                    label="İlçe"
-                    icon={MapPinIcon}
-                    value={formData.district}
-                    onChange={(value) => updateField("district", value)}
-                    placeholder="Atakum"
-                  />
-
-                  <InputField
-                    label="Okul Telefon"
-                    icon={PhoneIcon}
-                    value={formData.schoolPhoneNumber}
-                    onChange={(value) =>
-                      updateField("schoolPhoneNumber", value)
-                    }
-                    placeholder="0362 000 00 00"
-                  />
-
-                  <InputField
-                    label="Adres"
-                    icon={MapPinIcon}
-                    value={formData.address}
-                    onChange={(value) => updateField("address", value)}
-                    placeholder="Mahalle, cadde, sokak"
-                  />
-                </div>
-              </section>
-
-              <section>
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-base-content/60">
-                  Admin Bilgileri
-                </h3>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <InputField
-                    label="Admin Ad Soyad"
+                    label="Ad"
                     icon={UserIcon}
-                    value={formData.adminFullName}
-                    onChange={(value) => updateField("adminFullName", value)}
-                    placeholder="Ahmet Yılmaz"
+                    value={formData.firstName}
+                    onChange={(value) => updateField("firstName", value)}
+                    placeholder="Mehmet"
                   />
 
                   <InputField
-                    label="Admin E-posta"
+                    label="Soyad"
+                    icon={UserIcon}
+                    value={formData.lastName}
+                    onChange={(value) => updateField("lastName", value)}
+                    placeholder="Demir"
+                  />
+
+                  <InputField
+                    label="E-posta"
                     icon={EnvelopeIcon}
                     type="email"
-                    value={formData.adminEmail}
-                    onChange={(value) => updateField("adminEmail", value)}
-                    placeholder="admin@edupulse.com"
+                    value={formData.email}
+                    onChange={(value) => updateField("email", value)}
+                    placeholder="mehmet.demir@test.com"
                   />
 
                   <InputField
-                    label="Admin Şifre"
+                    label="Telefon"
+                    icon={PhoneIcon}
+                    value={formData.phoneNumber}
+                    onChange={(value) => updateField("phoneNumber", value)}
+                    placeholder="05555555555"
+                  />
+
+                  <InputField
+                    label="Şifre"
                     icon={LockClosedIcon}
                     type="password"
-                    value={formData.adminPassword}
-                    onChange={(value) => updateField("adminPassword", value)}
+                    value={formData.password}
+                    onChange={(value) => updateField("password", value)}
                     placeholder="••••••••"
+                  />
+
+                  <InputField
+                    label="Okul Kodu"
+                    icon={KeyIcon}
+                    value={formData.schoolCode}
+                    onChange={(value) => updateField("schoolCode", value)}
+                    placeholder="EDU-116288"
                   />
                 </div>
               </section>
@@ -232,7 +230,7 @@ function RegisterSchoolPage() {
                 </button>
 
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Kaydediliyor..." : "Okul Kaydı Oluştur"}
+                  {loading ? "Kaydediliyor..." : "Kayıt Ol"}
                 </Button>
               </div>
             </form>
@@ -273,4 +271,4 @@ function InputField({
   );
 }
 
-export default RegisterSchoolPage;
+export default RegisterPage;

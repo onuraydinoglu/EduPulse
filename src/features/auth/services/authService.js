@@ -7,9 +7,9 @@ export const authService = {
     return response.data;
   },
 
-  registerSchool: async (data) => {
+  register: async (data) => {
     const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.REGISTER_SCHOOL,
+      API_ENDPOINTS.AUTH.REGISTER,
       data,
     );
     return response.data;
