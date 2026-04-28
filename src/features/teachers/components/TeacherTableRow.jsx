@@ -22,8 +22,8 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
       <td>
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${teacher.isActive
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-rose-50 text-rose-600"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-rose-50 text-rose-600"
             }`}
         >
           {teacher.isActive ? "Aktif" : "Pasif"}

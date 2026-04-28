@@ -1,22 +1,15 @@
 import axiosInstance from "../../../api/axiosInstance";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 
-export const teacherService = {
+export const officerService = {
   getAll: async () => {
-    const response = await axiosInstance.get(API_ENDPOINTS.USERS.TEACHERS);
-    return response.data;
-  },
-
-  getById: async (id) => {
-    const response = await axiosInstance.get(
-      `${API_ENDPOINTS.USERS.BASE}/${id}`,
-    );
+    const response = await axiosInstance.get(API_ENDPOINTS.USERS.OFFICERS);
     return response.data;
   },
 
   create: async (data) => {
     const response = await axiosInstance.post(
-      API_ENDPOINTS.USERS.TEACHER,
+      API_ENDPOINTS.USERS.OFFICER,
       data,
     );
     return response.data;
