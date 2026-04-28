@@ -14,10 +14,10 @@ import TeacherTable from "../components/TeacherTable";
 import { teacherService } from "../services/teacherService";
 
 const emptyTeacherForm = {
-  FullName: "",
+  firstName: "",
+  lastName: "",
   phoneNumber: "",
   email: "",
-  password: "",
 };
 
 function TeachersPage() {
@@ -25,6 +25,7 @@ function TeachersPage() {
   const [formData, setFormData] = useState(emptyTeacherForm);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [deletingTeacherId, setDeletingTeacherId] = useState(null);
+  const [temporaryPasswords, setTemporaryPasswords] = useState({});
   const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
 
@@ -43,7 +44,11 @@ function TeachersPage() {
       const result = await teacherService.getAll();
 
       if (result.isSuccess) {
-        setTeachers(result.data);
+        const onlyTeachers = (result.data || []).filter(
+          (user) => (user.roleName || "").toLowerCase() === "teacher"
+        );
+
+        setTeachers(onlyTeachers);
       } else {
         showToast(result.message || "Öğretmenler getirilemedi.", "error");
       }
@@ -90,7 +95,6 @@ function TeachersPage() {
       lastName: teacher.lastName || "",
       phoneNumber: teacher.phoneNumber || "",
       email: teacher.email || "",
-      password: "",
     });
 
     document.getElementById("teacher_modal").showModal();
@@ -130,23 +134,21 @@ function TeachersPage() {
   };
 
   const handleSubmit = async () => {
-    if (
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
-      !formData.phoneNumber.trim() ||
-      !formData.email.trim() ||
-      !formData.password.trim()
-    ) {
-      showToast("Lütfen ad, soyad, telefon, email ve şifre alanlarını doldurun.", "error");
+    const firstName = formData.firstName.trim();
+    const lastName = formData.lastName.trim();
+    const phoneNumber = formData.phoneNumber.trim();
+    const email = formData.email.trim();
+
+    if (!firstName || !lastName || !phoneNumber || !email) {
+      showToast("Lütfen ad, soyad, telefon ve email alanlarını doldurun.", "error");
       return;
     }
 
     const preparedTeacher = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      phoneNumber: formData.phoneNumber.trim(),
-      email: formData.email.trim(),
-      password: formData.password.trim(),
+      firstName,
+      lastName,
+      phoneNumber,
+      email,
     };
 
     try {
@@ -161,6 +163,17 @@ function TeachersPage() {
       if (!result.isSuccess) {
         showToast(result.message || "İşlem başarısız.", "error");
         return;
+      }
+
+      if (!isEditing) {
+        const temporaryPassword = result.message?.split("Geçici şifre: ")[1];
+
+        if (temporaryPassword) {
+          setTemporaryPasswords((prev) => ({
+            ...prev,
+            [email]: temporaryPassword,
+          }));
+        }
       }
 
       await getTeachers();
@@ -223,6 +236,7 @@ function TeachersPage() {
 
         <TeacherTable
           teachers={filteredTeachers}
+          temporaryPasswords={temporaryPasswords}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteModal}
         />
@@ -245,7 +259,11 @@ function TeachersPage() {
           </>
         }
       >
-        <TeacherForm formData={formData} setFormData={setFormData} />
+        <TeacherForm
+          formData={formData}
+          setFormData={setFormData}
+          isEditing={isEditing}
+        />
       </Modal>
 
       <ConfirmModal

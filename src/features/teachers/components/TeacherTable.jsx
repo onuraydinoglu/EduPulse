@@ -1,6 +1,6 @@
 import TeacherTableRow from "./TeacherTableRow";
 
-function TeacherTable({ teachers, onEdit, onDelete }) {
+function TeacherTable({ teachers, temporaryPasswords = {}, onEdit, onDelete }) {
   return (
     <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
@@ -8,8 +8,9 @@ function TeacherTable({ teachers, onEdit, onDelete }) {
           <thead className="bg-base-200/70">
             <tr>
               <th className="text-sm">Öğretmen</th>
-              <th className="text-sm">Branşı</th>
-              <th className="text-sm">Sınıfı</th>
+              <th className="text-sm">Telefon</th>
+              <th className="text-sm">Email</th>
+              <th className="text-sm">Geçici Şifre</th>
               <th className="text-sm">Durum</th>
               <th className="text-right text-sm">İşlemler</th>
             </tr>
@@ -20,6 +21,7 @@ function TeacherTable({ teachers, onEdit, onDelete }) {
               <TeacherTableRow
                 key={teacher.id}
                 teacher={teacher}
+                temporaryPassword={temporaryPasswords[teacher.email]}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
