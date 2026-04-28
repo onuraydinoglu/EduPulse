@@ -9,7 +9,7 @@ function SchoolTableRow({ school, onEdit, onDelete }) {
       <td className="px-5 py-4">
         <div>
           <p className="font-medium text-gray-900">{school.name}</p>
-          <p className="text-xs text-gray-400">{school.email || "Email yok"}</p>
+          <p className="text-xs text-gray-400">{school.schoolCode}</p>
         </div>
       </td>
 
@@ -21,7 +21,7 @@ function SchoolTableRow({ school, onEdit, onDelete }) {
       </td>
 
       <td className="px-5 py-4 text-gray-600">
-        {school.principalName || "-"}
+        {school.email}
       </td>
 
       <td className="px-5 py-4 text-gray-600">
@@ -31,8 +31,8 @@ function SchoolTableRow({ school, onEdit, onDelete }) {
       <td className="px-5 py-4">
         <span
           className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${school.isActive
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-rose-50 text-rose-600"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-rose-50 text-rose-600"
             }`}
         >
           {school.isActive ? "Aktif" : "Pasif"}
