@@ -8,6 +8,7 @@ import {
   ChartBarIcon,
   RectangleGroupIcon,
   DocumentChartBarIcon,
+  IdentificationIcon,
 } from "@heroicons/react/24/outline";
 
 export const menuItems = [
@@ -27,6 +28,12 @@ export const menuItems = [
     title: "Öğretmenler",
     path: "/dashboard/teachers",
     icon: UsersIcon,
+    roles: ["schooladmin"],
+  },
+  {
+    title: "Memurlar",
+    path: "/dashboard/officers",
+    icon: IdentificationIcon,
     roles: ["schooladmin"],
   },
   {

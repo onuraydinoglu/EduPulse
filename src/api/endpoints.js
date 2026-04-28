@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
     BASE: "/Users",
     TEACHER: "/Users/teacher",
     OFFICER: "/Users/officer",
+    TEACHERS: "/Users/teachers",
+    OFFICERS: "/Users/officers",
   },
 
   SCHOOLS: "/Schools",
