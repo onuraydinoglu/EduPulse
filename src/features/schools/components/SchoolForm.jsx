@@ -48,12 +48,12 @@ function SchoolForm({ formData, setFormData, errors = {} }) {
 
       <div>
         <FormInput
-          label="Telefon"
-          placeholder="Örn: 0362 000 00 00"
-          value={formData.phoneNumber}
-          onChange={(value) => updateField("phoneNumber", value)}
+          label="Adres"
+          placeholder="Okul adresi"
+          value={formData.address}
+          onChange={(value) => updateField("address", value)}
         />
-        <ErrorMessage message={errors.phoneNumber} />
+        <ErrorMessage message={errors.address} />
       </div>
 
       <div>
@@ -68,22 +68,12 @@ function SchoolForm({ formData, setFormData, errors = {} }) {
 
       <div>
         <FormInput
-          label="Müdür Adı"
-          placeholder="Örn: Ahmet Yılmaz"
-          value={formData.principalName}
-          onChange={(value) => updateField("principalName", value)}
+          label="Telefon"
+          placeholder="Örn: 0362 000 00 00"
+          value={formData.phoneNumber}
+          onChange={(value) => updateField("phoneNumber", value)}
         />
-        <ErrorMessage message={errors.principalName} />
-      </div>
-
-      <div className="md:col-span-2">
-        <FormInput
-          label="Adres"
-          placeholder="Okul adresi"
-          value={formData.address}
-          onChange={(value) => updateField("address", value)}
-        />
-        <ErrorMessage message={errors.address} />
+        <ErrorMessage message={errors.phoneNumber} />
       </div>
     </div>
   );

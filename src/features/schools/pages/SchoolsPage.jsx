@@ -20,7 +20,6 @@ const emptySchoolForm = {
   address: "",
   phoneNumber: "",
   email: "",
-  principalName: "",
 };
 
 function SchoolsPage() {
@@ -70,13 +69,6 @@ function SchoolsPage() {
       errors.address = "Adres en fazla 250 karakter olabilir.";
     }
 
-    if (!formData.phoneNumber.trim()) {
-      errors.phoneNumber = "Telefon numarası boş olamaz.";
-    } else if (!/^0\d{10}$/.test(formData.phoneNumber.trim())) {
-      errors.phoneNumber =
-        "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır.";
-    }
-
     if (
       formData.email.trim() &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
@@ -84,8 +76,11 @@ function SchoolsPage() {
       errors.email = "Geçerli bir email giriniz.";
     }
 
-    if (formData.principalName.trim().length > 100) {
-      errors.principalName = "Müdür adı en fazla 100 karakter olabilir.";
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = "Telefon numarası boş olamaz.";
+    } else if (!/^0\d{10}$/.test(formData.phoneNumber.trim())) {
+      errors.phoneNumber =
+        "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır.";
     }
 
     setFormErrors(errors);
@@ -122,12 +117,10 @@ function SchoolsPage() {
     return schools.filter((school) => {
       const schoolName = school.name || "";
       const schoolCity = school.city || "";
-      const principalName = school.principalName || "";
 
       const matchesSearch =
         schoolName.toLowerCase().includes(normalizedSearch) ||
-        schoolCity.toLowerCase().includes(normalizedSearch) ||
-        principalName.toLowerCase().includes(normalizedSearch);
+        schoolCity.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus =
         status === "all" ||
@@ -156,7 +149,6 @@ function SchoolsPage() {
       address: school.address || "",
       phoneNumber: school.phoneNumber || "",
       email: school.email || "",
-      principalName: school.principalName || "",
     });
 
     document.getElementById("school_modal").showModal();
@@ -208,7 +200,6 @@ function SchoolsPage() {
       address: formData.address.trim(),
       phoneNumber: formData.phoneNumber.trim(),
       email: formData.email.trim(),
-      principalName: formData.principalName.trim(),
     };
 
     try {
