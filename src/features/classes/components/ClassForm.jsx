@@ -1,8 +1,7 @@
 import FormInput from "../../../components/ui/FormInput";
 import FormSelect from "../../../components/ui/FormSelect";
-import { teachers } from "../../../data/mockData";
 
-function ClassForm({ formData, setFormData }) {
+function ClassForm({ formData, setFormData, teachers = [] }) {
   const updateField = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -27,18 +26,23 @@ function ClassForm({ formData, setFormData }) {
       <FormInput
         label="Şube"
         placeholder="Örn: A"
-        value={formData.branch}
-        onChange={(value) => updateField("branch", value.toUpperCase())}
+        value={formData.section}
+        onChange={(value) => updateField("section", value.toUpperCase())}
       />
 
       <FormSelect
         label="Sınıf Öğretmeni"
-        value={formData.teacher}
-        onChange={(value) => updateField("teacher", value)}
-        options={teachers.map((teacher) => ({
-          label: teacher.fullName,
-          value: teacher.fullName,
-        }))}
+        value={formData.teacherId}
+        onChange={(value) => updateField("teacherId", value)}
+        options={[
+          { label: "Öğretmen seçilmedi", value: "" },
+          ...teachers.map((teacher) => ({
+            label:
+              teacher.fullName ||
+              `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
+            value: teacher.id,
+          })),
+        ]}
         className="md:col-span-2"
       />
     </div>
