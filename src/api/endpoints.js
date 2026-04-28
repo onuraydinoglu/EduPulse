@@ -4,10 +4,15 @@ export const API_ENDPOINTS = {
     REGISTER: "/Auth/register",
   },
 
+  USERS: {
+    BASE: "/Users",
+    TEACHER: "/Users/teacher",
+    OFFICER: "/Users/officer",
+  },
+
   SCHOOLS: "/Schools",
   CLASSROOMS: "/Classrooms",
   LESSONS: "/Lessons",
-  TEACHERS: "/Teachers",
   STUDENTS: "/Students",
   PARENTS: "/Parents",
   STUDENT_GRADES: "/StudentGrades",
