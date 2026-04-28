@@ -14,11 +14,10 @@ import TeacherTable from "../components/TeacherTable";
 import { teacherService } from "../services/teacherService";
 
 const emptyTeacherForm = {
-  firstName: "",
-  lastName: "",
+  FullName: "",
   phoneNumber: "",
   email: "",
-  schoolId: "",
+  password: "",
 };
 
 function TeachersPage() {
@@ -91,7 +90,7 @@ function TeachersPage() {
       lastName: teacher.lastName || "",
       phoneNumber: teacher.phoneNumber || "",
       email: teacher.email || "",
-      schoolId: teacher.schoolId || "",
+      password: "",
     });
 
     document.getElementById("teacher_modal").showModal();
@@ -135,9 +134,10 @@ function TeachersPage() {
       !formData.firstName.trim() ||
       !formData.lastName.trim() ||
       !formData.phoneNumber.trim() ||
-      !formData.schoolId.trim()
+      !formData.email.trim() ||
+      !formData.password.trim()
     ) {
-      showToast("Lütfen ad, soyad, telefon ve okul alanlarını doldurun.", "error");
+      showToast("Lütfen ad, soyad, telefon, email ve şifre alanlarını doldurun.", "error");
       return;
     }
 
@@ -146,7 +146,7 @@ function TeachersPage() {
       lastName: formData.lastName.trim(),
       phoneNumber: formData.phoneNumber.trim(),
       email: formData.email.trim(),
-      schoolId: formData.schoolId.trim(),
+      password: formData.password.trim(),
     };
 
     try {

@@ -14,7 +14,7 @@ function TeacherForm({ formData, setFormData }) {
         label="Ad"
         placeholder="Örn: Ayşe"
         value={formData.firstName}
-        onChange={(value) => updateField("firstName", value)}
+        onChange={(value) => updateField("fullName", value)}
       />
 
       <FormInput
@@ -40,11 +40,11 @@ function TeacherForm({ formData, setFormData }) {
       />
 
       <FormInput
-        label="Okul Id"
-        placeholder="SchoolId giriniz"
-        value={formData.schoolId}
-        onChange={(value) => updateField("schoolId", value)}
-        className="md:col-span-2"
+        label="Şifre"
+        type="password"
+        placeholder="Öğretmen giriş şifresi"
+        value={formData.password}
+        onChange={(value) => updateField("password", value)}
       />
     </div>
   );
