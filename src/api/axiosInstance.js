@@ -1,10 +1,22 @@
 import axios from "axios";
+import { authStorage } from "../features/auth/services/authStorage";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const user = authStorage.getUser();
+  const token = user?.token || user?.accessToken || user?.jwtToken;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });
 
 axiosInstance.interceptors.response.use(
