@@ -71,3 +71,10 @@ export const studentValidationSchema = {
   ],
   classroomId: [validators.required("Sınıf seçilmelidir.")],
 };
+
+export const lessonValidationSchema = {
+  name: [
+    validators.required("Ders adı zorunludur."),
+    validators.minLength(2, "Ders adı en az 2 karakter olmalıdır."),
+  ],
+};

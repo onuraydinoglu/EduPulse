@@ -8,21 +8,16 @@ function LessonTableRow({ lesson, onEdit, onDelete }) {
       </td>
 
       <td>
-        <span
-          className={`badge ${lesson.isActive ? "badge-success" : "badge-error"
-            } badge-outline`}
-        >
-          {lesson.isActive ? "Aktif" : "Pasif"}
+        <span className="badge badge-success badge-outline">
+          {lesson.isActive === false ? "Pasif" : "Aktif"}
         </span>
       </td>
 
-      <td>
-        <div className="flex justify-end">
-          <TableActions
-            onEdit={() => onEdit(lesson)}
-            onDelete={() => onDelete(lesson.id)}
-          />
-        </div>
+      <td className="text-right">
+        <TableActions
+          onEdit={() => onEdit(lesson)}
+          onDelete={() => onDelete(lesson.id)}
+        />
       </td>
     </tr>
   );
