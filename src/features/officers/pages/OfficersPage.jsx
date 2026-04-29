@@ -14,6 +14,14 @@ import OfficerForm from "../components/OfficerForm";
 import OfficerTable from "../components/OfficerTable";
 import { officerService } from "../services/officerService";
 
+import {
+  validateForm,
+  hasValidationError,
+} from "../../../validations/validationRules";
+
+import { userValidationSchema } from "../../../validations/schemas";
+import { cleanPhone } from "../../../utils/phoneFormatter";
+
 const emptyOfficerForm = {
   firstName: "",
   lastName: "",
@@ -24,6 +32,7 @@ const emptyOfficerForm = {
 function OfficersPage() {
   const [officers, setOfficers] = useState([]);
   const [formData, setFormData] = useState(emptyOfficerForm);
+  const [errors, setErrors] = useState({});
   const [editingOfficerId, setEditingOfficerId] = useState(null);
   const [deletingOfficerId, setDeletingOfficerId] = useState(null);
   const [temporaryPasswords, setTemporaryPasswords] = useState({});
@@ -38,6 +47,41 @@ function OfficersPage() {
     setTimeout(() => {
       setToast({ message: "", type: "success" });
     }, 2500);
+  };
+
+  const getErrorMessage = (error, fallback) => {
+    const data = error?.response?.data;
+
+    if (typeof data === "string") return data;
+
+    return (
+      data?.message ||
+      data?.Message ||
+      data?.error ||
+      data?.Error ||
+      data?.title ||
+      data?.errors?.[0] ||
+      data?.Errors?.[0] ||
+      error?.message ||
+      fallback
+    );
+  };
+
+  const getBackendFieldErrors = (error) => {
+    const data = error?.response?.data;
+    const backendErrors = data?.errors || data?.Errors;
+
+    if (!backendErrors || Array.isArray(backendErrors)) return {};
+
+    const fieldErrors = {};
+
+    Object.entries(backendErrors).forEach(([key, value]) => {
+      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+
+      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
+    });
+
+    return fieldErrors;
   };
 
   const getOfficers = async () => {
@@ -55,7 +99,7 @@ function OfficersPage() {
       }
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+      showToast(getErrorMessage(error, "Sunucu hatası oluştu."), "error");
     }
   };
 
@@ -85,11 +129,13 @@ function OfficersPage() {
   const handleOpenCreateModal = () => {
     setEditingOfficerId(null);
     setFormData(emptyOfficerForm);
+    setErrors({});
     document.getElementById("officer_modal").showModal();
   };
 
   const handleOpenEditModal = (officer) => {
     setEditingOfficerId(officer.id);
+    setErrors({});
 
     setFormData({
       firstName: officer.firstName || "",
@@ -102,6 +148,9 @@ function OfficersPage() {
   };
 
   const handleCloseModal = () => {
+    setFormData(emptyOfficerForm);
+    setEditingOfficerId(null);
+    setErrors({});
     document.getElementById("officer_modal").close();
   };
 
@@ -110,7 +159,14 @@ function OfficersPage() {
     document.getElementById("officer_delete_modal").showModal();
   };
 
+  const handleCloseDeleteModal = () => {
+    setDeletingOfficerId(null);
+    document.getElementById("officer_delete_modal").close();
+  };
+
   const handleDelete = async () => {
+    if (!deletingOfficerId) return;
+
     try {
       const result = await officerService.delete(deletingOfficerId);
 
@@ -121,32 +177,28 @@ function OfficersPage() {
 
       await getOfficers();
 
-      setDeletingOfficerId(null);
-      document.getElementById("officer_delete_modal").close();
-
+      handleCloseDeleteModal();
       showToast("Memur başarıyla silindi.");
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+      showToast(getErrorMessage(error, "Memur silinirken hata oluştu."), "error");
     }
   };
 
   const handleSubmit = async () => {
-    const firstName = formData.firstName.trim();
-    const lastName = formData.lastName.trim();
-    const phoneNumber = formData.phoneNumber.trim();
-    const email = formData.email.trim();
+    const validationErrors = validateForm(formData, userValidationSchema);
+    setErrors(validationErrors);
 
-    if (!firstName || !lastName || !phoneNumber || !email) {
-      showToast("Lütfen ad, soyad, telefon ve email alanlarını doldurun.", "error");
+    if (hasValidationError(validationErrors)) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
       return;
     }
 
     const preparedOfficer = {
-      firstName,
-      lastName,
-      phoneNumber,
-      email,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      phoneNumber: cleanPhone(formData.phoneNumber),
+      email: formData.email.trim(),
     };
 
     try {
@@ -159,7 +211,13 @@ function OfficersPage() {
         : await officerService.create(preparedOfficer);
 
       if (!result.isSuccess) {
-        showToast(result.message || "İşlem başarısız.", "error");
+        const message = result.message || "İşlem başarısız.";
+
+        setErrors({
+          general: message,
+        });
+
+        showToast(message, "error");
         return;
       }
 
@@ -169,15 +227,13 @@ function OfficersPage() {
         if (temporaryPassword) {
           setTemporaryPasswords((prev) => ({
             ...prev,
-            [email]: temporaryPassword,
+            [preparedOfficer.email]: temporaryPassword,
           }));
         }
       }
 
       await getOfficers();
 
-      setFormData(emptyOfficerForm);
-      setEditingOfficerId(null);
       handleCloseModal();
 
       showToast(
@@ -187,7 +243,16 @@ function OfficersPage() {
       );
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+
+      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
+      const backendFieldErrors = getBackendFieldErrors(error);
+
+      setErrors({
+        ...backendFieldErrors,
+        general: message,
+      });
+
+      showToast(message, "error");
     }
   };
 
@@ -245,9 +310,9 @@ function OfficersPage() {
         title={isEditing ? "Memur Bilgilerini Düzenle" : "Yeni Memur Ekle"}
         footer={
           <>
-            <form method="dialog">
-              <Button variant="ghost">Vazgeç</Button>
-            </form>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Vazgeç
+            </Button>
 
             <Button onClick={handleSubmit}>
               {isEditing ? "Güncelle" : "Kaydet"}
@@ -258,6 +323,7 @@ function OfficersPage() {
         <OfficerForm
           formData={formData}
           setFormData={setFormData}
+          errors={errors}
           isEditing={isEditing}
         />
       </Modal>

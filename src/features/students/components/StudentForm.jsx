@@ -24,13 +24,23 @@ const studentFields = [
   },
 ];
 
-function StudentForm({ formData, setFormData }) {
+function StudentForm({ formData, setFormData, errors = {} }) {
   return (
-    <FormFields
-      fields={studentFields}
-      formData={formData}
-      setFormData={setFormData}
-    />
+    <div>
+      {/* 🔴 Backend / genel hata */}
+      {errors.general && (
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+          {errors.general}
+        </div>
+      )}
+
+      <FormFields
+        fields={studentFields}
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors} // ✅ KRİTİK
+      />
+    </div>
   );
 }
 

@@ -13,6 +13,14 @@ import TeacherForm from "../components/TeacherForm";
 import TeacherTable from "../components/TeacherTable";
 import { teacherService } from "../services/teacherService";
 
+import {
+  validateForm,
+  hasValidationError,
+} from "../../../validations/validationRules";
+
+import { userValidationSchema } from "../../../validations/schemas";
+import { cleanPhone } from "../../../utils/phoneFormatter";
+
 const emptyTeacherForm = {
   firstName: "",
   lastName: "",
@@ -23,6 +31,7 @@ const emptyTeacherForm = {
 function TeachersPage() {
   const [teachers, setTeachers] = useState([]);
   const [formData, setFormData] = useState(emptyTeacherForm);
+  const [errors, setErrors] = useState({});
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [deletingTeacherId, setDeletingTeacherId] = useState(null);
   const [temporaryPasswords, setTemporaryPasswords] = useState({});
@@ -37,6 +46,40 @@ function TeachersPage() {
     setTimeout(() => {
       setToast({ message: "", type: "success" });
     }, 2500);
+  };
+
+  const getErrorMessage = (error, fallback) => {
+    const data = error?.response?.data;
+
+    if (typeof data === "string") return data;
+
+    return (
+      data?.message ||
+      data?.Message ||
+      data?.error ||
+      data?.Error ||
+      data?.title ||
+      data?.errors?.[0] ||
+      data?.Errors?.[0] ||
+      error?.message ||
+      fallback
+    );
+  };
+
+  const getBackendFieldErrors = (error) => {
+    const data = error?.response?.data;
+    const backendErrors = data?.errors || data?.Errors;
+
+    if (!backendErrors || Array.isArray(backendErrors)) return {};
+
+    const fieldErrors = {};
+
+    Object.entries(backendErrors).forEach(([key, value]) => {
+      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
+    });
+
+    return fieldErrors;
   };
 
   const getTeachers = async () => {
@@ -54,7 +97,7 @@ function TeachersPage() {
       }
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+      showToast(getErrorMessage(error, "Sunucu hatası oluştu."), "error");
     }
   };
 
@@ -81,14 +124,24 @@ function TeachersPage() {
     });
   }, [teachers, search]);
 
+  const openModal = (id) => {
+    document.getElementById(id)?.showModal();
+  };
+
+  const closeModal = (id) => {
+    document.getElementById(id)?.close();
+  };
+
   const handleOpenCreateModal = () => {
     setEditingTeacherId(null);
     setFormData(emptyTeacherForm);
-    document.getElementById("teacher_modal").showModal();
+    setErrors({});
+    openModal("teacher_modal");
   };
 
   const handleOpenEditModal = (teacher) => {
     setEditingTeacherId(teacher.id);
+    setErrors({});
 
     setFormData({
       firstName: teacher.firstName || "",
@@ -97,23 +150,29 @@ function TeachersPage() {
       email: teacher.email || "",
     });
 
-    document.getElementById("teacher_modal").showModal();
+    openModal("teacher_modal");
   };
 
-  const handleCloseModal = () => {
-    document.getElementById("teacher_modal").close();
+  const handleCloseTeacherModal = () => {
+    setEditingTeacherId(null);
+    setFormData(emptyTeacherForm);
+    setErrors({});
+    closeModal("teacher_modal");
   };
 
   const handleOpenDeleteModal = (id) => {
     setDeletingTeacherId(id);
-    document.getElementById("teacher_delete_modal").showModal();
+    openModal("teacher_delete_modal");
   };
 
   const handleCloseDeleteModal = () => {
-    document.getElementById("teacher_delete_modal").close();
+    setDeletingTeacherId(null);
+    closeModal("teacher_delete_modal");
   };
 
   const handleDelete = async () => {
+    if (!deletingTeacherId) return;
+
     try {
       const result = await teacherService.delete(deletingTeacherId);
 
@@ -124,31 +183,31 @@ function TeachersPage() {
 
       await getTeachers();
 
-      setDeletingTeacherId(null);
       handleCloseDeleteModal();
       showToast("Öğretmen başarıyla silindi.");
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+      showToast(
+        getErrorMessage(error, "Öğretmen silinirken hata oluştu."),
+        "error"
+      );
     }
   };
 
   const handleSubmit = async () => {
-    const firstName = formData.firstName.trim();
-    const lastName = formData.lastName.trim();
-    const phoneNumber = formData.phoneNumber.trim();
-    const email = formData.email.trim();
+    const validationErrors = validateForm(formData, userValidationSchema);
+    setErrors(validationErrors);
 
-    if (!firstName || !lastName || !phoneNumber || !email) {
-      showToast("Lütfen ad, soyad, telefon ve email alanlarını doldurun.", "error");
+    if (hasValidationError(validationErrors)) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
       return;
     }
 
     const preparedTeacher = {
-      firstName,
-      lastName,
-      phoneNumber,
-      email,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      phoneNumber: cleanPhone(formData.phoneNumber),
+      email: formData.email.trim(),
     };
 
     try {
@@ -161,7 +220,13 @@ function TeachersPage() {
         : await teacherService.create(preparedTeacher);
 
       if (!result.isSuccess) {
-        showToast(result.message || "İşlem başarısız.", "error");
+        const message = result.message || "İşlem başarısız.";
+
+        setErrors({
+          general: message,
+        });
+
+        showToast(message, "error");
         return;
       }
 
@@ -171,16 +236,14 @@ function TeachersPage() {
         if (temporaryPassword) {
           setTemporaryPasswords((prev) => ({
             ...prev,
-            [email]: temporaryPassword,
+            [preparedTeacher.email]: temporaryPassword,
           }));
         }
       }
 
       await getTeachers();
 
-      setFormData(emptyTeacherForm);
-      setEditingTeacherId(null);
-      handleCloseModal();
+      handleCloseTeacherModal();
 
       showToast(
         isEditing
@@ -189,7 +252,16 @@ function TeachersPage() {
       );
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+
+      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
+      const backendFieldErrors = getBackendFieldErrors(error);
+
+      setErrors({
+        ...backendFieldErrors,
+        general: message,
+      });
+
+      showToast(message, "error");
     }
   };
 
@@ -249,9 +321,9 @@ function TeachersPage() {
         }
         footer={
           <>
-            <form method="dialog">
-              <Button variant="ghost">Vazgeç</Button>
-            </form>
+            <Button variant="ghost" onClick={handleCloseTeacherModal}>
+              Vazgeç
+            </Button>
 
             <Button onClick={handleSubmit}>
               {isEditing ? "Güncelle" : "Kaydet"}
@@ -262,6 +334,7 @@ function TeachersPage() {
         <TeacherForm
           formData={formData}
           setFormData={setFormData}
+          errors={errors}
           isEditing={isEditing}
         />
       </Modal>

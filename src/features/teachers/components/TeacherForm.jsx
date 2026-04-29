@@ -2,23 +2,32 @@ import FormFields from "../../../components/common/FormFields";
 
 const teacherFields = [
   { name: "firstName", label: "Ad", placeholder: "Örn: Ayşe" },
-  { name: "lastName", label: "Soyad", placeholder: "Örn: Demir" },
-  { name: "phoneNumber", label: "Telefon", placeholder: "Örn: 0555 555 55 55" },
-  {
+  { name: "lastName", label: "Soyad", placeholder: "Örn: Demir" }, {
     name: "email",
     label: "Email",
     type: "email",
     placeholder: "Örn: ayse.demir@mail.com",
   },
+  { name: "phoneNumber", label: "Telefon", placeholder: "Örn: 05555555555" },
+
 ];
 
-function TeacherForm({ formData, setFormData }) {
+function TeacherForm({ formData, setFormData, errors = {} }) {
   return (
-    <FormFields
-      fields={teacherFields}
-      formData={formData}
-      setFormData={setFormData}
-    />
+    <div>
+      {errors.general && (
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+          {errors.general}
+        </div>
+      )}
+
+      <FormFields
+        fields={teacherFields}
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+      />
+    </div>
   );
 }
 
