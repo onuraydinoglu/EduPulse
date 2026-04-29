@@ -12,13 +12,14 @@ import Toast from "../../../components/ui/Toast";
 import StudentForm from "../components/StudentForm";
 import StudentTable from "../components/StudentTable";
 import { studentService } from "../services/studentService";
+import { classService } from "../../classes/services/classService";
 
 import {
   validateForm,
   hasValidationError,
 } from "../../../validations/validationRules";
 
-import { userValidationSchema } from "../../../validations/schemas";
+import { studentValidationSchema } from "../../../validations/schemas";
 import { cleanPhone } from "../../../utils/phoneFormatter";
 
 const emptyStudentForm = {
@@ -26,10 +27,13 @@ const emptyStudentForm = {
   lastName: "",
   email: "",
   phoneNumber: "",
+  studentNumber: "",
+  classroomId: "",
 };
 
 function StudentsPage() {
   const [students, setStudents] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
   const [formData, setFormData] = useState(emptyStudentForm);
   const [errors, setErrors] = useState({});
   const [editingStudentId, setEditingStudentId] = useState(null);
@@ -96,12 +100,28 @@ function StudentsPage() {
     }
   };
 
+  const getClassrooms = async () => {
+    try {
+      const result = await classService.getAll();
+
+      if (result.isSuccess) {
+        setClassrooms(result.data || []);
+      } else {
+        showToast(result.message || "Sınıflar getirilemedi.", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, "Sınıflar getirilemedi."), "error");
+    }
+  };
+
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchData = async () => {
       await getStudents();
+      await getClassrooms();
     };
 
-    fetchStudents();
+    fetchData();
   }, []);
 
   const filteredStudents = useMemo(() => {
@@ -114,6 +134,7 @@ function StudentsPage() {
 
       return (
         fullName.toLowerCase().includes(normalizedSearch) ||
+        student.studentNumber?.toLowerCase().includes(normalizedSearch) ||
         student.email?.toLowerCase().includes(normalizedSearch) ||
         student.phoneNumber?.toLowerCase().includes(normalizedSearch)
       );
@@ -136,6 +157,8 @@ function StudentsPage() {
       lastName: student.lastName || "",
       email: student.email || "",
       phoneNumber: student.phoneNumber || "",
+      studentNumber: student.studentNumber || "",
+      classroomId: student.classroomId || "",
     });
 
     document.getElementById("student_modal").showModal();
@@ -159,7 +182,7 @@ function StudentsPage() {
   };
 
   const handleSubmit = async () => {
-    const validationErrors = validateForm(formData, userValidationSchema);
+    const validationErrors = validateForm(formData, studentValidationSchema);
     setErrors(validationErrors);
 
     if (hasValidationError(validationErrors)) {
@@ -172,6 +195,8 @@ function StudentsPage() {
       lastName: formData.lastName.trim(),
       email: formData.email.trim(),
       phoneNumber: cleanPhone(formData.phoneNumber),
+      studentNumber: formData.studentNumber.trim(),
+      classroomId: formData.classroomId,
     };
 
     try {
@@ -225,7 +250,6 @@ function StudentsPage() {
       }
 
       await getStudents();
-
       handleCloseDeleteModal();
       showToast("Öğrenci silindi.");
     } catch (error) {
@@ -272,7 +296,7 @@ function StudentsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Öğrenci, e-posta veya telefon ara..."
+              placeholder="Öğrenci, numara, e-posta veya telefon ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
@@ -303,6 +327,7 @@ function StudentsPage() {
         <StudentForm
           formData={formData}
           setFormData={setFormData}
+          classrooms={classrooms}
           errors={errors}
         />
       </Modal>

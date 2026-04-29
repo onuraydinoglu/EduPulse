@@ -63,12 +63,15 @@ export const classroomValidationSchema = {
 
 export const studentValidationSchema = {
   firstName: [validators.required("Ad zorunludur.")],
+
   lastName: [validators.required("Soyad zorunludur.")],
-  schoolNumber: [validators.required("Okul numarası zorunludur.")],
-  studentPhone: [
-    validators.required("Öğrenci telefonu zorunludur."),
-    validators.phone(),
-  ],
+
+  email: [validators.email()],
+
+  phoneNumber: [validators.phone()],
+
+  studentNumber: [validators.required("Öğrenci numarası zorunludur.")],
+
   classroomId: [validators.required("Sınıf seçilmelidir.")],
 };
 
