@@ -16,13 +16,13 @@ export const officerService = {
   },
 
   update: async (data) => {
-    const response = await axiosInstance.put(API_ENDPOINTS.USERS.BASE, data);
+    const response = await axiosInstance.put(API_ENDPOINTS.USERS.OFFICER, data);
     return response.data;
   },
 
   delete: async (id) => {
     const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.USERS.BASE}/${id}`,
+      `${API_ENDPOINTS.USERS.OFFICER}/${id}`,
     );
     return response.data;
   },
