@@ -14,6 +14,13 @@ import ClassTable from "../components/ClassTable";
 import { classService } from "../services/classService";
 import { teacherService } from "../../teachers/services/teacherService";
 
+import {
+  validateForm,
+  hasValidationError,
+} from "../../../validations/validationRules";
+
+import { classroomValidationSchema } from "../../../validations/schemas";
+
 const emptyClassForm = {
   grade: "",
   section: "",
@@ -24,6 +31,7 @@ function ClassesPage() {
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [formData, setFormData] = useState(emptyClassForm);
+  const [errors, setErrors] = useState({});
   const [editingClassId, setEditingClassId] = useState(null);
   const [deletingClassId, setDeletingClassId] = useState(null);
   const [search, setSearch] = useState("");
@@ -37,18 +45,53 @@ function ClassesPage() {
     setTimeout(() => setToast({ message: "", type: "success" }), 2500);
   };
 
+  const getErrorMessage = (error, fallback) => {
+    const data = error?.response?.data;
+
+    if (typeof data === "string") return data;
+
+    return (
+      data?.message ||
+      data?.Message ||
+      data?.error ||
+      data?.Error ||
+      data?.title ||
+      data?.errors?.[0] ||
+      data?.Errors?.[0] ||
+      error?.message ||
+      fallback
+    );
+  };
+
+  const getBackendFieldErrors = (error) => {
+    const data = error?.response?.data;
+    const backendErrors = data?.errors || data?.Errors;
+
+    if (!backendErrors || Array.isArray(backendErrors)) return {};
+
+    const fieldErrors = {};
+
+    Object.entries(backendErrors).forEach(([key, value]) => {
+      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
+    });
+
+    return fieldErrors;
+  };
+
   const loadClasses = async () => {
     try {
       const result = await classService.getAll();
+
+      if (result?.isSuccess === false) {
+        showToast(result.message || "Sınıflar yüklenirken hata oluştu.", "error");
+        return;
+      }
+
       setClasses(result.data || []);
     } catch (error) {
-      showToast(
-        error?.response?.data?.message ||
-        error?.response?.data?.Message ||
-        error?.message ||
-        "Sınıflar yüklenirken hata oluştu.",
-        "error"
-      );
+      console.error(error);
+      showToast(getErrorMessage(error, "Sınıflar yüklenirken hata oluştu."), "error");
     }
   };
 
@@ -63,13 +106,8 @@ function ClassesPage() {
         setClasses(classResult.data || []);
         setTeachers(teacherResult.data || []);
       } catch (error) {
-        showToast(
-          error?.response?.data?.message ||
-          error?.response?.data?.Message ||
-          error?.message ||
-          "Veriler yüklenirken hata oluştu.",
-          "error"
-        );
+        console.error(error);
+        showToast(getErrorMessage(error, "Veriler yüklenirken hata oluştu."), "error");
       }
     };
 
@@ -80,7 +118,8 @@ function ClassesPage() {
     const normalizedSearch = search.toLowerCase().trim();
 
     return classes.filter((classItem) => {
-      const className = classItem.name || `${classItem.grade}-${classItem.section}`;
+      const className =
+        classItem.name || `${classItem.grade}-${classItem.section}`;
 
       const teacher = teachers.find((x) => x.id === classItem.teacherId);
       const teacherName =
@@ -101,11 +140,13 @@ function ClassesPage() {
   const handleOpenCreateModal = () => {
     setEditingClassId(null);
     setFormData(emptyClassForm);
+    setErrors({});
     document.getElementById("class_modal").showModal();
   };
 
   const handleOpenEditModal = (classItem) => {
     setEditingClassId(classItem.id);
+    setErrors({});
 
     setFormData({
       grade: String(classItem.grade || ""),
@@ -117,6 +158,9 @@ function ClassesPage() {
   };
 
   const handleCloseModal = () => {
+    setFormData(emptyClassForm);
+    setEditingClassId(null);
+    setErrors({});
     document.getElementById("class_modal").close();
   };
 
@@ -126,12 +170,16 @@ function ClassesPage() {
   };
 
   const handleCloseDeleteModal = () => {
+    setDeletingClassId(null);
     document.getElementById("class_delete_modal").close();
   };
 
   const handleSubmit = async () => {
-    if (!formData.grade || !formData.section.trim()) {
-      showToast("Sınıf seviyesi ve şube alanı zorunludur.", "error");
+    const validationErrors = validateForm(formData, classroomValidationSchema);
+    setErrors(validationErrors);
+
+    if (hasValidationError(validationErrors)) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
       return;
     }
 
@@ -142,49 +190,61 @@ function ClassesPage() {
     };
 
     try {
-      if (isEditing) {
-        await classService.update({
+      const result = isEditing
+        ? await classService.update({
           id: editingClassId,
           ...preparedData,
+        })
+        : await classService.create(preparedData);
+
+      if (result?.isSuccess === false) {
+        const message = result.message || "İşlem başarısız.";
+
+        setErrors({
+          general: message,
         });
 
-        showToast("Sınıf güncellendi.");
-      } else {
-        await classService.create(preparedData);
-        showToast("Sınıf eklendi.");
+        showToast(message, "error");
+        return;
       }
 
-      setFormData(emptyClassForm);
-      setEditingClassId(null);
+      await loadClasses();
       handleCloseModal();
-      loadClasses();
+
+      showToast(isEditing ? "Sınıf güncellendi." : "Sınıf eklendi.");
     } catch (error) {
-      showToast(
-        error?.response?.data?.message ||
-        error?.response?.data?.Message ||
-        error?.message ||
-        "İşlem sırasında hata oluştu.",
-        "error"
-      );
+      console.error(error);
+
+      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
+      const backendFieldErrors = getBackendFieldErrors(error);
+
+      setErrors({
+        ...backendFieldErrors,
+        general: message,
+      });
+
+      showToast(message, "error");
     }
   };
 
   const handleDelete = async () => {
-    try {
-      await classService.delete(deletingClassId);
+    if (!deletingClassId) return;
 
-      setDeletingClassId(null);
+    try {
+      const result = await classService.delete(deletingClassId);
+
+      if (result?.isSuccess === false) {
+        showToast(result.message || "Sınıf silinemedi.", "error");
+        return;
+      }
+
+      await loadClasses();
+
       handleCloseDeleteModal();
       showToast("Sınıf silindi.");
-      loadClasses();
     } catch (error) {
-      showToast(
-        error?.response?.data?.message ||
-        error?.response?.data?.Message ||
-        error?.message ||
-        "Sınıf silinirken hata oluştu.",
-        "error"
-      );
+      console.error(error);
+      showToast(getErrorMessage(error, "Sınıf silinirken hata oluştu."), "error");
     }
   };
 
@@ -251,9 +311,9 @@ function ClassesPage() {
         title={isEditing ? "Sınıf Düzenle" : "Yeni Sınıf"}
         footer={
           <>
-            <form method="dialog">
-              <Button variant="ghost">Vazgeç</Button>
-            </form>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Vazgeç
+            </Button>
 
             <Button onClick={handleSubmit}>
               {isEditing ? "Güncelle" : "Kaydet"}
@@ -265,6 +325,7 @@ function ClassesPage() {
           formData={formData}
           setFormData={setFormData}
           teachers={teachers}
+          errors={errors}
         />
       </Modal>
 

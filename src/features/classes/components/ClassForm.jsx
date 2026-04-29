@@ -1,6 +1,6 @@
 import FormFields from "../../../components/common/FormFields";
 
-function ClassForm({ formData, setFormData, teachers = [] }) {
+function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
   const teacherOptions = teachers.map((teacher) => ({
     label:
       teacher.fullName ||
@@ -39,11 +39,20 @@ function ClassForm({ formData, setFormData, teachers = [] }) {
   ];
 
   return (
-    <FormFields
-      fields={classFields}
-      formData={formData}
-      setFormData={setFormData}
-    />
+    <div>
+      {errors.general && (
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+          {errors.general}
+        </div>
+      )}
+
+      <FormFields
+        fields={classFields}
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+      />
+    </div>
   );
 }
 

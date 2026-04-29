@@ -1,42 +1,43 @@
-import FormInput from "../../../components/ui/FormInput";
+import FormFields from "../../../components/common/FormFields";
 
-function OfficerForm({ formData, setFormData, }) {
-  const updateField = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+const officerFields = [
+  {
+    name: "firstName",
+    label: "Ad",
+    placeholder: "Örn: Ahmet",
+  },
+  {
+    name: "lastName",
+    label: "Soyad",
+    placeholder: "Örn: Yılmaz",
+  },
+  {
+    name: "email",
+    label: "E-posta",
+    type: "email",
+    placeholder: "memur@mail.com",
+  },
+  {
+    name: "phoneNumber",
+    label: "Telefon",
+    placeholder: "05551234567",
+  },
+];
 
+function OfficerForm({ formData, setFormData, errors }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <FormInput
-        label="Ad"
-        placeholder="Örn: Mehmet"
-        value={formData.firstName}
-        onChange={(value) => updateField("firstName", value)}
-      />
+    <div>
+      {errors?.general && (
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          {errors.general}
+        </div>
+      )}
 
-      <FormInput
-        label="Soyad"
-        placeholder="Örn: Yılmaz"
-        value={formData.lastName}
-        onChange={(value) => updateField("lastName", value)}
-      />
-
-      <FormInput
-        label="Telefon"
-        placeholder="Örn: 0555 555 55 55"
-        value={formData.phoneNumber}
-        onChange={(value) => updateField("phoneNumber", value)}
-      />
-
-      <FormInput
-        label="E-posta"
-        type="email"
-        placeholder="Örn: memur@okul.com"
-        value={formData.email}
-        onChange={(value) => updateField("email", value)}
+      <FormFields
+        fields={officerFields}
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors} // ✅ kritik
       />
     </div>
   );

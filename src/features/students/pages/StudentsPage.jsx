@@ -13,6 +13,14 @@ import StudentForm from "../components/StudentForm";
 import StudentTable from "../components/StudentTable";
 import { studentService } from "../services/studentService";
 
+import {
+  validateForm,
+  hasValidationError,
+} from "../../../validations/validationRules";
+
+import { userValidationSchema } from "../../../validations/schemas";
+import { cleanPhone } from "../../../utils/phoneFormatter";
+
 const emptyStudentForm = {
   firstName: "",
   lastName: "",
@@ -23,6 +31,7 @@ const emptyStudentForm = {
 function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [formData, setFormData] = useState(emptyStudentForm);
+  const [errors, setErrors] = useState({});
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [deletingStudentId, setDeletingStudentId] = useState(null);
   const [toast, setToast] = useState({ message: "", type: "success" });
@@ -41,16 +50,35 @@ function StudentsPage() {
   const getErrorMessage = (error, fallback) => {
     const data = error?.response?.data;
 
+    if (typeof data === "string") return data;
+
     return (
       data?.message ||
       data?.Message ||
       data?.error ||
       data?.Error ||
+      data?.title ||
       data?.errors?.[0] ||
       data?.Errors?.[0] ||
       error?.message ||
       fallback
     );
+  };
+
+  const getBackendFieldErrors = (error) => {
+    const data = error?.response?.data;
+    const backendErrors = data?.errors || data?.Errors;
+
+    if (!backendErrors || Array.isArray(backendErrors)) return {};
+
+    const fieldErrors = {};
+
+    Object.entries(backendErrors).forEach(([key, value]) => {
+      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
+    });
+
+    return fieldErrors;
   };
 
   const getStudents = async () => {
@@ -64,7 +92,7 @@ function StudentsPage() {
       }
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+      showToast(getErrorMessage(error, "Sunucu hatası oluştu."), "error");
     }
   };
 
@@ -95,11 +123,13 @@ function StudentsPage() {
   const handleOpenCreateModal = () => {
     setEditingStudentId(null);
     setFormData(emptyStudentForm);
+    setErrors({});
     document.getElementById("student_modal").showModal();
   };
 
   const handleOpenEditModal = (student) => {
     setEditingStudentId(student.id);
+    setErrors({});
 
     setFormData({
       firstName: student.firstName || "",
@@ -112,6 +142,9 @@ function StudentsPage() {
   };
 
   const handleCloseModal = () => {
+    setFormData(emptyStudentForm);
+    setEditingStudentId(null);
+    setErrors({});
     document.getElementById("student_modal").close();
   };
 
@@ -121,17 +154,16 @@ function StudentsPage() {
   };
 
   const handleCloseDeleteModal = () => {
+    setDeletingStudentId(null);
     document.getElementById("student_delete_modal").close();
   };
 
   const handleSubmit = async () => {
-    if (
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
-      !formData.email.trim() ||
-      !formData.phoneNumber.trim()
-    ) {
-      showToast("Lütfen tüm alanları doldurun.", "error");
+    const validationErrors = validateForm(formData, userValidationSchema);
+    setErrors(validationErrors);
+
+    if (hasValidationError(validationErrors)) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
       return;
     }
 
@@ -139,42 +171,65 @@ function StudentsPage() {
       firstName: formData.firstName.trim(),
       lastName: formData.lastName.trim(),
       email: formData.email.trim(),
-      phoneNumber: formData.phoneNumber.trim(),
+      phoneNumber: cleanPhone(formData.phoneNumber),
     };
 
     try {
-      if (isEditing) {
-        await studentService.update({
+      const result = isEditing
+        ? await studentService.update({
           id: editingStudentId,
           ...preparedData,
+        })
+        : await studentService.create(preparedData);
+
+      if (!result.isSuccess) {
+        const message = result.message || "İşlem başarısız.";
+
+        setErrors({
+          general: message,
         });
 
-        showToast("Öğrenci güncellendi.");
-      } else {
-        await studentService.create(preparedData);
-        showToast("Öğrenci eklendi.");
+        showToast(message, "error");
+        return;
       }
 
       await getStudents();
-
-      setFormData(emptyStudentForm);
-      setEditingStudentId(null);
       handleCloseModal();
+
+      showToast(isEditing ? "Öğrenci güncellendi." : "Öğrenci eklendi.");
     } catch (error) {
-      showToast(getErrorMessage(error, "İşlem sırasında hata oluştu."), "error");
+      console.error(error);
+
+      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
+      const backendFieldErrors = getBackendFieldErrors(error);
+
+      setErrors({
+        ...backendFieldErrors,
+        general: message,
+      });
+
+      showToast(message, "error");
     }
   };
 
   const handleDelete = async () => {
+    if (!deletingStudentId) return;
+
     try {
-      await studentService.delete(deletingStudentId);
+      const result = await studentService.delete(deletingStudentId);
+
+      if (result && result.isSuccess === false) {
+        const message = result.message || "Öğrenci silinemedi.";
+        showToast(message, "error");
+        return;
+      }
 
       await getStudents();
 
-      setDeletingStudentId(null);
       handleCloseDeleteModal();
       showToast("Öğrenci silindi.");
     } catch (error) {
+      console.error(error);
       showToast(
         getErrorMessage(error, "Öğrenci silinirken hata oluştu."),
         "error"
@@ -235,9 +290,9 @@ function StudentsPage() {
         title={isEditing ? "Öğrenci Düzenle" : "Yeni Öğrenci"}
         footer={
           <>
-            <form method="dialog">
-              <Button variant="ghost">Vazgeç</Button>
-            </form>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Vazgeç
+            </Button>
 
             <Button onClick={handleSubmit}>
               {isEditing ? "Güncelle" : "Kaydet"}
@@ -245,7 +300,11 @@ function StudentsPage() {
           </>
         }
       >
-        <StudentForm formData={formData} setFormData={setFormData} />
+        <StudentForm
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+        />
       </Modal>
 
       <ConfirmModal
