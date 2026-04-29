@@ -1,16 +1,27 @@
 import ClassTableRow from "./ClassTableRow";
 
-function ClassTable({ classes, onEdit, onDelete }) {
+function ClassTable({ classes, teachers = [], onEdit, onDelete }) {
+  const getTeacherName = (classItem) => {
+    if (classItem.teacherFullName) return classItem.teacherFullName;
+
+    const teacher = teachers.find((x) => x.id === classItem.teacherId);
+
+    return (
+      teacher?.fullName ||
+      `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim()
+    );
+  };
+
   return (
     <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-200/70">
+          <thead>
             <tr>
-              <th className="text-sm">Sınıf</th>
-              <th className="text-sm">Sınıf Öğretmeni</th>
-              <th className="text-sm">Öğrenci Sayısı</th>
-              <th className="text-right text-sm">İşlemler</th>
+              <th>Sınıf</th>
+              <th>Sınıf Öğretmeni</th>
+              <th>Öğrenci Sayısı</th>
+              <th className="text-right">İşlemler</th>
             </tr>
           </thead>
 
@@ -19,19 +30,22 @@ function ClassTable({ classes, onEdit, onDelete }) {
               <ClassTableRow
                 key={classItem.id}
                 classItem={classItem}
+                teacherName={getTeacherName(classItem)}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
             ))}
+
+            {classes.length === 0 && (
+              <tr>
+                <td colSpan="4" className="py-8 text-center text-gray-500">
+                  Kayıt bulunamadı.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-
-      {classes.length === 0 && (
-        <div className="p-8 text-center text-sm text-base-content/60">
-          Kayıt bulunamadı.
-        </div>
-      )}
     </div>
   );
 }

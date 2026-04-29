@@ -41,8 +41,14 @@ function ClassesPage() {
     try {
       const result = await classService.getAll();
       setClasses(result.data || []);
-    } catch {
-      showToast("Sınıflar yüklenirken hata oluştu.", "error");
+    } catch (error) {
+      showToast(
+        error?.response?.data?.message ||
+        error?.response?.data?.Message ||
+        error?.message ||
+        "Sınıflar yüklenirken hata oluştu.",
+        "error"
+      );
     }
   };
 
@@ -56,11 +62,14 @@ function ClassesPage() {
 
         setClasses(classResult.data || []);
         setTeachers(teacherResult.data || []);
-      } catch {
-        setToast({
-          message: "Veriler yüklenirken hata oluştu.",
-          type: "error",
-        });
+      } catch (error) {
+        showToast(
+          error?.response?.data?.message ||
+          error?.response?.data?.Message ||
+          error?.message ||
+          "Veriler yüklenirken hata oluştu.",
+          "error"
+        );
       }
     };
 
@@ -149,8 +158,14 @@ function ClassesPage() {
       setEditingClassId(null);
       handleCloseModal();
       loadClasses();
-    } catch {
-      showToast("İşlem sırasında hata oluştu.", "error");
+    } catch (error) {
+      showToast(
+        error?.response?.data?.message ||
+        error?.response?.data?.Message ||
+        error?.message ||
+        "İşlem sırasında hata oluştu.",
+        "error"
+      );
     }
   };
 
@@ -162,8 +177,14 @@ function ClassesPage() {
       handleCloseDeleteModal();
       showToast("Sınıf silindi.");
       loadClasses();
-    } catch {
-      showToast("Sınıf silinirken hata oluştu.", "error");
+    } catch (error) {
+      showToast(
+        error?.response?.data?.message ||
+        error?.response?.data?.Message ||
+        error?.message ||
+        "Sınıf silinirken hata oluştu.",
+        "error"
+      );
     }
   };
 

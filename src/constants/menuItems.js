@@ -16,7 +16,7 @@ export const menuItems = [
     title: "Anasayfa",
     path: "/dashboard",
     icon: HomeIcon,
-    roles: ["superadmin", "schooladmin", "teacher"],
+    roles: ["superadmin", "schooladmin", "teacher", "officer"],
   },
   {
     title: "Okullar",
