@@ -9,6 +9,13 @@ function ClassForm({ formData, setFormData, teachers = [] }) {
     }));
   };
 
+  const teacherOptions = teachers.map((teacher) => ({
+    label:
+      teacher.fullName ||
+      `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
+    value: teacher.id,
+  }));
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <FormSelect
@@ -36,12 +43,7 @@ function ClassForm({ formData, setFormData, teachers = [] }) {
         onChange={(value) => updateField("teacherId", value)}
         options={[
           { label: "Öğretmen seçilmedi", value: "" },
-          ...teachers.map((teacher) => ({
-            label:
-              teacher.fullName ||
-              `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
-            value: teacher.id,
-          })),
+          ...teacherOptions,
         ]}
         className="md:col-span-2"
       />
