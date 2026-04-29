@@ -12,6 +12,12 @@ import Toast from "../../../components/ui/Toast";
 import LessonForm from "../components/LessonForm";
 import LessonTable from "../components/LessonTable";
 import { lessonService } from "../services/lessonService";
+import {
+  validateForm,
+  hasValidationError,
+} from "../../../validations/validationRules";
+
+import { lessonValidationSchema } from "../../../validations/schemas";
 
 const emptyLessonForm = {
   name: "",
@@ -24,6 +30,7 @@ function LessonsPage() {
   const [deletingLessonId, setDeletingLessonId] = useState(null);
   const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
+  const [errors, setErrors] = useState({});
 
   const isEditing = editingLessonId !== null;
 
@@ -69,6 +76,7 @@ function LessonsPage() {
   const handleOpenCreateModal = () => {
     setEditingLessonId(null);
     setFormData(emptyLessonForm);
+    setErrors({});
     document.getElementById("lesson_modal").showModal();
   };
 
@@ -79,6 +87,7 @@ function LessonsPage() {
       name: lesson.name || "",
     });
 
+    setErrors({});
     document.getElementById("lesson_modal").showModal();
   };
 
@@ -115,15 +124,17 @@ function LessonsPage() {
   };
 
   const handleSubmit = async () => {
-    const name = formData.name.trim();
+    const validationErrors = validateForm(formData, lessonValidationSchema);
 
-    if (!name) {
-      showToast("Lütfen ders adını girin.", "error");
+    if (hasValidationError(validationErrors)) {
+      setErrors(validationErrors);
       return;
     }
 
+    setErrors({});
+
     const preparedLesson = {
-      name,
+      name: formData.name.trim(),
     };
 
     try {
@@ -136,7 +147,9 @@ function LessonsPage() {
         : await lessonService.create(preparedLesson);
 
       if (!result.isSuccess) {
-        showToast(result.message || "İşlem başarısız.", "error");
+        setErrors({
+          general: result.message || "İşlem başarısız.",
+        });
         return;
       }
 
@@ -144,6 +157,7 @@ function LessonsPage() {
 
       setFormData(emptyLessonForm);
       setEditingLessonId(null);
+      setErrors({});
       handleCloseModal();
 
       showToast(
@@ -153,7 +167,15 @@ function LessonsPage() {
       );
     } catch (error) {
       console.error(error);
-      showToast(error.message || "Sunucu hatası oluştu.", "error");
+
+      setErrors({
+        general:
+          error.response?.data?.message ||
+          error.response?.data?.Message ||
+          error.response?.data?.title ||
+          error.message ||
+          "Sunucu hatası oluştu.",
+      });
     }
   };
 
@@ -175,23 +197,28 @@ function LessonsPage() {
         </CreateButton>
       </div>
 
-      <div className="relative">
-        <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Ders ara..."
-          className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-md">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Ders ara..."
+              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+            />
+          </div>
+        </div>
+
+        <LessonTable
+          lessons={filteredLessons}
+          onEdit={handleOpenEditModal}
+          onDelete={handleOpenDeleteModal}
         />
-      </div>
-
-      <LessonTable
-        lessons={filteredLessons}
-        onEdit={handleOpenEditModal}
-        onDelete={handleOpenDeleteModal}
-      />
+      </section>
 
       <Modal
         id="lesson_modal"
@@ -208,7 +235,11 @@ function LessonsPage() {
           </>
         }
       >
-        <LessonForm formData={formData} setFormData={setFormData} />
+        <LessonForm
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+        />
       </Modal>
 
       <ConfirmModal
