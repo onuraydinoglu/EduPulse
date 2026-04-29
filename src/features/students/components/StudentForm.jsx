@@ -1,43 +1,36 @@
-import FormInput from "../../../components/ui/FormInput";
+import FormFields from "../../../components/common/FormFields";
+
+const studentFields = [
+  {
+    name: "firstName",
+    label: "Ad",
+    placeholder: "Örn: Ali",
+  },
+  {
+    name: "lastName",
+    label: "Soyad",
+    placeholder: "Örn: Yıldız",
+  },
+  {
+    name: "email",
+    label: "E-posta",
+    type: "email",
+    placeholder: "Örn: ali.yildiz@test.com",
+  },
+  {
+    name: "phoneNumber",
+    label: "Telefon",
+    placeholder: "Örn: 05555555555",
+  },
+];
 
 function StudentForm({ formData, setFormData }) {
-  const updateField = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <FormInput
-        label="Ad"
-        placeholder="Örn: Ali"
-        value={formData.firstName}
-        onChange={(value) => updateField("firstName", value)}
-      />
-
-      <FormInput
-        label="Soyad"
-        placeholder="Örn: Yıldız"
-        value={formData.lastName}
-        onChange={(value) => updateField("lastName", value)}
-      />
-
-      <FormInput
-        label="E-posta"
-        placeholder="Örn: ali.yildiz@test.com"
-        value={formData.email}
-        onChange={(value) => updateField("email", value)}
-      />
-
-      <FormInput
-        label="Telefon"
-        placeholder="Örn: 05555555555"
-        value={formData.phoneNumber}
-        onChange={(value) => updateField("phoneNumber", value)}
-      />
-    </div>
+    <FormFields
+      fields={studentFields}
+      formData={formData}
+      setFormData={setFormData}
+    />
   );
 }
 
