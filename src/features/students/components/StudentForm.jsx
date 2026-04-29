@@ -1,5 +1,4 @@
 import FormInput from "../../../components/ui/FormInput";
-import FormSelect from "../../../components/ui/FormSelect";
 
 function StudentForm({ formData, setFormData }) {
   const updateField = (field, value) => {
@@ -25,66 +24,18 @@ function StudentForm({ formData, setFormData }) {
         onChange={(value) => updateField("lastName", value)}
       />
 
-      <FormSelect
-        label="Sınıf"
-        value={formData.className}
-        onChange={(value) => updateField("className", value)}
-        options={[
-          { label: "9-A", value: "9-A" },
-          { label: "9-B", value: "9-B" },
-          { label: "10-A", value: "10-A" },
-          { label: "10-B", value: "10-B" },
-          { label: "11-A", value: "11-A" },
-          { label: "11-B", value: "11-B" },
-          { label: "12-A", value: "12-A" },
-          { label: "12-B", value: "12-B" },
-        ]}
+      <FormInput
+        label="E-posta"
+        placeholder="Örn: ali.yildiz@test.com"
+        value={formData.email}
+        onChange={(value) => updateField("email", value)}
       />
 
       <FormInput
-        label="Kulüp"
-        placeholder="Örn: Robotik"
-        value={formData.club}
-        onChange={(value) => updateField("club", value)}
-      />
-
-      <FormInput
-        label="Okul Numarası"
-        placeholder="Örn: 1234"
-        value={formData.schoolNumber}
-        onChange={(value) => updateField("schoolNumber", value)}
-      />
-
-      <FormInput
-        label="Öğrenci Telefonu"
-        placeholder="Örn: 05xx xxx xx xx"
-        value={formData.studentPhone}
-        onChange={(value) => updateField("studentPhone", value)}
-      />
-
-      <FormInput
-        label="Veli Ad Soyad"
-        placeholder="Örn: Ahmet Yıldız"
-        value={formData.parentName}
-        onChange={(value) => updateField("parentName", value)}
-      />
-
-      <FormInput
-        label="Veli Telefonu"
-        placeholder="Örn: 05xx xxx xx xx"
-        value={formData.parentPhone}
-        onChange={(value) => updateField("parentPhone", value)}
-      />
-
-      <FormSelect
-        label="Durum"
-        value={formData.status}
-        onChange={(value) => updateField("status", value)}
-        options={[
-          { label: "Aktif", value: "Aktif" },
-          { label: "Pasif", value: "Pasif" },
-        ]}
-        className="md:col-span-2"
+        label="Telefon"
+        placeholder="Örn: 05555555555"
+        value={formData.phoneNumber}
+        onChange={(value) => updateField("phoneNumber", value)}
       />
     </div>
   );
