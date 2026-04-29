@@ -8,7 +8,7 @@ const teacherFields = [
     type: "email",
     placeholder: "Örn: ayse.demir@mail.com",
   },
-  { name: "phoneNumber", label: "Telefon", placeholder: "Örn: 05555555555" },
+  { name: "phoneNumber", label: "Telefon", placeholder: "Örn: 0555 123 45 67" },
 
 ];
 

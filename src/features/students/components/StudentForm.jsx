@@ -20,7 +20,7 @@ const studentFields = [
   {
     name: "phoneNumber",
     label: "Telefon",
-    placeholder: "Örn: 05555555555",
+    placeholder: "Örn: 0555 123 45 67",
   },
 ];
 
