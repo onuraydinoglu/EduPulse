@@ -5,13 +5,15 @@ function StudentTable({ students, onEdit, onDelete }) {
     <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-200/70">
+          <thead>
             <tr>
-              <th className="text-sm">Öğrenci</th>
-              <th className="text-sm">E-posta</th>
-              <th className="text-sm">Telefon</th>
-              <th className="text-sm">Durum</th>
-              <th className="text-right text-sm">İşlemler</th>
+              <th>Öğrenci</th>
+              <th>Öğrenci No</th>
+              <th>Sınıf</th>
+              <th>E-posta</th>
+              <th>Telefon</th>
+              <th>Durum</th>
+              <th className="text-right">İşlemler</th>
             </tr>
           </thead>
 

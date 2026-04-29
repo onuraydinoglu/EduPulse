@@ -8,15 +8,12 @@ function StudentTableRow({ student, onEdit, onDelete }) {
   const isActive = student.isActive ?? student.IsActive ?? true;
 
   return (
-    <tr className="hover:bg-base-200/60">
-      <td>
-        <div>
-          <p className="font-semibold">{fullName}</p>
-          <p className="text-xs text-base-content/50">
-            {student.roleName || "student"}
-          </p>
-        </div>
-      </td>
+    <tr>
+      <td className="font-medium text-gray-900">{fullName || "-"}</td>
+
+      <td>{student.studentNumber || "-"}</td>
+
+      <td>{student.classroomName || student.className || "-"}</td>
 
       <td>{student.email || "-"}</td>
 
@@ -24,10 +21,8 @@ function StudentTableRow({ student, onEdit, onDelete }) {
 
       <td>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${isActive
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-rose-50 text-rose-600"
-            }`}
+          className={`badge ${isActive ? "badge-success" : "badge-error"
+            } badge-outline`}
         >
           {isActive ? "Aktif" : "Pasif"}
         </span>
