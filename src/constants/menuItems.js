@@ -3,6 +3,7 @@ import {
   BuildingOfficeIcon,
   UsersIcon,
   AcademicCapIcon,
+  BookOpenIcon,
   ClipboardDocumentListIcon,
   Squares2X2Icon,
   ChartBarIcon,
@@ -41,6 +42,12 @@ export const menuItems = [
     path: "/dashboard/reports/teacher",
     icon: ChartBarIcon,
     roles: ["teacher"],
+  },
+  {
+    title: "Dersler",
+    path: "/dashboard/lessons",
+    icon: BookOpenIcon,
+    roles: ["schooladmin", "officer", "teacher"],
   },
   {
     title: "Sınıflar",

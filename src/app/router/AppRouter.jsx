@@ -8,6 +8,7 @@ import TeachersPage from "../../features/teachers/pages/TeachersPage";
 import OfficersPage from "../../features/officers/pages/OfficersPage";
 import ClassesPage from "../../features/classes/pages/ClassesPage";
 import StudentsPage from "../../features/students/pages/StudentsPage";
+import LessonsPage from "../../features/lessons/pages/LessonsPage";
 import ExamsPage from "../../features/exams/pages/ExamsPage";
 import TrialExamsPage from "../../features/trialExams/pages/TrialExamsPage";
 import ClubsPage from "../../features/clubs/pages/ClubsPage";
@@ -30,6 +31,7 @@ function AppRouter() {
           <Route path="officers" element={<OfficersPage />} />
           <Route path="classes" element={<ClassesPage />} />
           <Route path="students" element={<StudentsPage />} />
+          <Route path="lessons" element={<LessonsPage />} />
           <Route path="exams" element={<ExamsPage />} />
           <Route path="trial-exams" element={<TrialExamsPage />} />
           <Route path="clubs" element={<ClubsPage />} />

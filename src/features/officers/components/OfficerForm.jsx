@@ -20,7 +20,7 @@ const officerFields = [
   {
     name: "phoneNumber",
     label: "Telefon",
-    placeholder: "05551234567",
+    placeholder: "0555 123 45 67",
   },
 ];
 
