@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   CLASSROOMS: "/Classrooms",
   LESSONS: "/Lessons",
   STUDENTS: "/Students",
-  PARENTS: "/Parents",
   STUDENT_GRADES: "/StudentGrades",
+  TEACHER_LESSONS: "/TeacherLessons",
+  /* PARENTS: "/Parents", */
 };

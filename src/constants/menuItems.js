@@ -62,6 +62,12 @@ export const menuItems = [
     roles: ["schooladmin"],
   },
   {
+    title: "Ders Atamaları",
+    path: "/dashboard/teacher-lessons",
+    icon: AcademicCapIcon,
+    roles: ["schooladmin"],
+  },
+  {
     title: "Sınavlar",
     path: "/dashboard/exams",
     icon: ClipboardDocumentListIcon,
