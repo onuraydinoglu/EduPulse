@@ -14,6 +14,7 @@ import TrialExamsPage from "../../features/trialExams/pages/TrialExamsPage";
 import ClubsPage from "../../features/clubs/pages/ClubsPage";
 import PrincipalReportsPage from "../../features/reports/pages/PrincipalReportsPage";
 import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage";
+import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
 
 function AppRouter() {
   return (
@@ -32,6 +33,7 @@ function AppRouter() {
           <Route path="classes" element={<ClassesPage />} />
           <Route path="students" element={<StudentsPage />} />
           <Route path="lessons" element={<LessonsPage />} />
+          <Route path="teacher-lessons" element={<TeacherLessonsPage />} />
           <Route path="exams" element={<ExamsPage />} />
           <Route path="trial-exams" element={<TrialExamsPage />} />
           <Route path="clubs" element={<ClubsPage />} />

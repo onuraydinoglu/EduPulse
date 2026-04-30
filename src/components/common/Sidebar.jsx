@@ -73,8 +73,8 @@ function Sidebar({ collapsed }) {
 
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 ${isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-base-content/45 group-hover:bg-base-300/50 group-hover:text-base-content"
+                      ? "bg-primary/10 text-primary"
+                      : "text-base-content/45 group-hover:bg-base-300/50 group-hover:text-base-content"
                       }`}
                   >
                     <Icon className="h-[18px] w-[18px]" />
