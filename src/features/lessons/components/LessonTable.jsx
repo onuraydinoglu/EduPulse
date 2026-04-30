@@ -1,38 +1,25 @@
 import LessonTableRow from "./LessonTableRow";
 
-function LessonTable({ lessons, onEdit, onDelete }) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Ders Adı</th>
-              <th>Durum</th>
-              <th className="text-right">İşlemler</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {lessons.length > 0 ? (
-              lessons.map((lesson) => (
-                <LessonTableRow
-                  key={lesson.id}
-                  lesson={lesson}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="py-8 text-center text-gray-500">
-                  Ders kaydı bulunamadı.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+function LessonTable({ lessons, onEdit, onDelete, onDetail }) {
+  if (!lessons || lessons.length === 0) {
+    return (
+      <div className="rounded-3xl border border-dashed border-base-300 bg-base-100 p-12 text-center text-base-content/60">
+        Ders kaydı bulunamadı.
       </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {lessons.map((lesson) => (
+        <LessonTableRow
+          key={lesson.id}
+          lesson={lesson}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onDetail={onDetail}
+        />
+      ))}
     </div>
   );
 }

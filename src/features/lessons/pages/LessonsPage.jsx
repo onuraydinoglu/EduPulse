@@ -183,23 +183,24 @@ function LessonsPage() {
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm font-medium text-blue-600">Ders Yönetimi</p>
-          <h1 className="text-2xl font-bold text-gray-900">Dersler</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Okulunuza ait ders kayıtlarını yönetin
-          </p>
-        </div>
+      <div className="rounded-3xl border border-base-300/70 bg-base-100 p-6 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-[1fr_320px_auto] md:items-center">
+          {/* SOL */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">
+              Ders Yönetimi
+            </p>
 
-        <CreateButton icon={BookOpenIcon} onClick={handleOpenCreateModal}>
-          Yeni Ders
-        </CreateButton>
-      </div>
+            <h1 className="mt-1 text-2xl font-bold text-base-content">
+              Dersler
+            </h1>
 
+            <p className="mt-1 text-sm text-base-content/60">
+              Okulunuza ait ders kayıtlarını yönetin
+            </p>
+          </div>
 
-      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          {/* SEARCH */}
           <div className="relative w-full md:max-w-md">
             <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 
@@ -211,14 +212,23 @@ function LessonsPage() {
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
-        </div>
 
-        <LessonTable
-          lessons={filteredLessons}
-          onEdit={handleOpenEditModal}
-          onDelete={handleOpenDeleteModal}
-        />
-      </section>
+          {/* BUTTON */}
+          <div className="flex justify-start md:justify-end">
+            <CreateButton icon={BookOpenIcon} onClick={handleOpenCreateModal}>
+              Yeni Ders
+            </CreateButton>
+          </div>
+        </div>
+      </div>
+
+
+
+      <LessonTable
+        lessons={filteredLessons}
+        onEdit={handleOpenEditModal}
+        onDelete={handleOpenDeleteModal}
+      />
 
       <Modal
         id="lesson_modal"
