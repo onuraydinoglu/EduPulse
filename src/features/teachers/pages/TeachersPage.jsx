@@ -12,6 +12,7 @@ import Toast from "../../../components/ui/Toast";
 import TeacherForm from "../components/TeacherForm";
 import TeacherTable from "../components/TeacherTable";
 import { teacherService } from "../services/teacherService";
+import { lessonService } from "../../lessons/services/lessonService";
 
 import {
   validateForm,
@@ -26,6 +27,8 @@ const emptyTeacherForm = {
   lastName: "",
   phoneNumber: "",
   email: "",
+  branchLessonId: "",
+  department: "",
 };
 
 function TeachersPage() {
@@ -37,6 +40,7 @@ function TeachersPage() {
   const [temporaryPasswords, setTemporaryPasswords] = useState({});
   const [toast, setToast] = useState({ message: "", type: "success" });
   const [search, setSearch] = useState("");
+  const [lessons, setLessons] = useState([]);
 
   const isEditing = editingTeacherId !== null;
 
@@ -87,11 +91,7 @@ function TeachersPage() {
       const result = await teacherService.getAll();
 
       if (result.isSuccess) {
-        const onlyTeachers = (result.data || []).filter(
-          (user) => (user.roleName || "").toLowerCase() === "teacher"
-        );
-
-        setTeachers(onlyTeachers);
+        setTeachers(result.data || []);
       } else {
         showToast(result.message || "Öğretmenler getirilemedi.", "error");
       }
@@ -107,6 +107,29 @@ function TeachersPage() {
     };
 
     fetchTeachers();
+  }, []);
+
+
+  const getLessons = async () => {
+    try {
+      const result = await lessonService.getAll();
+
+      if (result.isSuccess) {
+        setLessons(result.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Dersler getirilemedi.", "error");
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getTeachers();
+      await getLessons();
+    };
+
+    fetchData();
   }, []);
 
   const filteredTeachers = useMemo(() => {
@@ -148,6 +171,8 @@ function TeachersPage() {
       lastName: teacher.lastName || "",
       phoneNumber: teacher.phoneNumber || "",
       email: teacher.email || "",
+      branchLessonId: teacher.branchLessonId || "",
+      department: teacher.department || "",
     });
 
     openModal("teacher_modal");
@@ -208,6 +233,8 @@ function TeachersPage() {
       lastName: formData.lastName.trim(),
       phoneNumber: cleanPhone(formData.phoneNumber),
       email: formData.email.trim(),
+      branchLessonId: formData.branchLessonId || null,
+      department: formData.department.trim() || null,
     };
 
     try {
@@ -335,7 +362,7 @@ function TeachersPage() {
           formData={formData}
           setFormData={setFormData}
           errors={errors}
-          isEditing={isEditing}
+          lessons={lessons}
         />
       </Modal>
 

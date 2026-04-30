@@ -1,18 +1,36 @@
 import FormFields from "../../../components/common/FormFields";
 
-const teacherFields = [
-  { name: "firstName", label: "Ad", placeholder: "Örn: Ayşe" },
-  { name: "lastName", label: "Soyad", placeholder: "Örn: Demir" }, {
-    name: "email",
-    label: "Email",
-    type: "email",
-    placeholder: "Örn: ayse.demir@mail.com",
-  },
-  { name: "phoneNumber", label: "Telefon", placeholder: "Örn: 0555 123 45 67" },
+function TeacherForm({ formData, setFormData, errors = {}, lessons = [] }) {
+  const teacherFields = [
+    { name: "firstName", label: "Ad", placeholder: "Örn: Ayşe" },
+    { name: "lastName", label: "Soyad", placeholder: "Örn: Demir" },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Örn: ayse.demir@mail.com",
+    },
+    {
+      name: "phoneNumber",
+      label: "Telefon",
+      placeholder: "Örn: 0555 123 45 67",
+    },
+    {
+      name: "branchLessonId",
+      label: "Branş",
+      type: "select",
+      options: lessons.map((lesson) => ({
+        value: lesson.id,
+        label: lesson.name || lesson.lessonName,
+      })),
+    },
+    {
+      name: "department",
+      label: "Departman",
+      placeholder: "Eğer öğretmeniniz branşı yoksa mezun olduğu bölümü yazınız.",
+    },
+  ];
 
-];
-
-function TeacherForm({ formData, setFormData, errors = {} }) {
   return (
     <div>
       {errors.general && (
