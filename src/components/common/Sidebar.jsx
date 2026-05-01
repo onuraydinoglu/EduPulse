@@ -25,7 +25,7 @@ function Sidebar({ collapsed }) {
 
   return (
     <aside
-      className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "w-20" : "w-72"
+      className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "w-20" : "w-66"
         }`}
     >
       <div className={`${collapsed ? "px-3" : "px-6"} py-6`}>

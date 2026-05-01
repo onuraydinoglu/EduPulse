@@ -43,8 +43,8 @@ function LessonTableRow({ lesson, onEdit, onDelete, onDetail }) {
 
 
 
-        <div className="mt-5 flex items-center justify-between rounded-xl py-3">
-          <span className="text-xs font-medium text-base-content/50">
+        <div className="mt-5 flex items-center justify-between border-t border-base-300/60 pt-4">
+          <span className="text-xs font-medium text-base-content/45">
             Ders işlemleri
           </span>
 

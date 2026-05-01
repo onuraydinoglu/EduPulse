@@ -187,10 +187,6 @@ function LessonsPage() {
         <div className="grid gap-4 md:grid-cols-[1fr_320px_auto] md:items-center">
           {/* SOL */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">
-              Ders Yönetimi
-            </p>
-
             <h1 className="mt-1 text-2xl font-bold text-base-content">
               Dersler
             </h1>
@@ -221,8 +217,6 @@ function LessonsPage() {
           </div>
         </div>
       </div>
-
-
 
       <LessonTable
         lessons={filteredLessons}

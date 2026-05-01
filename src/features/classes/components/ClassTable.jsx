@@ -1,51 +1,45 @@
 import ClassTableRow from "./ClassTableRow";
 
-function ClassTable({ classes, teachers = [], onEdit, onDelete }) {
+function ClassTable({ classes = [], teachers = [], onEdit, onDelete, onDetail }) {
   const getTeacherName = (classItem) => {
     if (classItem.teacherFullName) return classItem.teacherFullName;
+    if (classItem.TeacherFullName) return classItem.TeacherFullName;
 
-    const teacher = teachers.find((x) => x.id === classItem.teacherId);
+    const teacherId = classItem.teacherId || classItem.TeacherId;
 
-    return (
-      teacher?.fullName ||
-      `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim()
+    const teacher = teachers.find(
+      (x) => (x.id || x.Id) === teacherId
     );
+
+    const fullName =
+      teacher?.fullName ||
+      teacher?.FullName ||
+      `${teacher?.firstName || teacher?.FirstName || ""} ${teacher?.lastName || teacher?.LastName || ""
+        }`.trim();
+
+    return fullName || "Atanmamış";
   };
 
-  return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Sınıf</th>
-              <th>Sınıf Öğretmeni</th>
-              <th>Öğrenci Sayısı</th>
-              <th className="text-right">İşlemler</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {classes.map((classItem) => (
-              <ClassTableRow
-                key={classItem.id}
-                classItem={classItem}
-                teacherName={getTeacherName(classItem)}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-
-            {classes.length === 0 && (
-              <tr>
-                <td colSpan="4" className="py-8 text-center text-gray-500">
-                  Kayıt bulunamadı.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+  if (!classes || classes.length === 0) {
+    return (
+      <div className="rounded-3xl border border-dashed border-base-300 bg-base-100 p-12 text-center text-base-content/60">
+        Sınıf kaydı bulunamadı.
       </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {classes.map((classItem) => (
+        <ClassTableRow
+          key={classItem.id || classItem.Id}
+          classItem={classItem}
+          teacherName={getTeacherName(classItem)}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onDetail={onDetail}
+        />
+      ))}
     </div>
   );
 }
