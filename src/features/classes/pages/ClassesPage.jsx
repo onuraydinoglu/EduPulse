@@ -20,6 +20,7 @@ import {
 } from "../../../validations/validationRules";
 
 import { classroomValidationSchema } from "../../../validations/schemas";
+import FilterSelect from "../../../components/ui/FilterSelect";
 
 const emptyClassForm = {
   grade: "",
@@ -252,59 +253,70 @@ function ClassesPage() {
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div className="rounded-3xl border border-base-300/50 bg-base-100 p-5 shadow-md">
+        {/* ÜST */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-blue-600">Sınıf Yönetimi</p>
-
-            <h1 className="mt-1 text-2xl font-semibold text-gray-950">
+            <h1 className="text-2xl font-bold tracking-tight text-base-content">
               Sınıflar
             </h1>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-base-content/55">
               Sınıfları oluşturun ve öğretmen atayın
             </p>
           </div>
 
-          <CreateButton icon={AcademicCapIcon} onClick={handleOpenCreateModal}>
+          <CreateButton
+            icon={AcademicCapIcon}
+            onClick={handleOpenCreateModal}
+            className="shadow-md transition hover:scale-[1.02]"
+          >
             Yeni Sınıf
           </CreateButton>
         </div>
-      </section>
 
-      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+        {/* ALT */}
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+          {/* SEARCH */}
           <div className="relative w-full md:max-w-md">
             <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 
             <input
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sınıf veya öğretmen ara..."
+              placeholder="Sınıf veya Öğretmen ara..."
               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
             />
           </div>
 
-          <select
-            value={gradeFilter}
-            onChange={(e) => setGradeFilter(e.target.value)}
-            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-52"
-          >
-            <option value="all">Tüm Sınıflar</option>
-            <option value="9">9. Sınıflar</option>
-            <option value="10">10. Sınıflar</option>
-            <option value="11">11. Sınıflar</option>
-            <option value="12">12. Sınıflar</option>
-          </select>
-        </div>
+          {/* SELECT */}
+          <div className="flex items-center h-11">
+            <FilterSelect
+              hideLabel
+              value={gradeFilter}
+              onChange={setGradeFilter}
+              className="w-40"
+              options={[
+                { value: "all", label: "Tümü" },
+                { value: "9", label: "9. Sınıf" },
+                { value: "10", label: "10. Sınıf" },
+                { value: "11", label: "11. Sınıf" },
+                { value: "12", label: "12. Sınıf" },
+              ]}
+            />
+          </div>
 
-        <ClassTable
-          classes={filteredClasses}
-          teachers={teachers}
-          onEdit={handleOpenEditModal}
-          onDelete={handleOpenDeleteModal}
-        />
-      </section>
+        </div>
+      </div>
+
+      <ClassTable
+        classes={filteredClasses}
+        teachers={teachers}
+        onEdit={handleOpenEditModal}
+        onDelete={handleOpenDeleteModal}
+      />
 
       <Modal
         id="class_modal"
