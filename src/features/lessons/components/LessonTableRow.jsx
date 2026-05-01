@@ -2,6 +2,7 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 import Card from "../../../components/ui/Card";
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
 function LessonTableRow({ lesson, onEdit, onDelete, onDetail }) {
   const isActive = lesson.isActive !== false;
@@ -31,17 +32,12 @@ function LessonTableRow({ lesson, onEdit, onDelete, onDetail }) {
             </div>
           </div>
 
-          <span
-            className={`shrink-0 inline-flex items-center rounded-xl border px-2.5 py-1 text-xs font-semibold ${isActive
-              ? "border-success/30 bg-success/10 text-success"
-              : "border-error/30 bg-error/10 text-error"
-              }`}
-          >
-            {isActive ? "Aktif" : "Pasif"}
-          </span>
+          {/* 🔥 BURASI DEĞİŞTİ */}
+          <StatusBadge
+            status={isActive ? "Aktif" : "Pasif"}
+            variant="soft"
+          />
         </div>
-
-
 
         <div className="mt-5 flex items-center justify-between border-t border-base-300/60 pt-4">
           <span className="text-xs font-medium text-base-content/45">

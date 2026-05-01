@@ -1,4 +1,5 @@
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
 function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
   const fullName = `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim();
@@ -9,9 +10,9 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
         <p className="font-semibold">{fullName || "İsimsiz Öğretmen"}</p>
       </td>
 
-      <td>{teacher.phoneNumber || "-"}</td>
-
       <td>{teacher.email || "-"}</td>
+
+      <td>{teacher.phoneNumber || "-"}</td>
 
       <td>
         <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
@@ -20,14 +21,7 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
       </td>
 
       <td>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${teacher.isActive
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-rose-50 text-rose-600"
-            }`}
-        >
-          {teacher.isActive ? "Aktif" : "Pasif"}
-        </span>
+        <StatusBadge status={teacher.isActive ? "Aktif" : "Pasif"} />
       </td>
 
       <td className="text-right">

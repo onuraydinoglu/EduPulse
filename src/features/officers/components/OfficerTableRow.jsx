@@ -1,4 +1,5 @@
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
 function OfficerTableRow({ officer, temporaryPassword, onEdit, onDelete }) {
   const fullName = `${officer.firstName || ""} ${officer.lastName || ""}`.trim();
@@ -20,12 +21,7 @@ function OfficerTableRow({ officer, temporaryPassword, onEdit, onDelete }) {
       </td>
 
       <td>
-        <span
-          className={`badge ${isActive ? "badge-success" : "badge-error"
-            } badge-outline`}
-        >
-          {isActive ? "Aktif" : "Pasif"}
-        </span>
+        <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
       </td>
 
       <td className="text-right">

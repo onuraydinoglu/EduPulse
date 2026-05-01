@@ -2,6 +2,7 @@ import { RectangleGroupIcon } from "@heroicons/react/24/outline";
 
 import Card from "../../../components/ui/Card";
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
 function ClassTableRow({ classItem, teacherName, onEdit, onDelete, onDetail }) {
   const isActive = classItem.isActive !== false;
@@ -39,14 +40,8 @@ function ClassTableRow({ classItem, teacherName, onEdit, onDelete, onDetail }) {
             </div>
           </div>
 
-          <span
-            className={`inline-flex shrink-0 items-center rounded-xl border px-2.5 py-1 text-xs font-semibold ${isActive
-              ? "border-success/30 bg-success/10 text-success"
-              : "border-error/30 bg-error/10 text-error"
-              }`}
-          >
-            {isActive ? "Aktif" : "Pasif"}
-          </span>
+          {/* 🔥 BURASI DEĞİŞTİ */}
+          <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
         </div>
 
         <div className="mt-5 space-y-2 text-sm">

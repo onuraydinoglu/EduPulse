@@ -3,10 +3,10 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`badge rounded-lg ${isActive ? "badge-success" : "badge-error"
-        }`}
+      className={`badge ${isActive ? "badge-success" : "badge-error"
+        } badge-outline`}
     >
-      {status}
+      {isActive ? "Aktif" : "Pasif"}
     </span>
   );
 }
