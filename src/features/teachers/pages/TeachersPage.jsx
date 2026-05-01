@@ -296,13 +296,9 @@ function TeachersPage() {
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
+      <section className="radius-card border border-gray-200 bg-white px-6 py-4">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-blue-600">
-              Öğretmen Yönetimi
-            </p>
-
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
               Öğretmenler
             </h1>

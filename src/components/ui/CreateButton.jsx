@@ -8,7 +8,7 @@ function CreateButton({
   return (
     <button
       onClick={onClick}
-      className="btn-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-semibold transition-all duration-200 cursor-pointer"
+      className="btn-gradient inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold transition-all duration-200 cursor-pointer"
     >
       {Icon && <Icon className="h-5 w-5" />}
       {children}
