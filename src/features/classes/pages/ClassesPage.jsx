@@ -26,6 +26,7 @@ const emptyClassForm = {
   grade: "",
   section: "",
   teacherId: "",
+  isActive: true,
 };
 
 function ClassesPage() {
@@ -153,6 +154,7 @@ function ClassesPage() {
       grade: String(classItem.grade || ""),
       section: classItem.section || "",
       teacherId: classItem.teacherId || "",
+      isActive: classItem.isActive !== false,
     });
 
     document.getElementById("class_modal").showModal();
@@ -188,6 +190,7 @@ function ClassesPage() {
       grade: Number(formData.grade),
       section: formData.section.trim().toUpperCase(),
       teacherId: formData.teacherId || null,
+      isActive: isEditing ? formData.isActive : true,
     };
 
     try {
@@ -338,6 +341,7 @@ function ClassesPage() {
           setFormData={setFormData}
           teachers={teachers}
           errors={errors}
+          isEditing={isEditing}
         />
       </Modal>
 

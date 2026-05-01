@@ -1,8 +1,16 @@
 import FormInput from "../ui/FormInput";
 import FormSelect from "../ui/FormSelect";
+import ActiveCheckbox from "../ui/ActiveCheckbox";
 import { formatPhone } from "../../utils/phoneFormatter";
 
-function FormFields({ fields = [], formData, setFormData, errors = {} }) {
+function FormFields({
+  fields = [],
+  formData,
+  setFormData,
+  errors = {},
+  isEditing = false,
+  showActiveCheckbox = true,
+}) {
   const updateField = (field, value) => {
     let finalValue = value;
 
@@ -50,6 +58,19 @@ function FormFields({ fields = [], formData, setFormData, errors = {} }) {
           />
         );
       })}
+
+      {isEditing && showActiveCheckbox && (
+        <ActiveCheckbox
+          className="md:col-span-2"
+          checked={formData.isActive !== false}
+          onChange={(value) =>
+            setFormData((prev) => ({
+              ...prev,
+              isActive: value,
+            }))
+          }
+        />
+      )}
     </div>
   );
 }

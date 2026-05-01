@@ -1,6 +1,12 @@
 import FormFields from "../../../components/common/FormFields";
 
-function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
+function ClassForm({
+  formData,
+  setFormData,
+  teachers = [],
+  errors = {},
+  isEditing = false,
+}) {
   const teacherOptions = teachers.map((teacher) => ({
     label:
       teacher.fullName ||
@@ -51,6 +57,7 @@ function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
         formData={formData}
         setFormData={setFormData}
         errors={errors}
+        isEditing={isEditing}
       />
     </div>
   );

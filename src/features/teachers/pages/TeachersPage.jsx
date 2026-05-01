@@ -29,6 +29,7 @@ const emptyTeacherForm = {
   email: "",
   branchLessonId: "",
   department: "",
+  isActive: true,
 };
 
 function TeachersPage() {
@@ -173,6 +174,7 @@ function TeachersPage() {
       email: teacher.email || "",
       branchLessonId: teacher.branchLessonId || "",
       department: teacher.department || "",
+      isActive: teacher.isActive !== false,
     });
 
     openModal("teacher_modal");
@@ -235,6 +237,7 @@ function TeachersPage() {
       email: formData.email.trim(),
       branchLessonId: formData.branchLessonId || null,
       department: formData.department.trim() || null,
+      isActive: isEditing ? formData.isActive : true,
     };
 
     try {
@@ -242,7 +245,6 @@ function TeachersPage() {
         ? await teacherService.update({
           id: editingTeacherId,
           ...preparedTeacher,
-          isActive: true,
         })
         : await teacherService.create(preparedTeacher);
 
@@ -359,6 +361,7 @@ function TeachersPage() {
           setFormData={setFormData}
           errors={errors}
           lessons={lessons}
+          isEditing={isEditing}
         />
       </Modal>
 

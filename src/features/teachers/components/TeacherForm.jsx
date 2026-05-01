@@ -1,6 +1,12 @@
 import FormFields from "../../../components/common/FormFields";
 
-function TeacherForm({ formData, setFormData, errors = {}, lessons = [] }) {
+function TeacherForm({
+  formData,
+  setFormData,
+  errors = {},
+  lessons = [],
+  isEditing = false,
+}) {
   const teacherFields = [
     { name: "firstName", label: "Ad", placeholder: "Örn: Ayşe" },
     { name: "lastName", label: "Soyad", placeholder: "Örn: Demir" },
@@ -19,10 +25,13 @@ function TeacherForm({ formData, setFormData, errors = {}, lessons = [] }) {
       name: "branchLessonId",
       label: "Branş",
       type: "select",
-      options: lessons.map((lesson) => ({
-        value: lesson.id,
-        label: lesson.name || lesson.lessonName,
-      })),
+      options: [
+        { value: "", label: "Branş seçiniz" },
+        ...lessons.map((lesson) => ({
+          value: lesson.id,
+          label: lesson.name || lesson.lessonName,
+        })),
+      ],
     },
     {
       name: "department",
@@ -44,6 +53,7 @@ function TeacherForm({ formData, setFormData, errors = {}, lessons = [] }) {
         formData={formData}
         setFormData={setFormData}
         errors={errors}
+        isEditing={isEditing}
       />
     </div>
   );

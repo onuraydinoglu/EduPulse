@@ -24,7 +24,12 @@ const officerFields = [
   },
 ];
 
-function OfficerForm({ formData, setFormData, errors }) {
+function OfficerForm({
+  formData,
+  setFormData,
+  errors = {},
+  isEditing = false,
+}) {
   return (
     <div>
       {errors?.general && (
@@ -37,7 +42,8 @@ function OfficerForm({ formData, setFormData, errors }) {
         fields={officerFields}
         formData={formData}
         setFormData={setFormData}
-        errors={errors} // ✅ kritik
+        errors={errors}
+        isEditing={isEditing}
       />
     </div>
   );

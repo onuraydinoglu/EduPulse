@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
+import CreateButton from "../../../components/ui/CreateButton";
 
 import TeacherLessonForm from "../components/TeacherLessonForm";
 import TeacherLessonTable from "../components/TeacherLessonTable";
@@ -38,6 +42,8 @@ function TeacherLessonsPage() {
     message: "",
     type: "success",
   });
+
+  const isEditing = editingId !== null;
 
   const getListData = (result) => {
     if (result?.isSuccess) return result.data || [];
@@ -94,30 +100,28 @@ function TeacherLessonsPage() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
     const loadTeacherLessons = async () => {
       try {
         const data = await fetchTeacherLessons();
-
-        if (isMounted) {
-          setItems(data);
-        }
+        setItems(data);
       } catch (error) {
         console.error(error);
-
-        if (isMounted) {
-          showToast("Atamalar yüklenirken hata oluştu.", "error");
-        }
+        showToast("Atamalar yüklenirken hata oluştu.", "error");
       }
     };
 
     loadTeacherLessons();
-
-    return () => {
-      isMounted = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleOpenCreateModal = async () => {
+    await getSelectData();
+
+    setEditingId(null);
+    setFormData(emptyForm);
+
+    openModal("teacher_lesson_modal");
+  };
 
   const handleOpenEditModal = async (item) => {
     await getSelectData();
@@ -126,10 +130,10 @@ function TeacherLessonsPage() {
 
     setFormData({
       id: item.id,
-      teacherId: item.teacherId,
-      lessonId: item.lessonId,
-      classroomId: item.classroomId,
-      isActive: item.isActive ?? true,
+      teacherId: item.teacherId || "",
+      lessonId: item.lessonId || "",
+      classroomId: item.classroomId || "",
+      isActive: item.isActive ?? item.IsActive ?? true,
     });
 
     openModal("teacher_lesson_modal");
@@ -146,15 +150,24 @@ function TeacherLessonsPage() {
     openModal("teacher_lesson_delete_modal");
   };
 
+  const handleCloseDeleteModal = () => {
+    setDeletingId(null);
+    closeModal("teacher_lesson_delete_modal");
+  };
+
   const handleDelete = async () => {
     if (!deletingId) return;
 
     try {
-      await teacherLessonService.delete(deletingId);
+      const result = await teacherLessonService.delete(deletingId);
+
+      if (result?.isSuccess === false) {
+        showToast(result.message || "Atama silinemedi.", "error");
+        return;
+      }
 
       await refreshTeacherLessons();
-      closeModal("teacher_lesson_delete_modal");
-      setDeletingId(null);
+      handleCloseDeleteModal();
 
       showToast("Atama başarıyla silindi.");
     } catch (error) {
@@ -165,23 +178,29 @@ function TeacherLessonsPage() {
 
   const handleSubmit = async () => {
     try {
-      const result = await teacherLessonService.update({
-        id: editingId,
+      const payload = {
         teacherId: formData.teacherId,
         lessonId: formData.lessonId,
         classroomId: formData.classroomId,
-        isActive: formData.isActive,
-      });
+      };
 
-      if (result && result.isSuccess === false) {
-        showToast(result.message || "Güncelleme başarısız.", "error");
+      const result = isEditing
+        ? await teacherLessonService.update({
+          id: editingId,
+          ...payload,
+          isActive: formData.isActive,
+        })
+        : await teacherLessonService.create(payload);
+
+      if (result?.isSuccess === false) {
+        showToast(result.message || "İşlem başarısız.", "error");
         return;
       }
 
       await refreshTeacherLessons();
       handleCloseModal();
 
-      showToast("Atama başarıyla güncellendi.");
+      showToast(isEditing ? "Atama güncellendi." : "Yeni atama oluşturuldu.");
     } catch (error) {
       console.error(error);
       showToast("İşlem sırasında hata oluştu.", "error");
@@ -206,12 +225,24 @@ function TeacherLessonsPage() {
       <Toast message={toast.message} type={toast.type} />
 
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
-        <div>
-          <p className="text-sm font-medium text-blue-600">Atama Yönetimi</p>
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium text-blue-600">
+              Atama Yönetimi
+            </p>
 
-          <h1 className="mt-1 text-2xl font-semibold text-gray-950">
-            Öğretmen Ders Sınıf Atamaları
-          </h1>
+            <h1 className="mt-1 text-2xl font-semibold text-gray-950">
+              Öğretmen Ders Sınıf Atamaları
+            </h1>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Öğretmen, ders ve sınıf atamalarını yönetin
+            </p>
+          </div>
+
+          <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
+            Yeni Atama
+          </CreateButton>
         </div>
       </section>
 
@@ -239,14 +270,16 @@ function TeacherLessonsPage() {
 
       <Modal
         id="teacher_lesson_modal"
-        title="Atamayı Düzenle"
+        title={isEditing ? "Atamayı Düzenle" : "Yeni Atama"}
         footer={
           <>
             <Button variant="ghost" onClick={handleCloseModal}>
               Vazgeç
             </Button>
 
-            <Button onClick={handleSubmit}>Güncelle</Button>
+            <Button onClick={handleSubmit}>
+              {isEditing ? "Güncelle" : "Kaydet"}
+            </Button>
           </>
         }
       >
@@ -256,7 +289,7 @@ function TeacherLessonsPage() {
           teachers={teachers}
           lessons={lessons}
           classrooms={classrooms}
-          isEdit={true}
+          isEdit={isEditing}
         />
       </Modal>
 
