@@ -102,15 +102,6 @@ function TeachersPage() {
     }
   };
 
-  useEffect(() => {
-    const fetchTeachers = async () => {
-      await getTeachers();
-    };
-
-    fetchTeachers();
-  }, []);
-
-
   const getLessons = async () => {
     try {
       const result = await lessonService.getAll();
