@@ -7,6 +7,13 @@ export const teacherService = {
     return response.data;
   },
 
+  getActive: async () => {
+    const response = await axiosInstance.get(
+      `${API_ENDPOINTS.TEACHERS}/active`,
+    );
+    return response.data;
+  },
+
   getById: async (id) => {
     const response = await axiosInstance.get(`${API_ENDPOINTS.TEACHERS}/${id}`);
     return response.data;
