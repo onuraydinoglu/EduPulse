@@ -8,8 +8,8 @@ function TeacherTable({ teachers, temporaryPasswords = {}, onEdit, onDelete }) {
           <thead className="bg-base-200/70">
             <tr>
               <th className="text-sm">Öğretmen</th>
-              <th className="text-sm">Telefon</th>
               <th className="text-sm">Email</th>
+              <th className="text-sm">Telefon</th>
               <th className="text-sm">Geçici Şifre</th>
               <th className="text-sm">Durum</th>
               <th className="text-right text-sm">İşlemler</th>

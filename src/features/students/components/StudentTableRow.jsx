@@ -1,4 +1,5 @@
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
 function StudentTableRow({ student, onEdit, onDelete }) {
   const fullName =
@@ -20,12 +21,7 @@ function StudentTableRow({ student, onEdit, onDelete }) {
       <td>{student.phoneNumber || "-"}</td>
 
       <td>
-        <span
-          className={`badge ${isActive ? "badge-success" : "badge-error"
-            } badge-outline`}
-        >
-          {isActive ? "Aktif" : "Pasif"}
-        </span>
+        <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
       </td>
 
       <td className="text-right">
