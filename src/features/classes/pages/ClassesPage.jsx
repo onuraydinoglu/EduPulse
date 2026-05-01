@@ -32,6 +32,7 @@ const emptyClassForm = {
 function ClassesPage() {
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [activeTeachers, setActiveTeachers] = useState([]);
   const [formData, setFormData] = useState(emptyClassForm);
   const [errors, setErrors] = useState({});
   const [editingClassId, setEditingClassId] = useState(null);
@@ -100,13 +101,15 @@ function ClassesPage() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [classResult, teacherResult] = await Promise.all([
+        const [classResult, teacherResult, activeTeacherResult] = await Promise.all([
           classService.getAll(),
           teacherService.getAll(),
+          teacherService.getActive(),
         ]);
 
         setClasses(classResult.data || []);
         setTeachers(teacherResult.data || []);
+        setActiveTeachers(activeTeacherResult.data || []);
       } catch (error) {
         console.error(error);
         showToast(getErrorMessage(error, "Veriler yüklenirken hata oluştu."), "error");
@@ -339,7 +342,7 @@ function ClassesPage() {
         <ClassForm
           formData={formData}
           setFormData={setFormData}
-          teachers={teachers}
+          teachers={activeTeachers}
           errors={errors}
           isEditing={isEditing}
         />

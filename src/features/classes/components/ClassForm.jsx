@@ -36,10 +36,7 @@ function ClassForm({
       name: "teacherId",
       label: "Sınıf Öğretmeni",
       type: "select",
-      options: [
-        { label: "Öğretmen seçilmedi", value: "" },
-        ...teacherOptions,
-      ],
+      options: teacherOptions,
       className: "md:col-span-2",
     },
   ];
