@@ -30,10 +30,18 @@ function Navbar({ collapsed, setCollapsed }) {
     <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-xl">
       <div className="flex h-16 items-center justify-between px-3 lg:px-6">
         <div className="flex items-center gap-3">
+          <label
+            htmlFor="dashboard-drawer"
+            aria-label="open sidebar"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 lg:hidden"
+          >
+            <Bars3BottomLeftIcon className="h-5 w-5" />
+          </label>
+
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-gray-500"
+            className="hidden h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 lg:flex"
           >
             <Bars3BottomLeftIcon className="h-5 w-5" />
           </button>
@@ -80,7 +88,7 @@ function Navbar({ collapsed, setCollapsed }) {
               <ChevronDownIcon className="hidden h-4 w-4 text-gray-400 md:block" />
             </button>
 
-            <ul className="menu dropdown-content mt-3 w-56 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl">
+            <ul className="menu dropdown-content z-50 mt-3 w-56 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl">
               <li>
                 <NavLink to="/dashboard/profile" className="rounded-xl">
                   <UserCircleIcon className="h-5 w-5" />
