@@ -27,6 +27,7 @@ const emptyOfficerForm = {
   lastName: "",
   phoneNumber: "",
   email: "",
+  isActive: true,
 };
 
 function OfficersPage() {
@@ -142,6 +143,7 @@ function OfficersPage() {
       lastName: officer.lastName || "",
       phoneNumber: officer.phoneNumber || "",
       email: officer.email || "",
+      isActive: officer.isActive !== false,
     });
 
     document.getElementById("officer_modal").showModal();
@@ -199,6 +201,7 @@ function OfficersPage() {
       lastName: formData.lastName.trim(),
       phoneNumber: cleanPhone(formData.phoneNumber),
       email: formData.email.trim(),
+      isActive: isEditing ? formData.isActive : true,
     };
 
     try {
@@ -206,7 +209,6 @@ function OfficersPage() {
         ? await officerService.update({
           id: editingOfficerId,
           ...preparedOfficer,
-          isActive: true,
         })
         : await officerService.create(preparedOfficer);
 

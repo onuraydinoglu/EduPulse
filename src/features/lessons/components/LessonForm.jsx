@@ -8,7 +8,7 @@ const lessonFields = [
   },
 ];
 
-function LessonForm({ formData, setFormData, errors }) {
+function LessonForm({ formData, setFormData, errors = {}, isEditing = false }) {
   return (
     <>
       {errors?.general && (
@@ -22,6 +22,7 @@ function LessonForm({ formData, setFormData, errors }) {
         formData={formData}
         setFormData={setFormData}
         errors={errors}
+        isEditing={isEditing}
       />
     </>
   );

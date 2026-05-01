@@ -21,6 +21,7 @@ import { lessonValidationSchema } from "../../../validations/schemas";
 
 const emptyLessonForm = {
   name: "",
+  isActive: true,
 };
 
 function LessonsPage() {
@@ -85,6 +86,7 @@ function LessonsPage() {
 
     setFormData({
       name: lesson.name || "",
+      isActive: lesson.isActive !== false,
     });
 
     setErrors({});
@@ -135,6 +137,7 @@ function LessonsPage() {
 
     const preparedLesson = {
       name: formData.name.trim(),
+      isActive: isEditing ? formData.isActive : true,
     };
 
     try {
@@ -142,7 +145,6 @@ function LessonsPage() {
         ? await lessonService.update({
           id: editingLessonId,
           ...preparedLesson,
-          isActive: true,
         })
         : await lessonService.create(preparedLesson);
 
@@ -243,6 +245,7 @@ function LessonsPage() {
           formData={formData}
           setFormData={setFormData}
           errors={errors}
+          isEditing={isEditing}
         />
       </Modal>
 

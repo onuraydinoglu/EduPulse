@@ -29,6 +29,7 @@ const emptyStudentForm = {
   phoneNumber: "",
   studentNumber: "",
   classroomId: "",
+  isActive: true,
 };
 
 function StudentsPage() {
@@ -159,6 +160,7 @@ function StudentsPage() {
       phoneNumber: student.phoneNumber || "",
       studentNumber: student.studentNumber || "",
       classroomId: student.classroomId || "",
+      isActive: student.isActive !== false,
     });
 
     document.getElementById("student_modal").showModal();
@@ -197,6 +199,7 @@ function StudentsPage() {
       phoneNumber: cleanPhone(formData.phoneNumber),
       studentNumber: formData.studentNumber.trim(),
       classroomId: formData.classroomId,
+      isActive: isEditing ? formData.isActive : true,
     };
 
     try {
@@ -329,6 +332,7 @@ function StudentsPage() {
           setFormData={setFormData}
           classrooms={classrooms}
           errors={errors}
+          isEditing={isEditing}
         />
       </Modal>
 

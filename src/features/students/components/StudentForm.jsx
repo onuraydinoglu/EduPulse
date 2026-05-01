@@ -1,6 +1,12 @@
 import FormFields from "../../../components/common/FormFields";
 
-function StudentForm({ formData, setFormData, classrooms = [], errors = {} }) {
+function StudentForm({
+  formData,
+  setFormData,
+  classrooms = [],
+  errors = {},
+  isEditing = false,
+}) {
   const studentFields = [
     {
       name: "firstName",
@@ -51,6 +57,7 @@ function StudentForm({ formData, setFormData, classrooms = [], errors = {} }) {
       formData={formData}
       setFormData={setFormData}
       errors={errors}
+      isEditing={isEditing}
     />
   );
 }

@@ -1,4 +1,5 @@
 import FormSelect from "../../../components/ui/FormSelect";
+import ActiveCheckbox from "../../../components/ui/ActiveCheckbox";
 
 function TeacherLessonForm({
   formData,
@@ -16,28 +17,32 @@ function TeacherLessonForm({
     }));
   };
 
-  const teacherOptions = teachers.map((teacher) => ({
-    value: teacher.id,
-    label: `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
-  }));
+  const teacherOptions = [
+    { value: "", label: "Öğretmen seçiniz" },
+    ...teachers.map((teacher) => ({
+      value: teacher.id,
+      label: `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
+    })),
+  ];
 
-  const lessonOptions = lessons.map((lesson) => ({
-    value: lesson.id,
-    label: lesson.name || lesson.lessonName || "-",
-  }));
+  const lessonOptions = [
+    { value: "", label: "Ders seçiniz" },
+    ...lessons.map((lesson) => ({
+      value: lesson.id,
+      label: lesson.name || lesson.lessonName || "-",
+    })),
+  ];
 
-  const classroomOptions = classrooms.map((classroom) => ({
-    value: classroom.id,
-    label:
-      classroom.name ||
-      classroom.classroomName ||
-      `${classroom.grade || ""}/${classroom.section || ""}`.trim() ||
-      "-",
-  }));
-
-  const statusOptions = [
-    { value: "true", label: "Aktif" },
-    { value: "false", label: "Pasif" },
+  const classroomOptions = [
+    { value: "", label: "Sınıf seçiniz" },
+    ...classrooms.map((classroom) => ({
+      value: classroom.id,
+      label:
+        classroom.name ||
+        classroom.classroomName ||
+        `${classroom.grade || ""}/${classroom.section || ""}`.trim() ||
+        "-",
+    })),
   ];
 
   return (
@@ -64,11 +69,9 @@ function TeacherLessonForm({
       />
 
       {isEdit && (
-        <FormSelect
-          label="Durum"
-          value={String(formData.isActive)}
-          onChange={(value) => handleChange("isActive", value === "true")}
-          options={statusOptions}
+        <ActiveCheckbox
+          checked={formData.isActive !== false}
+          onChange={(value) => handleChange("isActive", value)}
         />
       )}
     </form>
