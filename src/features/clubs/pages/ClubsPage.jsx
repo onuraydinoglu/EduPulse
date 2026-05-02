@@ -1,33 +1,46 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MagnifyingGlassIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
-import { mockApi } from "../../../services/mockApi";
+import axiosInstance from "../../../api/axiosInstance";
+import { API_ENDPOINTS } from "../../../api/endpoints";
+
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
-import ClubForm from "../components/ClubForm";
 import CreateButton from "../../../components/ui/CreateButton";
+
+import ClubForm from "../components/ClubForm";
 import ClubTable from "../components/ClubTable";
+import { clubService } from "../services/clubService";
 
 const emptyClubForm = {
   name: "",
-  teacher: "",
-  studentCount: "",
-  status: "Aktif",
+  advisorTeacherId: "",
+  isActive: true,
 };
 
 function ClubsPage() {
-  const [clubs, setClubs] = useState(() => mockApi.getClubs());
+  const [clubs, setClubs] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+
   const [formData, setFormData] = useState(emptyClubForm);
   const [editingClubId, setEditingClubId] = useState(null);
   const [deletingClubId, setDeletingClubId] = useState(null);
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [toast, setToast] = useState({ message: "", type: "success" });
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [toast, setToast] = useState({
+    message: "",
+    type: "success",
+  });
 
   const isEditing = editingClubId !== null;
 
@@ -39,15 +52,63 @@ function ClubsPage() {
     }, 2500);
   };
 
+  const getResultData = (response) => {
+    return response.data?.data ?? response.data?.Data ?? response.data;
+  };
+
+  const fetchClubs = async () => {
+    try {
+      setLoading(true);
+      const data = await clubService.getAll();
+      setClubs(Array.isArray(data) ? data : []);
+    } catch (error) {
+      showToast(error.message || "Kulüpler yüklenirken hata oluştu.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const response = await axiosInstance.get(API_ENDPOINTS.TEACHERS);
+      const data = getResultData(response);
+      setTeachers(Array.isArray(data) ? data : []);
+    } catch {
+      setTeachers([]);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchClubs();
+      await fetchTeachers();
+    };
+
+    loadData();
+  }, []);
+
   const filteredClubs = useMemo(() => {
     const normalizedSearch = search.toLowerCase().trim();
 
     return clubs.filter((club) => {
-      const matchesSearch =
-        club.name.toLowerCase().includes(normalizedSearch) ||
-        club.teacher?.toLowerCase().includes(normalizedSearch);
+      const name = (club.name || club.Name || "").toLowerCase();
 
-      const matchesStatus = status === "all" || club.status === status;
+      const teacherName = (
+        club.advisorTeacherFullName ||
+        club.AdvisorTeacherFullName ||
+        ""
+      ).toLowerCase();
+
+      const isActive = club.isActive ?? club.IsActive ?? true;
+
+      const matchesSearch =
+        name.includes(normalizedSearch) ||
+        teacherName.includes(normalizedSearch);
+
+      const matchesStatus =
+        status === "all" ||
+        (status === "active" && isActive) ||
+        (status === "passive" && !isActive);
 
       return matchesSearch && matchesStatus;
     });
@@ -60,13 +121,15 @@ function ClubsPage() {
   };
 
   const handleOpenEditModal = (club) => {
-    setEditingClubId(club.id);
+    const id = club.id || club.Id;
+
+    setEditingClubId(id);
 
     setFormData({
-      name: club.name || "",
-      teacher: club.teacher || "",
-      studentCount: club.studentCount || "",
-      status: club.status,
+      name: club.name || club.Name || "",
+      advisorTeacherId:
+        club.advisorTeacherId || club.AdvisorTeacherId || "",
+      isActive: club.isActive ?? club.IsActive ?? true,
     });
 
     document.getElementById("club_modal").showModal();
@@ -85,61 +148,60 @@ function ClubsPage() {
     document.getElementById("club_delete_modal").close();
   };
 
-  const handleDelete = () => {
-    setClubs((prev) => prev.filter((club) => club.id !== deletingClubId));
+  const handleDelete = async () => {
+    try {
+      await clubService.delete(deletingClubId);
 
-    setDeletingClubId(null);
-    handleCloseDeleteModal();
-    showToast("Kulüp başarıyla silindi.");
+      setDeletingClubId(null);
+      handleCloseDeleteModal();
+      showToast("Kulüp başarıyla silindi.");
+      fetchClubs();
+    } catch (error) {
+      showToast(error.message || "Kulüp silinirken hata oluştu.", "error");
+    }
   };
 
-  const handleSubmit = () => {
-    if (!formData.name.trim() || !formData.teacher.trim()) {
-      showToast(
-        "Lütfen kulüp adı ve sorumlu öğretmen alanlarını doldurun.",
-        "error"
-      );
+  const handleSubmit = async () => {
+    if (!formData.name.trim()) {
+      showToast("Kulüp adı boş bırakılamaz.", "error");
       return;
     }
 
-    if (Number(formData.studentCount || 0) < 0) {
-      showToast("Öğrenci sayısı negatif olamaz.", "error");
+    if (!formData.advisorTeacherId) {
+      showToast("Sorumlu öğretmen seçiniz.", "error");
       return;
     }
 
-    const preparedClub = {
-      name: formData.name.trim(),
-      teacher: formData.teacher.trim(),
-      studentCount: Number(formData.studentCount || 0),
-      status: formData.status,
-    };
+    try {
+      setSaving(true);
 
-    if (isEditing) {
-      setClubs((prev) =>
-        prev.map((club) =>
-          club.id === editingClubId
-            ? {
-              ...club,
-              ...preparedClub,
-            }
-            : club
-        )
-      );
+      if (isEditing) {
+        await clubService.update({
+          id: editingClubId,
+          name: formData.name.trim(),
+          advisorTeacherId: formData.advisorTeacherId,
+          isActive: formData.isActive,
+        });
 
-      showToast("Kulüp bilgileri başarıyla güncellendi.");
-    } else {
-      const newClub = {
-        id: Date.now(),
-        ...preparedClub,
-      };
+        showToast("Kulüp bilgileri başarıyla güncellendi.");
+      } else {
+        await clubService.create({
+          name: formData.name.trim(),
+          advisorTeacherId: formData.advisorTeacherId,
+        });
 
-      setClubs((prev) => [newClub, ...prev]);
-      showToast("Yeni kulüp başarıyla eklendi.");
+        showToast("Yeni kulüp başarıyla eklendi.");
+      }
+
+      setFormData(emptyClubForm);
+      setEditingClubId(null);
+      handleCloseModal();
+      fetchClubs();
+    } catch (error) {
+      showToast(error.message || "Kulüp kaydedilirken hata oluştu.", "error");
+    } finally {
+      setSaving(false);
     }
-
-    setFormData(emptyClubForm);
-    setEditingClubId(null);
-    handleCloseModal();
   };
 
   return (
@@ -149,14 +211,16 @@ function ClubsPage() {
       <section className="radius-card border border-gray-200 bg-white px-6 py-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-blue-600">Kulüp Yönetimi</p>
+            <p className="text-sm font-medium text-blue-600">
+              Kulüp Yönetimi
+            </p>
 
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
               Kulüpler
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Öğrencilerin sosyal etkinlik ve kulüp kayıtlarını takip edin
+              Okulunuza ait kulüp kayıtlarını yönetin
             </p>
           </div>
 
@@ -186,16 +250,22 @@ function ClubsPage() {
             className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-52"
           >
             <option value="all">Tüm Durumlar</option>
-            <option value="Aktif">Aktif</option>
-            <option value="Pasif">Pasif</option>
+            <option value="active">Aktif</option>
+            <option value="passive">Pasif</option>
           </select>
         </div>
 
-        <ClubTable
-          clubs={filteredClubs}
-          onEdit={handleOpenEditModal}
-          onDelete={handleOpenDeleteModal}
-        />
+        {loading ? (
+          <div className="p-8 text-center text-sm text-gray-500">
+            Kulüpler yükleniyor...
+          </div>
+        ) : (
+          <ClubTable
+            clubs={filteredClubs}
+            onEdit={handleOpenEditModal}
+            onDelete={handleOpenDeleteModal}
+          />
+        )}
       </section>
 
       <Modal
@@ -207,13 +277,17 @@ function ClubsPage() {
               <Button variant="ghost">Vazgeç</Button>
             </form>
 
-            <Button onClick={handleSubmit}>
-              {isEditing ? "Güncelle" : "Kaydet"}
+            <Button onClick={handleSubmit} disabled={saving}>
+              {saving ? "Kaydediliyor..." : isEditing ? "Güncelle" : "Kaydet"}
             </Button>
           </>
         }
       >
-        <ClubForm formData={formData} setFormData={setFormData} />
+        <ClubForm
+          formData={formData}
+          setFormData={setFormData}
+          teachers={teachers}
+        />
       </Modal>
 
       <ConfirmModal

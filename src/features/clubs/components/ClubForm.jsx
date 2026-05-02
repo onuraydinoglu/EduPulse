@@ -1,14 +1,24 @@
 import FormInput from "../../../components/ui/FormInput";
 import FormSelect from "../../../components/ui/FormSelect";
-import { teachers } from "../../../data/mockData";
 
-function ClubForm({ formData, setFormData }) {
+function ClubForm({ formData, setFormData, teachers = [] }) {
   const updateField = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
+
+  const teacherOptions = teachers.map((teacher) => ({
+    label:
+      teacher.fullName ||
+      teacher.userFullName ||
+      teacher.teacherFullName ||
+      teacher.name ||
+      `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() ||
+      "İsimsiz Öğretmen",
+    value: teacher.id,
+  }));
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -21,29 +31,18 @@ function ClubForm({ formData, setFormData }) {
 
       <FormSelect
         label="Sorumlu Öğretmen"
-        value={formData.teacher}
-        onChange={(value) => updateField("teacher", value)}
-        options={teachers.map((teacher) => ({
-          label: teacher.fullName,
-          value: teacher.fullName,
-        }))}
-      />
-
-      <FormInput
-        label="Öğrenci Sayısı"
-        type="number"
-        placeholder="Örn: 24"
-        value={formData.studentCount}
-        onChange={(value) => updateField("studentCount", value)}
+        value={formData.advisorTeacherId}
+        onChange={(value) => updateField("advisorTeacherId", value)}
+        options={teacherOptions}
       />
 
       <FormSelect
         label="Durum"
-        value={formData.status}
-        onChange={(value) => updateField("status", value)}
+        value={String(formData.isActive)}
+        onChange={(value) => updateField("isActive", value === "true")}
         options={[
-          { label: "Aktif", value: "Aktif" },
-          { label: "Pasif", value: "Pasif" },
+          { label: "Aktif", value: "true" },
+          { label: "Pasif", value: "false" },
         ]}
       />
     </div>
