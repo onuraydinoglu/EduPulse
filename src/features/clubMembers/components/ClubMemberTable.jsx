@@ -1,38 +1,25 @@
 import ClubMemberTableRow from "./ClubMemberTableRow";
 
-function ClubMemberTable({ members = [], onDelete }) {
-  return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Kulüp</th>
-              <th className="text-sm">Öğrenci</th>
-              <th className="text-sm">Öğrenci No</th>
-              <th className="text-sm">Sınıf</th>
-              <th className="text-sm">Durum</th>
-              <th className="text-right text-sm">İşlemler</th>
-            </tr>
-          </thead>
+function ClubMemberTable({ clubs = [], onDetail }) {
+  const safeClubs = Array.isArray(clubs) ? clubs.filter(Boolean) : [];
 
-          <tbody>
-            {members.map((member) => (
-              <ClubMemberTableRow
-                key={member.id}
-                member={member}
-                onDelete={onDelete}
-              />
-            ))}
-          </tbody>
-        </table>
+  if (safeClubs.length === 0) {
+    return (
+      <div className="rounded-3xl border border-dashed border-base-300 bg-base-100 p-12 text-center text-base-content/60">
+        Üyesi olan kulüp bulunamadı.
       </div>
+    );
+  }
 
-      {members.length === 0 && (
-        <div className="p-8 text-center text-sm text-base-content/60">
-          Kayıt bulunamadı.
-        </div>
-      )}
+  return (
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {safeClubs.map((club) => (
+        <ClubMemberTableRow
+          key={club.id || club.Id}
+          club={club}
+          onDetail={onDetail}
+        />
+      ))}
     </div>
   );
 }
