@@ -6,13 +6,14 @@ import {
   BookOpenIcon,
   RectangleStackIcon,
   ClipboardDocumentListIcon,
-  ClipboardDocumentCheckIcon, // eklendi
+  ClipboardDocumentCheckIcon,
   Squares2X2Icon,
   ChartBarIcon,
   RectangleGroupIcon,
   DocumentChartBarIcon,
   IdentificationIcon,
-  UserGroupIcon, // eklendi
+  UserGroupIcon,
+  UserPlusIcon, // ✅ EKLENDİ
 } from "@heroicons/react/24/outline";
 
 export const menuItems = [
@@ -23,10 +24,9 @@ export const menuItems = [
     roles: ["superadmin", "schooladmin", "teacher", "officer"],
   },
 
-  // 👤 SADECE ICON DEĞİŞTİ
   {
     title: "Kullanıcılar",
-    icon: UserGroupIcon, // değişti
+    icon: UserGroupIcon,
     roles: ["schooladmin"],
     children: [
       {
@@ -50,7 +50,6 @@ export const menuItems = [
     ],
   },
 
-  // 📚 ZATEN DOĞRUYDU (değişmedi)
   {
     title: "Akademik Yönetim",
     icon: RectangleStackIcon,
@@ -77,10 +76,9 @@ export const menuItems = [
     ],
   },
 
-  // 📝 SADECE ICON DEĞİŞTİ
   {
     title: "Sınav Yönetimi",
-    icon: ClipboardDocumentCheckIcon, // değişti
+    icon: ClipboardDocumentCheckIcon,
     roles: ["schooladmin", "teacher"],
     children: [
       {
@@ -98,6 +96,7 @@ export const menuItems = [
     ],
   },
 
+  // ✅ BURASI ÖNEMLİ
   {
     title: "Sosyal Etkinlikler",
     icon: Squares2X2Icon,
@@ -107,6 +106,12 @@ export const menuItems = [
         title: "Kulüpler",
         path: "/dashboard/clubs",
         icon: Squares2X2Icon,
+        roles: ["schooladmin"],
+      },
+      {
+        title: "Kulüp Üyeleri",
+        path: "/dashboard/club-members",
+        icon: UserPlusIcon,
         roles: ["schooladmin"],
       },
     ],
