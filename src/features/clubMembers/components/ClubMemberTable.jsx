@@ -1,6 +1,6 @@
-import ClubTableRow from "./ClubTableRow";
+import ClubMemberTableRow from "./ClubMemberTableRow";
 
-function ClubTable({ clubs = [], onEdit, onDelete }) {
+function ClubMemberTable({ members = [], onDelete }) {
   return (
     <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
@@ -8,19 +8,19 @@ function ClubTable({ clubs = [], onEdit, onDelete }) {
           <thead className="bg-base-200/70">
             <tr>
               <th className="text-sm">Kulüp</th>
-              <th className="text-sm">Sorumlu Öğretmen</th>
-              <th className="text-sm">Üye Sayısı</th>
+              <th className="text-sm">Öğrenci</th>
+              <th className="text-sm">Öğrenci No</th>
+              <th className="text-sm">Sınıf</th>
               <th className="text-sm">Durum</th>
               <th className="text-right text-sm">İşlemler</th>
             </tr>
           </thead>
 
           <tbody>
-            {clubs.map((club) => (
-              <ClubTableRow
-                key={club.id}
-                club={club}
-                onEdit={onEdit}
+            {members.map((member) => (
+              <ClubMemberTableRow
+                key={member.id}
+                member={member}
                 onDelete={onDelete}
               />
             ))}
@@ -28,7 +28,7 @@ function ClubTable({ clubs = [], onEdit, onDelete }) {
         </table>
       </div>
 
-      {clubs.length === 0 && (
+      {members.length === 0 && (
         <div className="p-8 text-center text-sm text-base-content/60">
           Kayıt bulunamadı.
         </div>
@@ -37,4 +37,4 @@ function ClubTable({ clubs = [], onEdit, onDelete }) {
   );
 }
 
-export default ClubTable; 
+export default ClubMemberTable;
