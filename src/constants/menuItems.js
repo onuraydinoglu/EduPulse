@@ -12,6 +12,7 @@ import {
   RectangleGroupIcon,
   DocumentChartBarIcon,
   IdentificationIcon,
+  CalendarDaysIcon,
   UserGroupIcon,
   UserPlusIcon, // ✅ EKLENDİ
 } from "@heroicons/react/24/outline";
@@ -115,6 +116,13 @@ export const menuItems = [
         roles: ["schooladmin"],
       },
     ],
+  },
+
+  {
+    title: "Etkinlikler",
+    path: "/dashboard/events",
+    icon: CalendarDaysIcon,
+    roles: ["schooladmin", "officer"],
   },
 
   {

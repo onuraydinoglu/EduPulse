@@ -20,4 +20,6 @@ export const API_ENDPOINTS = {
 
   CLUBS: "/Clubs",
   CLUB_MEMBERS: "/ClubMembers",
+
+  EVENTS: "/Events",
 };

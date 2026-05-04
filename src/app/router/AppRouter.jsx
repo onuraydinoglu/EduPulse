@@ -23,6 +23,7 @@ import PrincipalReportsPage from "../../features/reports/pages/PrincipalReportsP
 import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage";
 
 import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
+import EventsPage from "../../features/events/pages/EventsPage";
 
 function AppRouter() {
   return (
@@ -49,6 +50,8 @@ function AppRouter() {
 
           <Route path="clubs" element={<ClubsPage />} />
           <Route path="club-members" element={<ClubMembersPage />} />
+
+          <Route path="events" element={<EventsPage />} />
 
           <Route path="reports/principal" element={<PrincipalReportsPage />} />
           <Route path="reports/teacher" element={<TeacherReportsPage />} />
