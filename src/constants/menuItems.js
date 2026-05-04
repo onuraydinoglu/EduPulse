@@ -126,6 +126,13 @@ export const menuItems = [
   },
 
   {
+    title: "Etkinlik Katılımcıları",
+    path: "/dashboard/event-members",
+    icon: UserGroupIcon,
+    roles: ["schooladmin", "officer"],
+  },
+
+  {
     title: "Raporlar",
     icon: ChartBarIcon,
     roles: ["schooladmin", "teacher"],

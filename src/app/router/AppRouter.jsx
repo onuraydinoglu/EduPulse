@@ -24,6 +24,7 @@ import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage"
 
 import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
 import EventsPage from "../../features/events/pages/EventsPage";
+import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
 
 function AppRouter() {
   return (
@@ -52,6 +53,7 @@ function AppRouter() {
           <Route path="club-members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
+          <Route path="event-members" element={<EventMembersPage />} />
 
           <Route path="reports/principal" element={<PrincipalReportsPage />} />
           <Route path="reports/teacher" element={<TeacherReportsPage />} />
