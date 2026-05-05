@@ -11,7 +11,6 @@ import { personalNoteService } from "../services/personalNoteService";
 const emptyForm = {
   title: "",
   content: "",
-  isPinned: false,
   isActive: true,
 };
 
@@ -28,10 +27,6 @@ function PersonalNotesWidget({ showToast }) {
   const sortNotes = (data) => {
     return Array.isArray(data)
       ? [...data].sort((a, b) => {
-        const aPinned = a.isPinned ?? a.IsPinned ?? false;
-        const bPinned = b.isPinned ?? b.IsPinned ?? false;
-
-        if (aPinned !== bPinned) return bPinned - aPinned;
 
         const aDate = new Date(a.createdDate || a.CreatedDate || 0);
         const bDate = new Date(b.createdDate || b.CreatedDate || 0);
@@ -126,7 +121,6 @@ function PersonalNotesWidget({ showToast }) {
           id: editingNoteId,
           title: noteForm.title,
           content: noteForm.content,
-          isPinned: noteForm.isPinned,
           isActive: noteForm.isActive,
         });
 
@@ -135,7 +129,6 @@ function PersonalNotesWidget({ showToast }) {
         await personalNoteService.create({
           title: noteForm.title,
           content: noteForm.content,
-          isPinned: noteForm.isPinned,
         });
 
         showToast?.("Not başarıyla oluşturuldu.");
@@ -153,7 +146,6 @@ function PersonalNotesWidget({ showToast }) {
     setNoteForm({
       title: note.title || note.Title || "",
       content: note.content || note.Content || "",
-      isPinned: note.isPinned ?? note.IsPinned ?? false,
       isActive: note.isActive ?? note.IsActive ?? true,
     });
     setErrors({});
@@ -212,7 +204,6 @@ function PersonalNotesWidget({ showToast }) {
               const id = note.id || note.Id;
               const title = note.title || note.Title || "Başlıksız Not";
               const content = note.content || note.Content || "";
-              const isPinned = note.isPinned ?? note.IsPinned ?? false;
 
               return (
                 <div
@@ -223,12 +214,6 @@ function PersonalNotesWidget({ showToast }) {
                     <p className="text-sm font-semibold text-gray-900">
                       {title}
                     </p>
-
-                    {isPinned && (
-                      <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600">
-                        Sabit
-                      </span>
-                    )}
                   </div>
 
                   <p className="text-sm text-gray-600">{content}</p>
@@ -298,23 +283,6 @@ function PersonalNotesWidget({ showToast }) {
               <p className="mt-1 text-sm text-red-500">{errors.content}</p>
             )}
           </div>
-
-          <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-            <span className="text-sm font-medium text-gray-700">
-              Not sabitlensin mi?
-            </span>
-
-            <input
-              type="checkbox"
-              checked={noteForm.isPinned}
-              onChange={(e) =>
-                setNoteForm((prev) => ({
-                  ...prev,
-                  isPinned: e.target.checked,
-                }))
-              }
-            />
-          </label>
 
           {isEditingNote && (
             <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
