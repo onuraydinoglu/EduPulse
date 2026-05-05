@@ -23,4 +23,6 @@ export const API_ENDPOINTS = {
 
   EVENTS: "/Events",
   EVENT_MEMBERS: "/EventMembers",
+
+  PERSONAL_NOTES: "/PersonalNotes",
 };
