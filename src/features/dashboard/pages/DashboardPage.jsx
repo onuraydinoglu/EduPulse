@@ -1,13 +1,5 @@
-import { useState } from "react";
-import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
-
-import Button from "../../../components/ui/Button";
-import ConfirmModal from "../../../components/ui/ConfirmModal";
-import Modal from "../../../components/ui/Modal";
-import TableActions from "../../../components/ui/TableActions";
-import CreateButton from "../../../components/ui/CreateButton";
-import Toast from "../../../components/ui/Toast";
 import PersonalNotesWidget from "../../personalNotes/components/PersonalNotesWidget";
+import DashboardMessagesWidget from "../../messages/components/DashboardMessagesWidget";
 
 function DashboardPage() {
   const schoolInfo = {
@@ -16,246 +8,35 @@ function DashboardPage() {
     principal: "Okul Müdürü",
   };
 
-  const teachers = [
-    { id: 1, fullName: "Ayşe Demir", branch: "Matematik", className: "9-A" },
-    {
-      id: 2,
-      fullName: "Murat Çelik",
-      branch: "Türk Dili ve Edebiyatı",
-      className: "10-B",
-    },
-    { id: 3, fullName: "Elif Şahin", branch: "Fizik", className: "11-A" },
-    { id: 4, fullName: "Ahmet Yılmaz", branch: "Kimya", className: "12-C" },
-  ];
-
-  const [message, setMessage] = useState("");
-  const [selectedTeacher, setSelectedTeacher] = useState("all");
-  const [editingMessageId, setEditingMessageId] = useState(null);
-  const [deletingMessageId, setDeletingMessageId] = useState(null);
-  const [sentMessages, setSentMessages] = useState([]);
-  const [toast, setToast] = useState(null);
-
-  const isEditingMessage = editingMessageId !== null;
-
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-  };
-
-  const handleOpenMessageModal = () => {
-    setEditingMessageId(null);
-    setMessage("");
-    setSelectedTeacher("all");
-    document.getElementById("message_modal").showModal();
-  };
-
-  const handleCloseMessageModal = () => {
-    document.getElementById("message_modal").close();
-    setEditingMessageId(null);
-    setMessage("");
-    setSelectedTeacher("all");
-  };
-
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    const receiver =
-      selectedTeacher === "all"
-        ? "Tüm Öğretmenler"
-        : teachers.find((teacher) => teacher.id === Number(selectedTeacher))
-          ?.fullName;
-
-    if (isEditingMessage) {
-      setSentMessages((prev) =>
-        prev.map((item) =>
-          item.id === editingMessageId
-            ? {
-              ...item,
-              receiver,
-              text: message,
-              date: new Date().toLocaleDateString("tr-TR"),
-            }
-            : item,
-        ),
-      );
-    } else {
-      const newMessage = {
-        id: Date.now(),
-        receiver,
-        text: message,
-        date: new Date().toLocaleDateString("tr-TR"),
-      };
-
-      setSentMessages((prev) => [newMessage, ...prev]);
-    }
-
-    handleCloseMessageModal();
-  };
-
-  const handleEditMessage = (item) => {
-    setEditingMessageId(item.id);
-    setMessage(item.text);
-
-    const teacher = teachers.find(
-      (teacher) => teacher.fullName === item.receiver,
-    );
-
-    setSelectedTeacher(teacher ? String(teacher.id) : "all");
-    document.getElementById("message_modal").showModal();
-  };
-
-  const handleOpenMessageDeleteModal = (id) => {
-    setDeletingMessageId(id);
-    document.getElementById("message_delete_modal").showModal();
-  };
-
-  const handleDeleteMessage = () => {
-    setSentMessages((prev) =>
-      prev.filter((item) => item.id !== deletingMessageId),
-    );
-
-    if (editingMessageId === deletingMessageId) {
-      handleCloseMessageModal();
-    }
-
-    setDeletingMessageId(null);
-    document.getElementById("message_delete_modal").close();
-  };
-
   return (
     <div className="space-y-6">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      <section className="rounded-3xl border border-base-300 bg-base-100/90 p-6 shadow-sm">
+        <p className="text-sm font-semibold text-blue-600">Müdür Paneli</p>
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-blue-600">Müdür Paneli</p>
-
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+            <h1 className="text-2xl font-bold text-base-content">
               {schoolInfo.name}
             </h1>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-base-content/60">
               {schoolInfo.city} konumundaki okulunuzun genel yönetim paneli
             </p>
           </div>
 
-          <div className="rounded-2xl bg-blue-50 px-5 py-3 text-sm font-medium text-blue-600">
-            Müdür: {schoolInfo.principal}
+          <div className="rounded-2xl bg-base-200 px-4 py-3 text-sm text-base-content/70">
+            Müdür:{" "}
+            <span className="font-semibold text-base-content">
+              {schoolInfo.principal}
+            </span>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_0.9fr]">
-        <section className="radius-card border border-gray-200 bg-white p-6">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight text-gray-950">
-                Öğretmen Mesajları
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Gönderilen mesajları buradan takip edebilirsiniz.
-              </p>
-            </div>
-
-            <CreateButton
-              icon={PaperAirplaneIcon}
-              onClick={handleOpenMessageModal}
-            >
-              Mesaj Gönder
-            </CreateButton>
-          </div>
-
-          <div className="space-y-3">
-            {sentMessages.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">
-                Henüz gönderilmiş mesaj bulunmuyor.
-              </p>
-            ) : (
-              sentMessages.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3"
-                >
-                  <div className="mb-1 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {item.receiver}
-                    </p>
-
-                    <span className="text-xs text-gray-400">{item.date}</span>
-                  </div>
-
-                  <p className="text-sm text-gray-600">{item.text}</p>
-
-                  <div className="mt-3 flex justify-end">
-                    <TableActions
-                      onEdit={() => handleEditMessage(item)}
-                      onDelete={() => handleOpenMessageDeleteModal(item.id)}
-                    />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        <PersonalNotesWidget showToast={showToast} />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <DashboardMessagesWidget />
+        <PersonalNotesWidget />
       </div>
-
-      <Modal
-        id="message_modal"
-        title={isEditingMessage ? "Mesajı Güncelle" : "Mesaj Gönder"}
-        footer={
-          <>
-            <form method="dialog">
-              <Button variant="ghost">Vazgeç</Button>
-            </form>
-
-            <Button onClick={handleSendMessage}>
-              {isEditingMessage ? "Güncelle" : "Gönder"}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <select
-            value={selectedTeacher}
-            onChange={(e) => setSelectedTeacher(e.target.value)}
-            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
-          >
-            <option value="all">Tüm Öğretmenler</option>
-
-            {teachers.map((teacher) => (
-              <option key={teacher.id} value={teacher.id}>
-                {teacher.fullName} - {teacher.branch} / {teacher.className}
-              </option>
-            ))}
-          </select>
-
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows="5"
-            placeholder="Öğretmenlere iletmek istediğiniz mesajı yazın..."
-            className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
-          />
-        </div>
-      </Modal>
-
-      <ConfirmModal
-        id="message_delete_modal"
-        title="Mesajı Sil"
-        description="Bu mesaj kalıcı olarak silinecek. Devam etmek istediğinize emin misiniz?"
-        confirmText="Evet, Sil"
-        cancelText="Vazgeç"
-        onConfirm={handleDeleteMessage}
-      />
     </div>
   );
 }

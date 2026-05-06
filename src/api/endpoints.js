@@ -25,4 +25,12 @@ export const API_ENDPOINTS = {
   EVENT_MEMBERS: "/EventMembers",
 
   PERSONAL_NOTES: "/PersonalNotes",
+
+  MESSAGES: {
+    BASE: "/Messages",
+    USERS: "/Messages/users",
+    INBOX: "/Messages/inbox",
+    SENT: "/Messages/sent",
+    CONVERSATION: "/Messages/conversation",
+  },
 };
