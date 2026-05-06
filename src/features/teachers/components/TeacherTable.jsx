@@ -2,17 +2,29 @@ import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({ teachers, temporaryPasswords = {}, onEdit, onDelete }) {
   return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+    <div className="overflow-hidden bg-white">
       <div className="overflow-x-auto">
-        <table className="table">
-          <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Öğretmen</th>
-              <th className="text-sm">Email</th>
-              <th className="text-sm">Telefon</th>
-              <th className="text-sm">Geçici Şifre</th>
-              <th className="text-sm">Durum</th>
-              <th className="text-right text-sm">İşlemler</th>
+        <table className="table w-full">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/80">
+              <th className="py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+                Öğretmen
+              </th>
+              <th className="py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+                Branş / Bölüm
+              </th>
+              <th className="py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+                Email
+              </th>
+              <th className="py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+                Telefon
+              </th>
+              <th className="py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+                Durum
+              </th>
+              <th className="py-4 text-right text-xs font-bold uppercase tracking-wide text-gray-500">
+                İşlemler
+              </th>
             </tr>
           </thead>
 
@@ -31,8 +43,13 @@ function TeacherTable({ teachers, temporaryPasswords = {}, onEdit, onDelete }) {
       </div>
 
       {teachers.length === 0 && (
-        <div className="p-8 text-center text-sm text-base-content/60">
-          Kayıt bulunamadı.
+        <div className="p-10 text-center">
+          <p className="text-sm font-semibold text-gray-700">
+            Kayıt bulunamadı.
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Arama veya filtre kriterlerini değiştirerek tekrar deneyin.
+          </p>
         </div>
       )}
     </div>

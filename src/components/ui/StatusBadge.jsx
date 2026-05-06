@@ -1,12 +1,18 @@
-function StatusBadge({ status }) {
-  const isActive = status === "Aktif";
+function StatusBadge({ status = "" }) {
+  const normalizedStatus = String(status).toLowerCase();
+
+  const variants = {
+    aktif: "badge-success",
+    pasif: "badge-error",
+    izinde: "badge-warning",
+  };
 
   return (
     <span
-      className={`badge ${isActive ? "badge-success" : "badge-error"
+      className={`badge ${variants[normalizedStatus] || "badge-neutral"
         } badge-outline`}
     >
-      {isActive ? "Aktif" : "Pasif"}
+      {status}
     </span>
   );
 }

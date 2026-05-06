@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   MagnifyingGlassIcon,
   UserPlusIcon,
+  AcademicCapIcon,
+  ClipboardDocumentCheckIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 import Button from "../../../components/ui/Button";
@@ -13,14 +16,12 @@ import TeacherForm from "../components/TeacherForm";
 import TeacherTable from "../components/TeacherTable";
 import { teacherService } from "../services/teacherService";
 import { lessonService } from "../../lessons/services/lessonService";
-
-import {
-  validateForm,
-  hasValidationError,
-} from "../../../validations/validationRules";
-
+import { validateForm, hasValidationError, } from "../../../validations/validationRules";
 import { userValidationSchema } from "../../../validations/schemas";
 import { cleanPhone } from "../../../utils/phoneFormatter";
+import TableStatsCards from "../components/TableStatsCards";
+import ExportButton from "../../../components/ui/ExportButton";
+import { exportToPdf } from "../../../utils/exportToPdf";
 
 const emptyTeacherForm = {
   firstName: "",
@@ -285,11 +286,43 @@ function TeachersPage() {
     }
   };
 
+  const handleExportTeachersPdf = () => {
+    exportToPdf({
+      title: "Öğretmen Listesi",
+      fileName: "ogretmen-listesi.pdf",
+      columns: [
+        { header: "#", accessor: "index" },
+        {
+          header: "Öğretmen",
+          accessor: (x) =>
+            x.fullName ||
+            `${x.firstName || ""} ${x.lastName || ""}`.trim(),
+        },
+        { header: "E-Posta", accessor: "email" },
+        { header: "Telefon", accessor: "phoneNumber" },
+        {
+          header: "Branş / Departman",
+          accessor: (x) =>
+            x.branchLessonName ||
+            x.branchName ||
+            x.lessonName ||
+            x.department,
+        },
+        {
+          header: "Durum",
+          accessor: (x) =>
+            x.isActive !== false ? "Aktif" : "Pasif",
+        },
+      ],
+      data: teachers,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-4">
+      <section>
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
@@ -297,15 +330,52 @@ function TeachersPage() {
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Öğretmen kayıtlarını yönetin
+              Öğretmen kayıtlarını yönetin ve sistem erişimlerini düzenleyin.
             </p>
           </div>
 
-          <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
-            Yeni Öğretmen
-          </CreateButton>
+          <div className="flex gap-4">
+
+            <ExportButton onClick={handleExportTeachersPdf}>
+              PDF İndir
+            </ExportButton>
+
+            <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
+              Yeni Öğretmen
+            </CreateButton>
+          </div>
         </div>
       </section>
+
+      <TableStatsCards
+        items={[
+          {
+            title: "Toplam Öğretmen",
+            value: teachers.length,
+            description: "Sistemde kayıtlı öğretmen",
+            icon: UserGroupIcon,
+            color: "primary",
+          },
+          {
+            title: "Aktif Çalışan",
+            value: teachers.filter((x) => x.isActive !== false).length,
+            description: "Görevde olan öğretmen",
+            icon: AcademicCapIcon,
+            color: "success",
+          },
+          {
+            title: "Toplam Branş / Departman",
+            value: new Set(
+              teachers
+                .map((x) => x.branchLessonName || x.department)
+                .filter(Boolean)
+            ).size,
+            description: "Benzersiz branş ve departman",
+            icon: ClipboardDocumentCheckIcon,
+            color: "warning",
+          },
+        ]}
+      />
 
       <section className="radius-card overflow-hidden border border-gray-200 bg-white">
         <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
