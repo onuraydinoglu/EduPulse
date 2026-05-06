@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 function FilterSelect({
   label,
   value,
@@ -6,40 +8,50 @@ function FilterSelect({
   error,
   className = "",
   hideLabel = false,
+  placeholder = "Seçiniz",
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const selectedOption = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!ref.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (optionValue) => {
+    onChange(optionValue);
+    setOpen(false);
+  };
+
   return (
-    <div className={className}>
+    <div ref={ref} className={`relative ${className}`}>
       {!hideLabel && label && (
         <label className="mb-1.5 block text-sm font-medium text-gray-700">
           {label}
         </label>
       )}
 
-      <div
-        className={`relative rounded-xl transition ${error
-          ? "focus-within:ring-4 focus-within:ring-rose-50"
-          : "focus-within:ring-4 focus-within:ring-blue-50"
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={`flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm font-normal outline-none transition ${error
+          ? "border-rose-400 text-rose-600 ring-4 ring-rose-50"
+          : "border-gray-200 text-gray-700 shadow-sm hover:border-blue-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
           }`}
       >
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`h-11 w-full appearance-none rounded-xl border bg-white px-4 pr-10 text-sm text-gray-700 outline-none transition ${error
-            ? "border-rose-400 focus:border-rose-500"
-            : "border-gray-200 hover:border-blue-300 focus:border-blue-400"
-            }`}
-        >
-          <option value="">Seçiniz</option>
-
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <span>{selectedOption?.label || placeholder}</span>
 
         <svg
-          className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          className={`h-4 w-4 text-gray-500 transition ${open ? "rotate-180" : ""
+            }`}
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -47,10 +59,36 @@ function FilterSelect({
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
-      </div>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-normal transition ${isSelected
+                  ? "bg-gray-100 text-gray-800"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+              >
+                <span className="w-4 text-center text-xs">
+                  {isSelected ? "✓" : ""}
+                </span>
+
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {error && (
-        <p className="mt-1 text-xs font-medium text-rose-500">{error}</p>
+        <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>
       )}
     </div>
   );
