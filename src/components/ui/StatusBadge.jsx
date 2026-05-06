@@ -1,5 +1,7 @@
 function StatusBadge({ status = "" }) {
-  const normalizedStatus = String(status).toLowerCase();
+  const normalizedStatus = String(status)
+    .toLocaleLowerCase("tr-TR")
+    .trim();
 
   const variants = {
     aktif: "badge-success",
@@ -7,12 +9,18 @@ function StatusBadge({ status = "" }) {
     izinde: "badge-warning",
   };
 
+  const labels = {
+    aktif: "Aktif",
+    pasif: "Pasif",
+    izinde: "İzinde",
+  };
+
   return (
     <span
       className={`badge ${variants[normalizedStatus] || "badge-neutral"
         } badge-outline`}
     >
-      {status}
+      {labels[normalizedStatus] || status}
     </span>
   );
 }

@@ -9,6 +9,7 @@ function FilterSelect({
   className = "",
   hideLabel = false,
   placeholder = "Seçiniz",
+  dropdownDirection = "down",
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -23,7 +24,10 @@ function FilterSelect({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleSelect = (optionValue) => {
@@ -62,7 +66,10 @@ function FilterSelect({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
+        <div
+          className={`absolute right-0 z-50 w-full overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ${dropdownDirection === "up" ? "bottom-full mb-2" : "mt-2"
+            }`}
+        >
           {options.map((option) => {
             const isSelected = option.value === value;
 

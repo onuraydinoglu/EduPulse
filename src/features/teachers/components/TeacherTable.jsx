@@ -1,11 +1,8 @@
-import {
-  AcademicCapIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-} from "@heroicons/react/24/outline";
-
 import SearchInput from "../../../components/ui/SearchInput";
 import FilterSelect from "../../../components/ui/FilterSelect";
+import Pagination from "../../../components/ui/Pagination";
+import { usePagination } from "../../../hooks/usePagination";
+
 import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({
@@ -18,8 +15,20 @@ function TeacherTable({
   onEdit,
   onDelete,
 }) {
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+  } = usePagination(teachers, 5);
+
   return (
-    <div className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
       <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
@@ -27,7 +36,7 @@ function TeacherTable({
               Öğretmen Listesi
             </h2>
 
-            <span className="text-sm">
+            <span className="text-sm text-base-content/60">
               - {teachers.length} Kayıt
             </span>
           </div>
@@ -53,7 +62,7 @@ function TeacherTable({
             options={[
               { label: "Tüm Durumlar", value: "all" },
               { label: "Aktif", value: "active" },
-              { label: "Pasif", value: "passive" },
+              { label: "İzinde", value: "leave" },
             ]}
           />
         </div>
@@ -63,43 +72,46 @@ function TeacherTable({
         <table className="table">
           <thead className="bg-base-100">
             <tr className="border-b border-base-300">
-              <th>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-base-content/50">
-                  <AcademicCapIcon className="h-4 w-4" />
+              <th className="px-6 py-5 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Öğretmen
-                </div>
+                </span>
               </th>
 
-              <th className="text-xs font-bold uppercase tracking-wide text-base-content/50">
-                Branş / Bölüm
+              <th className="px-6 py-5 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Branş / Bölüm
+                </span>
               </th>
 
-              <th>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-base-content/50">
-                  <EnvelopeIcon className="h-4 w-4" />
+              <th className="px-6 py-5 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Email
-                </div>
+                </span>
               </th>
 
-              <th>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-base-content/50">
-                  <PhoneIcon className="h-4 w-4" />
+              <th className="px-6 py-5 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Telefon
-                </div>
+                </span>
               </th>
 
-              <th className="text-xs font-bold uppercase tracking-wide text-base-content/50">
-                Durum
+              <th className="px-6 py-5 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Durum
+                </span>
               </th>
 
-              <th className="text-right text-xs font-bold uppercase tracking-wide text-base-content/50">
-                İşlemler
+              <th className="px-6 py-5 text-right">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  İşlemler
+                </span>
               </th>
             </tr>
           </thead>
 
           <tbody>
-            {teachers.map((teacher) => (
+            {paginatedItems.map((teacher) => (
               <TeacherTableRow
                 key={teacher.id}
                 teacher={teacher}
@@ -122,6 +134,17 @@ function TeacherTable({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
