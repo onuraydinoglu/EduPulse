@@ -70,7 +70,7 @@ function TeacherTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-100">
+          <thead className="bg-base-100 ">
             <tr className="border-b border-base-300">
               <th className="px-6 py-5 text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
@@ -135,16 +135,18 @@ function TeacherTable({
         </table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        startItem={startItem}
-        endItem={endItem}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-        onPageChange={setCurrentPage}
-      />
+      <div className="overflow-hidden rounded-b-3xl">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 }

@@ -1,16 +1,85 @@
+import FilterSelect from "../../../components/ui/FilterSelect";
+import Pagination from "../../../components/ui/Pagination";
+import SearchInput from "../../../components/ui/SearchInput";
+import { usePagination } from "../../../hooks/usePagination";
+
+import {
+  defaultClassroomFilterOption,
+  studentStatusFilterOptions,
+} from "../constants/studentFilters";
+
 import StudentTableRow from "./StudentTableRow";
 
-function StudentTable({ students, onEdit, onDelete }) {
+function StudentTable({
+  students,
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  classroomFilter,
+  setClassroomFilter,
+  classroomOptions = [],
+  onEdit,
+  onDelete,
+}) {
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+  } = usePagination(students, 5);
+
   return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-base-content">
+            Öğrenci Listesi
+          </h2>
+
+          <p className="text-sm text-base-content/60">
+            {students.length} kayıt listeleniyor.
+          </p>
+        </div>
+
+        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3 xl:w-auto">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Öğrenci, numara, e-posta veya telefon ara..."
+          />
+
+          <FilterSelect
+            value={classroomFilter}
+            onChange={setClassroomFilter}
+            hideLabel
+            placeholder="Sınıf filtresi"
+            options={[defaultClassroomFilterOption, ...classroomOptions]}
+          />
+
+          <FilterSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            hideLabel
+            placeholder="Durum filtresi"
+            options={studentStatusFilterOptions}
+          />
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
-            <tr>
+            <tr className="text-xs uppercase text-base-content/50">
               <th>Öğrenci</th>
               <th>Öğrenci No</th>
               <th>Sınıf</th>
-              <th>E-posta</th>
+              <th>E-Posta</th>
               <th>Telefon</th>
               <th>Durum</th>
               <th className="text-right">İşlemler</th>
@@ -18,23 +87,41 @@ function StudentTable({ students, onEdit, onDelete }) {
           </thead>
 
           <tbody>
-            {students.map((student) => (
+            {paginatedItems.map((student) => (
               <StudentTableRow
-                key={student.id}
+                key={student.id || student.Id}
                 student={student}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
             ))}
+
+            {students.length === 0 && (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="py-10 text-center text-base-content/50"
+                >
+                  Kayıt bulunamadı.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {students.length === 0 && (
-        <div className="p-8 text-center text-sm text-base-content/60">
-          Kayıt bulunamadı.
-        </div>
-      )}
+      <div className="border-t border-base-300/60 p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 }

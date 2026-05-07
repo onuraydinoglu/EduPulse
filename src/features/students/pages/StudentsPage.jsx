@@ -1,348 +1,89 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  MagnifyingGlassIcon,
-  UserPlusIcon,
-} from "@heroicons/react/24/outline";
-
-import Button from "../../../components/ui/Button";
-import ConfirmModal from "../../../components/ui/ConfirmModal";
-import CreateButton from "../../../components/ui/CreateButton";
-import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
-import StudentForm from "../components/StudentForm";
+
+import StudentDeleteModal from "../components/StudentDeleteModal";
+import StudentFormModal from "../components/StudentFormModal";
+import StudentsPageHeader from "../components/StudentsPageHeader";
+import StudentStatsCards from "../components/StudentStatsCards";
 import StudentTable from "../components/StudentTable";
-import { studentService } from "../services/studentService";
-import { classService } from "../../classes/services/classService";
 
 import {
-  validateForm,
-  hasValidationError,
-} from "../../../validations/validationRules";
+  STUDENT_DELETE_MODAL_ID,
+  STUDENT_MODAL_ID,
+} from "../constants/studentConstants";
 
-import { studentValidationSchema } from "../../../validations/schemas";
-import { cleanPhone } from "../../../utils/phoneFormatter";
-
-const emptyStudentForm = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNumber: "",
-  studentNumber: "",
-  classroomId: "",
-  isActive: true,
-};
+import { getStudentStats } from "../constants/studentTableColumns";
+import { useStudentsPage } from "../hooks/useStudentsPage";
 
 function StudentsPage() {
-  const [students, setStudents] = useState([]);
-  const [classrooms, setClassrooms] = useState([]);
-  const [formData, setFormData] = useState(emptyStudentForm);
-  const [errors, setErrors] = useState({});
-  const [editingStudentId, setEditingStudentId] = useState(null);
-  const [deletingStudentId, setDeletingStudentId] = useState(null);
-  const [toast, setToast] = useState({ message: "", type: "success" });
-  const [search, setSearch] = useState("");
+  const {
+    students,
+    filteredStudents,
+    classrooms,
+    classroomOptions,
 
-  const isEditing = editingStudentId !== null;
+    formData,
+    setFormData,
+    errors,
+    isEditing,
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
+    toast,
 
-    setTimeout(() => {
-      setToast({ message: "", type: "success" });
-    }, 2500);
-  };
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    classroomFilter,
+    setClassroomFilter,
 
-  const getErrorMessage = (error, fallback) => {
-    const data = error?.response?.data;
-
-    if (typeof data === "string") return data;
-
-    return (
-      data?.message ||
-      data?.Message ||
-      data?.error ||
-      data?.Error ||
-      data?.title ||
-      data?.errors?.[0] ||
-      data?.Errors?.[0] ||
-      error?.message ||
-      fallback
-    );
-  };
-
-  const getBackendFieldErrors = (error) => {
-    const data = error?.response?.data;
-    const backendErrors = data?.errors || data?.Errors;
-
-    if (!backendErrors || Array.isArray(backendErrors)) return {};
-
-    const fieldErrors = {};
-
-    Object.entries(backendErrors).forEach(([key, value]) => {
-      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
-      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
-    });
-
-    return fieldErrors;
-  };
-
-  const getStudents = async () => {
-    try {
-      const result = await studentService.getAll();
-
-      if (result.isSuccess) {
-        setStudents(result.data || []);
-      } else {
-        showToast(result.message || "Öğrenciler getirilemedi.", "error");
-      }
-    } catch (error) {
-      console.error(error);
-      showToast(getErrorMessage(error, "Sunucu hatası oluştu."), "error");
-    }
-  };
-
-  const getClassrooms = async () => {
-    try {
-      const result = await classService.getAll();
-
-      if (result.isSuccess) {
-        setClassrooms(result.data || []);
-      } else {
-        showToast(result.message || "Sınıflar getirilemedi.", "error");
-      }
-    } catch (error) {
-      console.error(error);
-      showToast(getErrorMessage(error, "Sınıflar getirilemedi."), "error");
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getStudents();
-      await getClassrooms();
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredStudents = useMemo(() => {
-    const normalizedSearch = search.toLowerCase().trim();
-
-    return students.filter((student) => {
-      const fullName =
-        student.fullName ||
-        `${student.firstName || ""} ${student.lastName || ""}`.trim();
-
-      return (
-        fullName.toLowerCase().includes(normalizedSearch) ||
-        student.studentNumber?.toLowerCase().includes(normalizedSearch) ||
-        student.email?.toLowerCase().includes(normalizedSearch) ||
-        student.phoneNumber?.toLowerCase().includes(normalizedSearch)
-      );
-    });
-  }, [students, search]);
-
-  const handleOpenCreateModal = () => {
-    setEditingStudentId(null);
-    setFormData(emptyStudentForm);
-    setErrors({});
-    document.getElementById("student_modal").showModal();
-  };
-
-  const handleOpenEditModal = (student) => {
-    setEditingStudentId(student.id);
-    setErrors({});
-
-    setFormData({
-      firstName: student.firstName || "",
-      lastName: student.lastName || "",
-      email: student.email || "",
-      phoneNumber: student.phoneNumber || "",
-      studentNumber: student.studentNumber || "",
-      classroomId: student.classroomId || "",
-      isActive: student.isActive !== false,
-    });
-
-    document.getElementById("student_modal").showModal();
-  };
-
-  const handleCloseModal = () => {
-    setFormData(emptyStudentForm);
-    setEditingStudentId(null);
-    setErrors({});
-    document.getElementById("student_modal").close();
-  };
-
-  const handleOpenDeleteModal = (id) => {
-    setDeletingStudentId(id);
-    document.getElementById("student_delete_modal").showModal();
-  };
-
-  const handleCloseDeleteModal = () => {
-    setDeletingStudentId(null);
-    document.getElementById("student_delete_modal").close();
-  };
-
-  const handleSubmit = async () => {
-    const validationErrors = validateForm(formData, studentValidationSchema);
-    setErrors(validationErrors);
-
-    if (hasValidationError(validationErrors)) {
-      showToast("Eksik veya hatalı alanlar var.", "error");
-      return;
-    }
-
-    const preparedData = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      email: formData.email.trim(),
-      phoneNumber: cleanPhone(formData.phoneNumber),
-      studentNumber: formData.studentNumber.trim(),
-      classroomId: formData.classroomId,
-      isActive: isEditing ? formData.isActive : true,
-    };
-
-    try {
-      const result = isEditing
-        ? await studentService.update({
-          id: editingStudentId,
-          ...preparedData,
-        })
-        : await studentService.create(preparedData);
-
-      if (!result.isSuccess) {
-        const message = result.message || "İşlem başarısız.";
-
-        setErrors({
-          general: message,
-        });
-
-        showToast(message, "error");
-        return;
-      }
-
-      await getStudents();
-      handleCloseModal();
-
-      showToast(isEditing ? "Öğrenci güncellendi." : "Öğrenci eklendi.");
-    } catch (error) {
-      console.error(error);
-
-      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
-      const backendFieldErrors = getBackendFieldErrors(error);
-
-      setErrors({
-        ...backendFieldErrors,
-        general: message,
-      });
-
-      showToast(message, "error");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deletingStudentId) return;
-
-    try {
-      const result = await studentService.delete(deletingStudentId);
-
-      if (result && result.isSuccess === false) {
-        const message = result.message || "Öğrenci silinemedi.";
-        showToast(message, "error");
-        return;
-      }
-
-      await getStudents();
-      handleCloseDeleteModal();
-      showToast("Öğrenci silindi.");
-    } catch (error) {
-      console.error(error);
-      showToast(
-        getErrorMessage(error, "Öğrenci silinirken hata oluştu."),
-        "error"
-      );
-    }
-  };
+    handleOpenCreateModal,
+    handleOpenEditModal,
+    handleCloseStudentModal,
+    handleOpenDeleteModal,
+    handleCloseDeleteModal,
+    handleDelete,
+    handleSubmit,
+    handleExportStudentsPdf,
+  } = useStudentsPage();
 
   return (
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-5">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <p className="text-sm font-medium text-blue-600">
-              Öğrenci Yönetimi
-            </p>
+      <StudentsPageHeader
+        onCreate={() => handleOpenCreateModal(STUDENT_MODAL_ID)}
+        onExport={handleExportStudentsPdf}
+      />
 
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
-              Öğrenciler
-            </h1>
+      <StudentStatsCards items={getStudentStats(students)} />
 
-            <p className="mt-1 text-sm text-gray-500">
-              Öğrenci kullanıcı hesaplarını yönetin
-            </p>
-          </div>
+      <StudentTable
+        students={filteredStudents}
+        search={search}
+        setSearch={setSearch}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        classroomFilter={classroomFilter}
+        setClassroomFilter={setClassroomFilter}
+        classroomOptions={classroomOptions}
+        onEdit={(student) => handleOpenEditModal(student, STUDENT_MODAL_ID)}
+        onDelete={(id) => handleOpenDeleteModal(id, STUDENT_DELETE_MODAL_ID)}
+      />
 
-          <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
-            Yeni Öğrenci
-          </CreateButton>
-        </div>
-      </section>
+      <StudentFormModal
+        modalId={STUDENT_MODAL_ID}
+        isEditing={isEditing}
+        formData={formData}
+        setFormData={setFormData}
+        classrooms={classrooms}
+        errors={errors}
+        onClose={() => handleCloseStudentModal(STUDENT_MODAL_ID)}
+        onSubmit={() => handleSubmit(STUDENT_MODAL_ID)}
+      />
 
-      <section className="radius-card overflow-hidden border border-gray-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-md">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Öğrenci, numara, e-posta veya telefon ara..."
-              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
-            />
-          </div>
-        </div>
-
-        <StudentTable
-          students={filteredStudents}
-          onEdit={handleOpenEditModal}
-          onDelete={handleOpenDeleteModal}
-        />
-      </section>
-
-      <Modal
-        id="student_modal"
-        title={isEditing ? "Öğrenci Düzenle" : "Yeni Öğrenci"}
-        footer={
-          <>
-            <Button variant="ghost" onClick={handleCloseModal}>
-              Vazgeç
-            </Button>
-
-            <Button onClick={handleSubmit}>
-              {isEditing ? "Güncelle" : "Kaydet"}
-            </Button>
-          </>
-        }
-      >
-        <StudentForm
-          formData={formData}
-          setFormData={setFormData}
-          classrooms={classrooms}
-          errors={errors}
-          isEditing={isEditing}
-        />
-      </Modal>
-
-      <ConfirmModal
-        id="student_delete_modal"
-        title="Öğrenciyi Sil"
-        description="Bu öğrenci kullanıcı kaydı silinecek. Devam etmek istediğinize emin misiniz?"
-        confirmText="Evet, Sil"
-        cancelText="Vazgeç"
-        onConfirm={handleDelete}
+      <StudentDeleteModal
+        modalId={STUDENT_DELETE_MODAL_ID}
+        onClose={() => handleCloseDeleteModal(STUDENT_DELETE_MODAL_ID)}
+        onConfirm={() => handleDelete(STUDENT_DELETE_MODAL_ID)}
       />
     </div>
   );

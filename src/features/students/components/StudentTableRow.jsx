@@ -1,33 +1,51 @@
-import TableActions from "../../../components/ui/TableActions";
 import StatusBadge from "../../../components/ui/StatusBadge";
+import TableActions from "../../../components/ui/TableActions";
+
+import {
+  getStudentClassroomName,
+  getStudentEmail,
+  getStudentFullName,
+  getStudentId,
+  getStudentNumber,
+  getStudentPhoneNumber,
+  getStudentStatus,
+} from "../utils/studentFormatters";
 
 function StudentTableRow({ student, onEdit, onDelete }) {
-  const fullName =
-    student.fullName ||
-    `${student.firstName || ""} ${student.lastName || ""}`.trim();
-
-  const isActive = student.isActive ?? student.IsActive ?? true;
+  const studentId = getStudentId(student);
 
   return (
-    <tr>
-      <td className="font-medium text-gray-900">{fullName || "-"}</td>
-
-      <td>{student.studentNumber || "-"}</td>
-
-      <td>{student.classroomName || student.className || "-"}</td>
-
-      <td>{student.email || "-"}</td>
-
-      <td>{student.phoneNumber || "-"}</td>
+    <tr className="transition hover:bg-base-200/40">
+      <td>
+        <div className="font-semibold text-base-content">
+          {getStudentFullName(student)}
+        </div>
+      </td>
 
       <td>
-        <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
+        <span className="badge badge-ghost">
+          {getStudentNumber(student) || "-"}
+        </span>
+      </td>
+
+      <td>
+        <span className="font-medium text-base-content/80">
+          {getStudentClassroomName(student)}
+        </span>
+      </td>
+
+      <td>{getStudentEmail(student) || "-"}</td>
+
+      <td>{getStudentPhoneNumber(student) || "-"}</td>
+
+      <td>
+        <StatusBadge status={getStudentStatus(student)} />
       </td>
 
       <td className="text-right">
         <TableActions
           onEdit={() => onEdit(student)}
-          onDelete={() => onDelete(student.id)}
+          onDelete={() => onDelete(studentId)}
         />
       </td>
     </tr>

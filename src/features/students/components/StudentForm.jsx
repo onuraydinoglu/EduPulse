@@ -1,5 +1,7 @@
 import FormFields from "../../../components/common/FormFields";
 
+import { getClassroomLabel } from "../utils/studentFormatters";
+
 function StudentForm({
   formData,
   setFormData,
@@ -39,17 +41,25 @@ function StudentForm({
       label: "Sınıf",
       type: "select",
       options: [
-        { value: "", label: "Sınıf seçiniz" },
+        {
+          value: "",
+          label: "Sınıf seçiniz",
+        },
         ...classrooms.map((classroom) => ({
-          value: classroom.id,
-          label:
-            classroom.name ||
-            classroom.className ||
-            `${classroom.grade || ""}/${classroom.section || ""}`,
+          value: classroom.id || classroom.Id,
+          label: getClassroomLabel(classroom),
         })),
       ],
     },
   ];
+
+  if (isEditing) {
+    studentFields.push({
+      name: "isActive",
+      label: "Aktif mi?",
+      type: "checkbox",
+    });
+  }
 
   return (
     <FormFields
@@ -57,7 +67,6 @@ function StudentForm({
       formData={formData}
       setFormData={setFormData}
       errors={errors}
-      isEditing={isEditing}
     />
   );
 }
