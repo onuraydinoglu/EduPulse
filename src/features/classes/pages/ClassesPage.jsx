@@ -1,360 +1,82 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  MagnifyingGlassIcon,
-  AcademicCapIcon,
-} from "@heroicons/react/24/outline";
-
-import Button from "../../../components/ui/Button";
-import ConfirmModal from "../../../components/ui/ConfirmModal";
-import CreateButton from "../../../components/ui/CreateButton";
-import Modal from "../../../components/ui/Modal";
 import Toast from "../../../components/ui/Toast";
-import ClassForm from "../components/ClassForm";
+
+import ClassDeleteModal from "../components/ClassDeleteModal";
+import ClassFormModal from "../components/ClassFormModal";
+import ClassesPageHeader from "../components/ClassesPageHeader";
+import ClassStatsCards from "../components/ClassStatsCards";
 import ClassTable from "../components/ClassTable";
-import { classService } from "../services/classService";
-import { teacherService } from "../../teachers/services/teacherService";
 
 import {
-  validateForm,
-  hasValidationError,
-} from "../../../validations/validationRules";
+  CLASS_DELETE_MODAL_ID,
+  CLASS_MODAL_ID,
+} from "../constants/classConstants";
 
-import { classroomValidationSchema } from "../../../validations/schemas";
-import FilterSelect from "../../../components/ui/FilterSelect";
-
-const emptyClassForm = {
-  grade: "",
-  section: "",
-  teacherId: "",
-  isActive: true,
-};
+import { getClassStats } from "../constants/classTableColumns";
+import { useClassesPage } from "../hooks/useClassesPage";
 
 function ClassesPage() {
-  const [classes, setClasses] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [activeTeachers, setActiveTeachers] = useState([]);
-  const [formData, setFormData] = useState(emptyClassForm);
-  const [errors, setErrors] = useState({});
-  const [editingClassId, setEditingClassId] = useState(null);
-  const [deletingClassId, setDeletingClassId] = useState(null);
-  const [search, setSearch] = useState("");
-  const [gradeFilter, setGradeFilter] = useState("all");
-  const [toast, setToast] = useState({ message: "", type: "success" });
+  const {
+    classes,
+    filteredClasses,
+    teachers,
 
-  const isEditing = editingClassId !== null;
+    formData,
+    setFormData,
+    errors,
+    isEditing,
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast({ message: "", type: "success" }), 2500);
-  };
+    toast,
 
-  const getErrorMessage = (error, fallback) => {
-    const data = error?.response?.data;
+    search,
+    setSearch,
+    gradeFilter,
+    setGradeFilter,
 
-    if (typeof data === "string") return data;
-
-    return (
-      data?.message ||
-      data?.Message ||
-      data?.error ||
-      data?.Error ||
-      data?.title ||
-      data?.errors?.[0] ||
-      data?.Errors?.[0] ||
-      error?.message ||
-      fallback
-    );
-  };
-
-  const getBackendFieldErrors = (error) => {
-    const data = error?.response?.data;
-    const backendErrors = data?.errors || data?.Errors;
-
-    if (!backendErrors || Array.isArray(backendErrors)) return {};
-
-    const fieldErrors = {};
-
-    Object.entries(backendErrors).forEach(([key, value]) => {
-      const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
-      fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
-    });
-
-    return fieldErrors;
-  };
-
-  const loadClasses = async () => {
-    try {
-      const result = await classService.getAll();
-
-      if (result?.isSuccess === false) {
-        showToast(result.message || "Sınıflar yüklenirken hata oluştu.", "error");
-        return;
-      }
-
-      setClasses(result.data || []);
-    } catch (error) {
-      console.error(error);
-      showToast(getErrorMessage(error, "Sınıflar yüklenirken hata oluştu."), "error");
-    }
-  };
-
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const [classResult, teacherResult, activeTeacherResult] = await Promise.all([
-          classService.getAll(),
-          teacherService.getAll(),
-          teacherService.getActive(),
-        ]);
-
-        setClasses(classResult.data || []);
-        setTeachers(teacherResult.data || []);
-        setActiveTeachers(activeTeacherResult.data || []);
-      } catch (error) {
-        console.error(error);
-        showToast(getErrorMessage(error, "Veriler yüklenirken hata oluştu."), "error");
-      }
-    };
-
-    loadInitialData();
-  }, []);
-
-  const filteredClasses = useMemo(() => {
-    const normalizedSearch = search.toLowerCase().trim();
-
-    return classes.filter((classItem) => {
-      const className =
-        classItem.name || `${classItem.grade}-${classItem.section}`;
-
-      const teacher = teachers.find((x) => x.id === classItem.teacherId);
-      const teacherName =
-        teacher?.fullName ||
-        `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim();
-
-      const matchesSearch =
-        className.toLowerCase().includes(normalizedSearch) ||
-        teacherName.toLowerCase().includes(normalizedSearch);
-
-      const matchesGrade =
-        gradeFilter === "all" || String(classItem.grade) === gradeFilter;
-
-      return matchesSearch && matchesGrade;
-    });
-  }, [classes, teachers, search, gradeFilter]);
-
-  const handleOpenCreateModal = () => {
-    setEditingClassId(null);
-    setFormData(emptyClassForm);
-    setErrors({});
-    document.getElementById("class_modal").showModal();
-  };
-
-  const handleOpenEditModal = (classItem) => {
-    setEditingClassId(classItem.id);
-    setErrors({});
-
-    setFormData({
-      grade: String(classItem.grade || ""),
-      section: classItem.section || "",
-      teacherId: classItem.teacherId || "",
-      isActive: classItem.isActive !== false,
-    });
-
-    document.getElementById("class_modal").showModal();
-  };
-
-  const handleCloseModal = () => {
-    setFormData(emptyClassForm);
-    setEditingClassId(null);
-    setErrors({});
-    document.getElementById("class_modal").close();
-  };
-
-  const handleOpenDeleteModal = (id) => {
-    setDeletingClassId(id);
-    document.getElementById("class_delete_modal").showModal();
-  };
-
-  const handleCloseDeleteModal = () => {
-    setDeletingClassId(null);
-    document.getElementById("class_delete_modal").close();
-  };
-
-  const handleSubmit = async () => {
-    const validationErrors = validateForm(formData, classroomValidationSchema);
-    setErrors(validationErrors);
-
-    if (hasValidationError(validationErrors)) {
-      showToast("Eksik veya hatalı alanlar var.", "error");
-      return;
-    }
-
-    const preparedData = {
-      grade: Number(formData.grade),
-      section: formData.section.trim().toUpperCase(),
-      teacherId: formData.teacherId || null,
-      isActive: isEditing ? formData.isActive : true,
-    };
-
-    try {
-      const result = isEditing
-        ? await classService.update({
-          id: editingClassId,
-          ...preparedData,
-        })
-        : await classService.create(preparedData);
-
-      if (result?.isSuccess === false) {
-        const message = result.message || "İşlem başarısız.";
-
-        setErrors({
-          general: message,
-        });
-
-        showToast(message, "error");
-        return;
-      }
-
-      await loadClasses();
-      handleCloseModal();
-
-      showToast(isEditing ? "Sınıf güncellendi." : "Sınıf eklendi.");
-    } catch (error) {
-      console.error(error);
-
-      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
-      const backendFieldErrors = getBackendFieldErrors(error);
-
-      setErrors({
-        ...backendFieldErrors,
-        general: message,
-      });
-
-      showToast(message, "error");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deletingClassId) return;
-
-    try {
-      const result = await classService.delete(deletingClassId);
-
-      if (result?.isSuccess === false) {
-        showToast(result.message || "Sınıf silinemedi.", "error");
-        return;
-      }
-
-      await loadClasses();
-
-      handleCloseDeleteModal();
-      showToast("Sınıf silindi.");
-    } catch (error) {
-      console.error(error);
-      showToast(getErrorMessage(error, "Sınıf silinirken hata oluştu."), "error");
-    }
-  };
+    handleOpenCreateModal,
+    handleOpenEditModal,
+    handleCloseClassModal,
+    handleOpenDeleteModal,
+    handleDelete,
+    handleSubmit,
+    handleExportClassesPdf,
+  } = useClassesPage();
 
   return (
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
-      <div className="rounded-3xl border border-base-300/50 bg-base-100 p-5 shadow-md">
-        {/* ÜST */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-base-content">
-              Sınıflar
-            </h1>
+      <ClassesPageHeader
+        onCreate={() => handleOpenCreateModal(CLASS_MODAL_ID)}
+        onExport={handleExportClassesPdf}
+      />
 
-            <p className="mt-1 text-sm text-base-content/55">
-              Sınıfları oluşturun ve öğretmen atayın
-            </p>
-          </div>
-
-          <CreateButton
-            icon={AcademicCapIcon}
-            onClick={handleOpenCreateModal}
-            className="shadow-md transition hover:scale-[1.02]"
-          >
-            Yeni Sınıf
-          </CreateButton>
-        </div>
-
-        {/* ALT */}
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-          {/* SEARCH */}
-          <div className="relative w-full md:max-w-md">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sınıf veya Öğretmen ara..."
-              className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
-            />
-          </div>
-
-          {/* SELECT */}
-          <div className="flex items-center h-11">
-            <FilterSelect
-              hideLabel
-              value={gradeFilter}
-              onChange={setGradeFilter}
-              className="w-40"
-              options={[
-                { value: "all", label: "Tümü" },
-                { value: "9", label: "9. Sınıf" },
-                { value: "10", label: "10. Sınıf" },
-                { value: "11", label: "11. Sınıf" },
-                { value: "12", label: "12. Sınıf" },
-              ]}
-            />
-          </div>
-
-        </div>
-      </div>
+      <ClassStatsCards items={getClassStats(classes)} />
 
       <ClassTable
         classes={filteredClasses}
         teachers={teachers}
-        onEdit={handleOpenEditModal}
-        onDelete={handleOpenDeleteModal}
+        search={search}
+        setSearch={setSearch}
+        gradeFilter={gradeFilter}
+        setGradeFilter={setGradeFilter}
+        onEdit={(classItem) => handleOpenEditModal(classItem, CLASS_MODAL_ID)}
+        onDelete={(id) => handleOpenDeleteModal(id, CLASS_DELETE_MODAL_ID)}
       />
 
-      <Modal
-        id="class_modal"
-        title={isEditing ? "Sınıf Düzenle" : "Yeni Sınıf"}
-        footer={
-          <>
-            <Button variant="ghost" onClick={handleCloseModal}>
-              Vazgeç
-            </Button>
+      <ClassFormModal
+        modalId={CLASS_MODAL_ID}
+        isEditing={isEditing}
+        formData={formData}
+        setFormData={setFormData}
+        teachers={teachers}
+        errors={errors}
+        onClose={() => handleCloseClassModal(CLASS_MODAL_ID)}
+        onSubmit={() => handleSubmit(CLASS_MODAL_ID)}
+      />
 
-            <Button onClick={handleSubmit}>
-              {isEditing ? "Güncelle" : "Kaydet"}
-            </Button>
-          </>
-        }
-      >
-        <ClassForm
-          formData={formData}
-          setFormData={setFormData}
-          teachers={activeTeachers}
-          errors={errors}
-          isEditing={isEditing}
-        />
-      </Modal>
-
-      <ConfirmModal
-        id="class_delete_modal"
-        title="Sınıfı Sil"
-        description="Bu işlem geri alınamaz."
-        confirmText="Evet, Sil"
-        cancelText="Vazgeç"
-        onConfirm={handleDelete}
+      <ClassDeleteModal
+        modalId={CLASS_DELETE_MODAL_ID}
+        onConfirm={() => handleDelete(CLASS_DELETE_MODAL_ID)}
       />
     </div>
   );

@@ -1,30 +1,17 @@
 import FormFields from "../../../components/common/FormFields";
 
-function ClassForm({
-  formData,
-  setFormData,
-  teachers = [],
-  errors = {},
-  isEditing = false,
-}) {
-  const teacherOptions = teachers.map((teacher) => ({
-    label:
-      teacher.fullName ||
-      `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
-    value: teacher.id,
-  }));
+import { classGradeOptions } from "../constants/classConstants";
+import { mapTeachersToOptions } from "../utils/classFormatters";
+
+function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
+  const teacherOptions = mapTeachersToOptions(teachers);
 
   const classFields = [
     {
       name: "grade",
       label: "Sınıf Seviyesi",
       type: "select",
-      options: [
-        { label: "9. Sınıf", value: "9" },
-        { label: "10. Sınıf", value: "10" },
-        { label: "11. Sınıf", value: "11" },
-        { label: "12. Sınıf", value: "12" },
-      ],
+      options: classGradeOptions,
     },
     {
       name: "section",
@@ -36,15 +23,21 @@ function ClassForm({
       name: "teacherId",
       label: "Sınıf Öğretmeni",
       type: "select",
-      options: teacherOptions,
+      options: [
+        {
+          label: "Öğretmen seçilmedi",
+          value: "",
+        },
+        ...teacherOptions,
+      ],
       className: "md:col-span-2",
     },
   ];
 
   return (
-    <div>
+    <div className="space-y-4">
       {errors.general && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+        <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
           {errors.general}
         </div>
       )}
@@ -54,7 +47,6 @@ function ClassForm({
         formData={formData}
         setFormData={setFormData}
         errors={errors}
-        isEditing={isEditing}
       />
     </div>
   );
