@@ -73,8 +73,8 @@ function ClassroomWorkspacePage() {
 
       <ClassroomWorkspaceSummary
         classroom={classroom}
+        teachers={teachers}
         studentCount={classStudents.length}
-        gradeCount={classGrades.length}
       />
 
       <ClassroomWorkspaceTabs
