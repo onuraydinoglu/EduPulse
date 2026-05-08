@@ -4,7 +4,9 @@ import {
     UserPlusIcon,
   } from "@heroicons/react/24/outline";
   
-  import Button from "../../../../components/ui/Button";
+  import CreateButton from "../../../../components/ui/CreateButton";
+  import ExportButton from "../../../../components/ui/ExportButton";
+  import StatusBadge from "../../../../components/ui/StatusBadge";
   import {
     getClassName,
     getClassTeacherName,
@@ -20,49 +22,52 @@ import {
     const isActive = classroom?.isActive ?? classroom?.IsActive;
   
     return (
-      <div className="rounded-3xl border border-base-300/60 bg-base-100 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4">
-            <button
-              type="button"
-              onClick={onBack}
-              className="btn btn-ghost btn-circle"
-              aria-label="Sınıflara dön"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </button>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn btn-ghost btn-circle mt-1"
+            aria-label="Sınıflara dön"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+          </button>
   
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold text-base-content">
-                  {getClassName(classroom)} Sınıfı
-                </h1>
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-bold text-base-content">
+                {getClassName(classroom)} Sınıfı
+              </h1>
   
-                <span className={`badge ${isActive ? "badge-success" : "badge-error"}`}>
-                  {isActive ? "Aktif" : "Pasif"}
-                </span>
-              </div>
-  
-              <p className="mt-1 text-sm text-base-content/60">
-                Sınıf öğretmeni:{" "}
-                <span className="font-semibold text-base-content">
-                  {getClassTeacherName(classroom, teachers) || "-"}
-                </span>
-              </p>
+              <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
             </div>
-          </div>
   
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <Button type="button" onClick={onOpenStudentModal}>
-              <UserPlusIcon className="h-5 w-5" />
-              Öğrenci Kaydı
-            </Button>
+            <p className="mt-1 text-sm text-base-content/60">
+              Sınıf öğretmeni:{" "}
+              <span className="font-semibold text-base-content">
+                {getClassTeacherName(classroom, teachers) || "Atanmamış"}
+              </span>
+            </p>
   
-            <Button type="button" variant="outline" onClick={onOpenGrades}>
-              <ClipboardDocumentListIcon className="h-5 w-5" />
-              Not Girişi
-            </Button>
+            <p className="mt-1 text-sm text-base-content/60">
+              Bu alandan sınıfa ait öğrenci kayıtlarını ve sınav notlarını
+              yönetin.
+            </p>
           </div>
+        </div>
+  
+        <div className="flex flex-wrap gap-2">
+          <ExportButton
+            onClick={onOpenGrades}
+            icon={ClipboardDocumentListIcon}
+            className="btn-outline"
+          >
+            Not Girişi
+          </ExportButton>
+  
+          <CreateButton onClick={onOpenStudentModal} icon={UserPlusIcon}>
+            Öğrenci Kaydı
+          </CreateButton>
         </div>
       </div>
     );

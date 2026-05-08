@@ -36,14 +36,19 @@ function ClassroomStudentCreateModal({
       }
     >
       {errors.general && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mb-4 rounded-2xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
           {errors.general}
         </div>
       )}
 
-      <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-        Seçili sınıf:{" "}
-        <span className="font-semibold">{getClassName(classroom)}</span>
+      <div className="mb-4 rounded-2xl border border-base-300/70 bg-base-200/60 px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-base-content/40">
+          Seçili Sınıf
+        </p>
+
+        <p className="mt-1 text-sm font-semibold text-base-content">
+          {getClassName(classroom)}
+        </p>
       </div>
 
       <StudentForm

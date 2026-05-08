@@ -82,6 +82,9 @@ function ClassroomWorkspacePage() {
         setActiveTab={setActiveTab}
         students={classStudents}
         grades={classGrades}
+        classroom={classroom}
+        onEditStudent={() => {}}
+        onDeleteStudent={() => {}}
       />
 
       <ClassroomStudentCreateModal
