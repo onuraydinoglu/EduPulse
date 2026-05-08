@@ -1,33 +1,48 @@
-import TableActions from "../../../components/ui/TableActions";
 import StatusBadge from "../../../components/ui/StatusBadge";
+import TableActions from "../../../components/ui/TableActions";
 
-function OfficerTableRow({ officer, temporaryPassword, onEdit, onDelete }) {
-  const fullName = `${officer.firstName || ""} ${officer.lastName || ""}`.trim();
+import {
+  getOfficerEmail,
+  getOfficerFullName,
+  getOfficerId,
+  getOfficerPhoneNumber,
+  getOfficerStatus,
+  getOfficerTemporaryPassword,
+} from "../utils/officerFormatters";
 
-  const isActive = officer.isActive ?? officer.IsActive ?? true;
+function OfficerTableRow({ officer, temporaryPasswords = {}, onEdit, onDelete }) {
+  const officerId = getOfficerId(officer);
+  const temporaryPassword = getOfficerTemporaryPassword(
+    officer,
+    temporaryPasswords,
+  );
 
   return (
-    <tr>
-      <td className="font-medium text-gray-900">{fullName || "-"}</td>
+    <tr className="transition hover:bg-base-200/40">
+      <td>
+        <div className="font-semibold text-base-content">
+          {getOfficerFullName(officer)}
+        </div>
+      </td>
 
-      <td>{officer.email || "-"}</td>
+      <td>{getOfficerEmail(officer) || "-"}</td>
 
-      <td>{officer.phoneNumber || "-"}</td>
+      <td>{getOfficerPhoneNumber(officer) || "-"}</td>
 
       <td>
-        <span className="rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
-          {temporaryPassword || officer.password || officer.generatedPassword || "-"}
+        <span className="badge badge-ghost font-mono">
+          {temporaryPassword || "-"}
         </span>
       </td>
 
       <td>
-        <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
+        <StatusBadge status={getOfficerStatus(officer)} />
       </td>
 
       <td className="text-right">
         <TableActions
           onEdit={() => onEdit(officer)}
-          onDelete={() => onDelete(officer.id)}
+          onDelete={() => onDelete(officerId)}
         />
       </td>
     </tr>

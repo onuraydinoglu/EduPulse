@@ -24,16 +24,11 @@ const officerFields = [
   },
 ];
 
-function OfficerForm({
-  formData,
-  setFormData,
-  errors = {},
-  isEditing = false,
-}) {
+function OfficerForm({ formData, setFormData, errors = {}, isEditing = false }) {
   return (
-    <div>
+    <div className="space-y-4">
       {errors?.general && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+        <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
           {errors.general}
         </div>
       )}
