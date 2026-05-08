@@ -25,6 +25,7 @@ import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage"
 import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
 import EventsPage from "../../features/events/pages/EventsPage";
 import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
+import ClassroomWorkspacePage from "../../features/classes/pages/ClassroomWorkspacePage";
 
 function AppRouter() {
   return (
@@ -41,7 +42,10 @@ function AppRouter() {
           <Route path="schools" element={<SchoolsPage />} />
           <Route path="teachers" element={<TeachersPage />} />
           <Route path="officers" element={<OfficersPage />} />
+
           <Route path="classes" element={<ClassesPage />} />
+          <Route path="classes/:classId" element={<ClassroomWorkspacePage />} />
+
           <Route path="students" element={<StudentsPage />} />
           <Route path="lessons" element={<LessonsPage />} />
           <Route path="teacher-lessons" element={<TeacherLessonsPage />} />

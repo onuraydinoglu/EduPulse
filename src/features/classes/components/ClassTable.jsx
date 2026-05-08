@@ -2,9 +2,7 @@ import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import { classGradeFilterOptions } from "../constants/classFilters";
-
 import ClassTableRow from "./ClassTableRow";
 
 function ClassTable({
@@ -34,7 +32,6 @@ function ClassTable({
       <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-lg font-bold text-base-content">Sınıf Listesi</h2>
-
           <p className="text-sm text-base-content/60">
             {classes.length} kayıt listeleniyor.
           </p>
@@ -64,6 +61,7 @@ function ClassTable({
               <th>Sınıf</th>
               <th>Sınıf Öğretmeni</th>
               <th>Öğrenci Sayısı</th>
+              <th>Sınıf Alanı</th>
               <th className="text-right">İşlemler</th>
             </tr>
           </thead>
@@ -81,10 +79,7 @@ function ClassTable({
 
             {classes.length === 0 && (
               <tr>
-                <td
-                  colSpan="4"
-                  className="py-10 text-center text-base-content/50"
-                >
+                <td colSpan="5" className="py-10 text-center text-base-content/50">
                   Sınıf kaydı bulunamadı.
                 </td>
               </tr>
