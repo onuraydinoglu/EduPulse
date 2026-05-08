@@ -1,14 +1,25 @@
 import FormFields from "../../../components/common/FormFields";
 
-import { getClassroomLabel } from "../utils/studentFormatters";
-
 function StudentForm({
   formData,
   setFormData,
   classrooms = [],
   errors = {},
   isEditing = false,
+  lockedClassroomId = "",
+  hideClassroomSelect = false,
 }) {
+  const classroomOptions = [
+    { value: "", label: "Sınıf seçiniz" },
+    ...classrooms.map((classroom) => ({
+      value: classroom.id,
+      label:
+        classroom.name ||
+        classroom.className ||
+        `${classroom.grade || ""}/${classroom.section || ""}`,
+    })),
+  ];
+
   const studentFields = [
     {
       name: "firstName",
@@ -40,33 +51,25 @@ function StudentForm({
       name: "classroomId",
       label: "Sınıf",
       type: "select",
-      options: [
-        {
-          value: "",
-          label: "Sınıf seçiniz",
-        },
-        ...classrooms.map((classroom) => ({
-          value: classroom.id || classroom.Id,
-          label: getClassroomLabel(classroom),
-        })),
-      ],
+      options: classroomOptions,
     },
   ];
 
-  if (isEditing) {
-    studentFields.push({
-      name: "isActive",
-      label: "Aktif mi?",
-      type: "checkbox",
-    });
-  }
+  const visibleFields = hideClassroomSelect
+    ? studentFields.filter((field) => field.name !== "classroomId")
+    : studentFields;
+
+  const preparedFormData = lockedClassroomId
+    ? { ...formData, classroomId: lockedClassroomId }
+    : formData;
 
   return (
     <FormFields
-      fields={studentFields}
-      formData={formData}
+      fields={visibleFields}
+      formData={preparedFormData}
       setFormData={setFormData}
       errors={errors}
+      isEditing={isEditing}
     />
   );
 }
