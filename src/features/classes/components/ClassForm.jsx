@@ -1,9 +1,19 @@
 import FormFields from "../../../components/common/FormFields";
 
-import { classGradeOptions } from "../constants/classConstants";
+import {
+  classGradeOptions,
+  classStatusOptions,
+} from "../constants/classConstants";
+
 import { mapTeachersToOptions } from "../utils/classFormatters";
 
-function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
+function ClassForm({
+  formData,
+  setFormData,
+  teachers = [],
+  errors = {},
+  isEditing = false,
+}) {
   const teacherOptions = mapTeachersToOptions(teachers);
 
   const classFields = [
@@ -34,12 +44,19 @@ function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
     },
   ];
 
+  const handleStatusChange = (event) => {
+    const value = event.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      isActive: value === "true",
+    }));
+  };
+
   return (
     <div className="space-y-4">
       {errors.general && (
-        <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
-          {errors.general}
-        </div>
+        <div className="alert alert-error text-sm">{errors.general}</div>
       )}
 
       <FormFields
@@ -48,6 +65,30 @@ function ClassForm({ formData, setFormData, teachers = [], errors = {} }) {
         setFormData={setFormData}
         errors={errors}
       />
+
+      {isEditing && (
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Durum</span>
+          </label>
+
+          <select
+            className="select select-bordered w-full"
+            value={String(formData.isActive ?? true)}
+            onChange={handleStatusChange}
+          >
+            {classStatusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          {errors.isActive && (
+            <span className="mt-1 text-xs text-error">{errors.isActive}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -16,26 +16,25 @@ function ClassFormModal({
   return (
     <Modal
       id={modalId}
-      title={isEditing ? "Sınıf Güncelle" : "Yeni Sınıf"}
-      description={
-        isEditing
-          ? "Sınıf seviyesini, şubesini ve sınıf öğretmeni atamasını güncelleyin."
-          : "Yeni sınıf oluşturun ve isteğe bağlı sınıf öğretmeni atayın."
-      }
+      title={isEditing ? "Sınıf Güncelle" : "Yeni Sınıf Ekle"}
+      onClose={onClose}
     >
       <ClassForm
         formData={formData}
         setFormData={setFormData}
         teachers={teachers}
         errors={errors}
+        isEditing={isEditing}
       />
 
-      <div className="mt-6 flex justify-end gap-3">
-        <Button variant="ghost" onClick={onClose}>
+      <div className="modal-action">
+        <Button type="button" variant="ghost" onClick={onClose}>
           Vazgeç
         </Button>
 
-        <Button onClick={onSubmit}>{isEditing ? "Güncelle" : "Kaydet"}</Button>
+        <Button type="button" variant="primary" onClick={onSubmit}>
+          {isEditing ? "Güncelle" : "Kaydet"}
+        </Button>
       </div>
     </Modal>
   );

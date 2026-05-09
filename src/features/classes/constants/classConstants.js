@@ -5,6 +5,7 @@ export const emptyClassForm = {
   grade: "",
   section: "",
   teacherId: "",
+  isActive: true,
 };
 
 export const classGradeOptions = [
@@ -23,5 +24,16 @@ export const classGradeOptions = [
   {
     label: "12. Sınıf",
     value: "12",
+  },
+];
+
+export const classStatusOptions = [
+  {
+    label: "Aktif",
+    value: "true",
+  },
+  {
+    label: "Pasif",
+    value: "false",
   },
 ];
