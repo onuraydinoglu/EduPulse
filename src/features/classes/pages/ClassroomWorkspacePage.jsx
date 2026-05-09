@@ -26,11 +26,14 @@ function ClassroomWorkspacePage() {
     savingStudent,
     loading,
     toast,
+    canManageStudents,
     resetStudentForm,
     createStudent,
   } = useClassroomWorkspace(classId);
 
   const handleOpenStudentModal = () => {
+    if (!canManageStudents) return;
+
     resetStudentForm();
     document.getElementById("classroom_student_modal")?.showModal();
   };
@@ -48,55 +51,56 @@ function ClassroomWorkspacePage() {
     }
   };
 
-  const handleOpenExamEntry = () => {
-    navigate(`/dashboard/classes/${classId}/exams`);
-  };
-
   if (loading) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center">
+      <div className="flex min-h-[400px] items-center justify-center">
         <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <ClassroomWorkspaceHeader
-        classroom={classroom}
-        teachers={teachers}
-        onBack={() => navigate("/dashboard/classes")}
-        onOpenStudentModal={handleOpenStudentModal}
-        onOpenGrades={handleOpenExamEntry}
-      />
+    <>
+      <Toast message={toast.message} type={toast.type} />
 
-      <ClassroomWorkspaceSummary
-        classroom={classroom}
-        teachers={teachers}
-        students={classStudents}
-        grades={classGrades}
-      />
+      <div className="space-y-6">
+        <ClassroomWorkspaceHeader
+          classroom={classroom}
+          teachers={teachers}
+          onBack={() => navigate("/dashboard/classes")}
+          onOpenStudentModal={handleOpenStudentModal}
+          onOpenGrades={() => setActiveTab("grades")}
+          canManageStudents={canManageStudents}
+        />
 
-      <ClassroomWorkspaceTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        students={classStudents}
-        grades={classGrades}
-        onEditStudent={() => { }}
-        onDeleteStudent={() => { }}
-      />
+        <ClassroomWorkspaceSummary
+          classroom={classroom}
+          studentCount={classStudents.length}
+        />
 
-      <ClassroomStudentCreateModal
-        formData={studentFormData}
-        setFormData={setStudentFormData}
-        errors={studentErrors}
-        loading={savingStudent}
-        onClose={handleCloseStudentModal}
-        onSubmit={handleCreateStudent}
-      />
+        <ClassroomWorkspaceTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          classroom={classroom}
+          students={classStudents}
+          grades={classGrades}
+          teachers={teachers}
+          onEditStudent={() => { }}
+          onDeleteStudent={() => { }}
+        />
+      </div>
 
-      {toast.message && <Toast message={toast.message} type={toast.type} />}
-    </div>
+      {canManageStudents && (
+        <ClassroomStudentCreateModal
+          formData={studentFormData}
+          setFormData={setStudentFormData}
+          errors={studentErrors}
+          saving={savingStudent}
+          onClose={handleCloseStudentModal}
+          onSubmit={handleCreateStudent}
+        />
+      )}
+    </>
   );
 }
 

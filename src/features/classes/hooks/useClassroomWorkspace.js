@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { classService } from "../services/classService";
-import { teacherService } from "../../teachers/services/teacherService";
 import { studentService } from "../../students/services/studentService";
 
 import {
@@ -10,6 +9,7 @@ import {
 } from "../../../validations/validationRules";
 import { studentValidationSchema } from "../../../validations/schemas";
 import { cleanPhone } from "../../../utils/phoneFormatter";
+import { isSchoolAdmin, isSuperAdmin } from "../../../utils/authUser";
 
 const emptyStudentForm = {
   firstName: "",
@@ -24,6 +24,7 @@ const emptyStudentForm = {
 const getResultData = (result) => result?.data || result?.Data || result || [];
 
 const getId = (item) => item?.id || item?.Id;
+
 const getClassroomId = (item) => item?.classroomId || item?.ClassroomId;
 
 const getErrorMessage = (error, fallback) => {
@@ -75,13 +76,25 @@ export function useClassroomWorkspace(classId) {
   const [studentErrors, setStudentErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [savingStudent, setSavingStudent] = useState(false);
-  const [toast, setToast] = useState({ message: "", type: "success" });
+
+  const [toast, setToast] = useState({
+    message: "",
+    type: "success",
+  });
+
+  const canManageStudents = isSchoolAdmin() || isSuperAdmin();
 
   const showToast = (message, type = "success") => {
-    setToast({ message, type });
+    setToast({
+      message,
+      type,
+    });
 
     setTimeout(() => {
-      setToast({ message: "", type: "success" });
+      setToast({
+        message: "",
+        type: "success",
+      });
     }, 2500);
   };
 
@@ -102,6 +115,7 @@ export function useClassroomWorkspace(classId) {
 
   const resetStudentForm = () => {
     setStudentErrors({});
+
     setStudentFormData({
       ...emptyStudentForm,
       classroomId: classId,
@@ -112,22 +126,13 @@ export function useClassroomWorkspace(classId) {
     try {
       setLoading(true);
 
-      const [classResult, teacherResult, studentResult] = await Promise.all([
+      const [classResult, studentResult] = await Promise.all([
         classService.getById(classId),
-        teacherService.getAll(),
         studentService.getAll(),
       ]);
 
       if (classResult?.isSuccess === false) {
         showToast(classResult.message || "Sınıf bilgisi getirilemedi.", "error");
-        return;
-      }
-
-      if (teacherResult?.isSuccess === false) {
-        showToast(
-          teacherResult.message || "Öğretmenler getirilemedi.",
-          "error"
-        );
         return;
       }
 
@@ -137,7 +142,7 @@ export function useClassroomWorkspace(classId) {
       }
 
       setClassroom(getResultData(classResult));
-      setTeachers(getResultData(teacherResult));
+      setTeachers([]);
       setStudents(getResultData(studentResult));
       setGrades([]);
     } catch (error) {
@@ -153,6 +158,11 @@ export function useClassroomWorkspace(classId) {
   };
 
   const createStudent = async () => {
+    if (!canManageStudents) {
+      showToast("Öğrenci kaydı oluşturma yetkiniz yok.", "error");
+      return false;
+    }
+
     const preparedFormData = {
       ...studentFormData,
       classroomId: classId,
@@ -198,8 +208,8 @@ export function useClassroomWorkspace(classId) {
 
       await loadWorkspace();
       resetStudentForm();
-      showToast("Öğrenci bu sınıfa kaydedildi.");
 
+      showToast("Öğrenci bu sınıfa kaydedildi.");
       return true;
     } catch (error) {
       console.error(error);
@@ -217,7 +227,6 @@ export function useClassroomWorkspace(classId) {
       });
 
       showToast(message, "error");
-
       return false;
     } finally {
       setSavingStudent(false);
@@ -231,23 +240,19 @@ export function useClassroomWorkspace(classId) {
   return {
     activeTab,
     setActiveTab,
-
     classroom,
     teachers,
     students,
     grades,
-
     classStudents,
     classGrades,
-
     studentFormData,
     setStudentFormData,
     studentErrors,
     savingStudent,
-
     loading,
     toast,
-
+    canManageStudents,
     resetStudentForm,
     createStudent,
   };

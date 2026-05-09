@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 import TableActions from "../../../components/ui/TableActions";
+
 import {
   getClassId,
   getClassName,
@@ -9,7 +10,13 @@ import {
   getClassTeacherName,
 } from "../utils/classFormatters";
 
-function ClassTableRow({ classItem, teachers = [], onEdit, onDelete }) {
+function ClassTableRow({
+  classItem,
+  teachers = [],
+  canManage = true,
+  onEdit,
+  onDelete,
+}) {
   const classId = getClassId(classItem);
 
   return (
@@ -39,10 +46,12 @@ function ClassTableRow({ classItem, teachers = [], onEdit, onDelete }) {
       </td>
 
       <td className="text-right">
-        <TableActions
-          onEdit={() => onEdit(classItem)}
-          onDelete={() => onDelete(classId)}
-        />
+        {canManage && (
+          <TableActions
+            onEdit={() => onEdit(classItem)}
+            onDelete={() => onDelete(classId)}
+          />
+        )}
       </td>
     </tr>
   );

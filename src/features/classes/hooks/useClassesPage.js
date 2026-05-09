@@ -7,9 +7,10 @@ import {
   hasValidationError,
   validateForm,
 } from "../../../validations/validationRules";
-
 import { classroomValidationSchema } from "../../../validations/schemas";
+
 import { exportToPdf } from "../../../utils/exportToPdf";
+import { isSchoolAdmin, isSuperAdmin } from "../../../utils/authUser";
 
 import { emptyClassForm } from "../constants/classConstants";
 import { classPdfColumns } from "../constants/classTableColumns";
@@ -41,6 +42,8 @@ export function useClassesPage() {
   const [gradeFilter, setGradeFilter] = useState("all");
 
   const isEditing = editingClassId !== null;
+
+  const canManageClasses = isSchoolAdmin() || isSuperAdmin();
 
   const showToast = (message, type = "success") => {
     setToast({
@@ -79,19 +82,24 @@ export function useClassesPage() {
 
       showToast(
         getErrorMessage(error, "Sınıflar yüklenirken hata oluştu."),
-        "error",
+        "error"
       );
     }
   };
 
   const loadTeachers = async () => {
+    if (!canManageClasses) {
+      setTeachers([]);
+      return;
+    }
+
     try {
       const result = await teacherService.getAll();
 
       if (result?.isSuccess === false) {
         showToast(
           result.message || "Öğretmenler yüklenirken hata oluştu.",
-          "error",
+          "error"
         );
         return;
       }
@@ -108,14 +116,18 @@ export function useClassesPage() {
 
       showToast(
         getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."),
-        "error",
+        "error"
       );
     }
   };
 
   useEffect(() => {
     const loadInitialData = async () => {
-      await Promise.all([loadClasses(), loadTeachers()]);
+      await loadClasses();
+
+      if (canManageClasses) {
+        await loadTeachers();
+      }
     };
 
     loadInitialData();
@@ -126,6 +138,11 @@ export function useClassesPage() {
   }, [classes, teachers, search, gradeFilter]);
 
   const handleOpenCreateModal = (modalId) => {
+    if (!canManageClasses) {
+      showToast("Sınıf oluşturma yetkiniz yok.", "error");
+      return;
+    }
+
     setEditingClassId(null);
     setFormData(emptyClassForm);
     setErrors({});
@@ -133,6 +150,11 @@ export function useClassesPage() {
   };
 
   const handleOpenEditModal = (classItem, modalId) => {
+    if (!canManageClasses) {
+      showToast("Sınıf düzenleme yetkiniz yok.", "error");
+      return;
+    }
+
     setEditingClassId(getClassId(classItem));
     setErrors({});
 
@@ -153,6 +175,11 @@ export function useClassesPage() {
   };
 
   const handleOpenDeleteModal = (id, modalId) => {
+    if (!canManageClasses) {
+      showToast("Sınıf silme yetkiniz yok.", "error");
+      return;
+    }
+
     setDeletingClassId(id);
     openModal(modalId);
   };
@@ -171,8 +198,12 @@ export function useClassesPage() {
   };
 
   const handleSubmit = async (modalId) => {
-    const validationErrors = validateForm(formData, classroomValidationSchema);
+    if (!canManageClasses) {
+      showToast("Bu işlem için yetkiniz yok.", "error");
+      return;
+    }
 
+    const validationErrors = validateForm(formData, classroomValidationSchema);
     setErrors(validationErrors);
 
     if (hasValidationError(validationErrors)) {
@@ -185,9 +216,9 @@ export function useClassesPage() {
     try {
       const result = isEditing
         ? await classService.update({
-            id: editingClassId,
-            ...preparedData,
-          })
+          id: editingClassId,
+          ...preparedData,
+        })
         : await classService.create(preparedData);
 
       if (result?.isSuccess === false) {
@@ -221,6 +252,11 @@ export function useClassesPage() {
   };
 
   const handleDelete = async (modalId) => {
+    if (!canManageClasses) {
+      showToast("Bu işlem için yetkiniz yok.", "error");
+      return;
+    }
+
     if (!deletingClassId) return;
 
     try {
@@ -233,13 +269,14 @@ export function useClassesPage() {
 
       await loadClasses();
       handleCloseDeleteModal(modalId);
+
       showToast("Sınıf silindi.");
     } catch (error) {
       console.error(error);
 
       showToast(
         getErrorMessage(error, "Sınıf silinirken hata oluştu."),
-        "error",
+        "error"
       );
     }
   };
@@ -257,20 +294,17 @@ export function useClassesPage() {
     classes,
     filteredClasses,
     teachers,
-
     formData,
     setFormData,
     errors,
     isEditing,
     deletingClassId,
-
     toast,
-
     search,
     setSearch,
     gradeFilter,
     setGradeFilter,
-
+    canManageClasses,
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseClassModal,
