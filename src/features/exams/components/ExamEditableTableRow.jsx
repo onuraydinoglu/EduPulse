@@ -34,8 +34,6 @@ function ExamEditableTableRow({
                     </div>
                 </td>
 
-                <td className="text-sm text-base-content/70">{row.classroomName}</td>
-
                 {examGradeFields.map((field) => (
                     <td key={field.key}>
                         <input
@@ -90,7 +88,7 @@ function ExamEditableTableRow({
 
             {error && (
                 <tr>
-                    <td colSpan={10} className="bg-error/5 px-4 py-2 text-sm text-error">
+                    <td colSpan={9} className="bg-error/5 px-4 py-2 text-sm text-error">
                         {error}
                     </td>
                 </tr>

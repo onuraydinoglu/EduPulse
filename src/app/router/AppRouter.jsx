@@ -45,6 +45,7 @@ function AppRouter() {
 
           <Route path="classes" element={<ClassesPage />} />
           <Route path="classes/:classId" element={<ClassroomWorkspacePage />} />
+          <Route path="classes/:classroomId/exams" element={<ExamsPage />} />
 
           <Route path="students" element={<StudentsPage />} />
           <Route path="lessons" element={<LessonsPage />} />

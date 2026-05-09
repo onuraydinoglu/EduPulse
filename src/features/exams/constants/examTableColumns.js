@@ -3,11 +3,11 @@ import {
     CheckCircleIcon,
     ClipboardDocumentCheckIcon,
     PencilSquareIcon,
+    XCircleIcon,
 } from "@heroicons/react/24/outline";
 
 export const examTableHeaders = [
     "Öğrenci",
-    "Sınıf",
     "1. Sınav",
     "2. Sınav",
     "Proje",
@@ -20,34 +20,38 @@ export const examTableHeaders = [
 
 export const getExamStats = (rows = []) => {
     const savedCount = rows.filter((row) => row.examId).length;
-
     const changedCount = rows.filter((row) => row.isDirty).length;
-
-    const passedCount = rows.filter((row) => {
-        return Number(row.average || 0) >= 50;
-    }).length;
+    const missingCount = Math.max(rows.length - savedCount, 0);
+    const passedCount = rows.filter((row) => Number(row.average || 0) >= 50).length;
 
     return [
         {
             title: "Toplam Öğrenci",
             value: rows.length,
-            description: "Not girişi yapılabilecek öğrenci",
+            description: "Seçili sınıftaki öğrenci",
             icon: AcademicCapIcon,
             color: "primary",
         },
         {
             title: "Kayıtlı Not",
             value: savedCount,
-            description: "Seçili derste kayıtlı not satırı",
+            description: "Seçili derste notu olan",
             icon: CheckCircleIcon,
             color: "success",
         },
         {
-            title: "Değişiklik",
+            title: "Bekleyen",
             value: changedCount,
-            description: "Kaydedilmeyi bekleyen satır",
+            description: "Kaydedilmemiş değişiklik",
             icon: PencilSquareIcon,
             color: "warning",
+        },
+        {
+            title: "Eksik",
+            value: missingCount,
+            description: "Henüz not girilmemiş",
+            icon: XCircleIcon,
+            color: "error",
         },
         {
             title: "Başarılı",
@@ -69,8 +73,8 @@ export const examPdfColumns = [
         accessor: (row) => row.studentFullName,
     },
     {
-        header: "Sınıf",
-        accessor: (row) => row.classroomName,
+        header: "Numara",
+        accessor: (row) => row.studentNumber,
     },
     {
         header: "1. Sınav",

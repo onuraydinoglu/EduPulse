@@ -1,10 +1,12 @@
 import { useNavigate, useParams } from "react-router-dom";
 
 import Toast from "../../../components/ui/Toast";
+
 import ClassroomWorkspaceHeader from "../components/workspace/ClassroomWorkspaceHeader";
 import ClassroomWorkspaceSummary from "../components/workspace/ClassroomWorkspaceSummary";
 import ClassroomWorkspaceTabs from "../components/workspace/ClassroomWorkspaceTabs";
 import ClassroomStudentCreateModal from "../components/workspace/ClassroomStudentCreateModal";
+
 import { useClassroomWorkspace } from "../hooks/useClassroomWorkspace";
 
 function ClassroomWorkspacePage() {
@@ -14,21 +16,16 @@ function ClassroomWorkspacePage() {
   const {
     activeTab,
     setActiveTab,
-
     classroom,
     teachers,
-
     classStudents,
     classGrades,
-
     studentFormData,
     setStudentFormData,
     studentErrors,
     savingStudent,
-
     loading,
     toast,
-
     resetStudentForm,
     createStudent,
   } = useClassroomWorkspace(classId);
@@ -51,30 +48,33 @@ function ClassroomWorkspacePage() {
     }
   };
 
+  const handleOpenExamEntry = () => {
+    navigate(`/dashboard/classes/${classId}/exams`);
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-[420px] items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="flex min-h-[320px] items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Toast message={toast.message} type={toast.type} />
-
       <ClassroomWorkspaceHeader
         classroom={classroom}
         teachers={teachers}
         onBack={() => navigate("/dashboard/classes")}
         onOpenStudentModal={handleOpenStudentModal}
-        onOpenGrades={() => setActiveTab("grades")}
+        onOpenGrades={handleOpenExamEntry}
       />
 
       <ClassroomWorkspaceSummary
         classroom={classroom}
         teachers={teachers}
-        studentCount={classStudents.length}
+        students={classStudents}
+        grades={classGrades}
       />
 
       <ClassroomWorkspaceTabs
@@ -82,21 +82,20 @@ function ClassroomWorkspacePage() {
         setActiveTab={setActiveTab}
         students={classStudents}
         grades={classGrades}
-        classroom={classroom}
-        onEditStudent={() => {}}
-        onDeleteStudent={() => {}}
+        onEditStudent={() => { }}
+        onDeleteStudent={() => { }}
       />
 
       <ClassroomStudentCreateModal
-        classroom={classroom}
-        classId={classId}
         formData={studentFormData}
         setFormData={setStudentFormData}
         errors={studentErrors}
-        saving={savingStudent}
+        loading={savingStudent}
         onClose={handleCloseStudentModal}
         onSubmit={handleCreateStudent}
       />
+
+      {toast.message && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }

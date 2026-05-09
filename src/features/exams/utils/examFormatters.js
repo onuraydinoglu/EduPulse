@@ -1,15 +1,58 @@
-import { emptyExamGrades } from "../constants/examConstants";
+import { emptyExamGrades, examGradeFields } from "../constants/examConstants";
 
 export const normalizeResultData = (result) => {
-    return result?.data || result?.Data || [];
+    if (Array.isArray(result)) return result;
+
+    if (Array.isArray(result?.data)) return result.data;
+    if (Array.isArray(result?.Data)) return result.Data;
+
+    if (Array.isArray(result?.data?.data)) return result.data.data;
+    if (Array.isArray(result?.Data?.Data)) return result.Data.Data;
+
+    return [];
+};
+
+export const unwrapSingleData = (result) => {
+    return result?.data || result?.Data || result;
 };
 
 export const getEntityId = (entity) => {
     return entity?.id || entity?.Id || "";
 };
 
+export const getClassroomName = (classroom) => {
+    if (!classroom) return "-";
+
+    const directName =
+        classroom?.name ||
+        classroom?.Name ||
+        classroom?.classroomName ||
+        classroom?.ClassroomName ||
+        classroom?.className ||
+        classroom?.ClassName;
+
+    if (directName) return directName;
+
+    const grade = classroom?.grade || classroom?.Grade || "";
+    const section = classroom?.section || classroom?.Section || "";
+
+    if (!grade && !section) return "-";
+
+    return `${grade}-${section}`.trim();
+};
+
 export const getStudentId = (student) => {
     return student?.id || student?.Id || "";
+};
+
+export const getStudentClassroomId = (student) => {
+    return (
+        student?.classroomId ||
+        student?.ClassroomId ||
+        student?.classId ||
+        student?.ClassId ||
+        ""
+    );
 };
 
 export const getStudentNumber = (student) => {
@@ -27,39 +70,44 @@ export const getStudentFullName = (student) => {
     return `${firstName} ${lastName}`.trim() || "-";
 };
 
-export const getStudentClassroomId = (student) => {
-    return student?.classroomId || student?.ClassroomId || "";
-};
-
-export const getStudentClassroomName = (student, classrooms = []) => {
-    const directName =
-        student?.classroomName ||
-        student?.ClassroomName ||
-        student?.className ||
-        student?.ClassName;
-
-    if (directName) return directName;
-
-    const classroomId = getStudentClassroomId(student);
-
-    const classroom = classrooms.find((item) => {
-        return getEntityId(item) === classroomId;
-    });
-
-    if (!classroom) return "-";
-
-    const grade = classroom?.grade || classroom?.Grade || "";
-    const section = classroom?.section || classroom?.Section || "";
-
-    return `${grade}/${section}`.trim() || "-";
-};
-
 export const getLessonId = (lesson) => {
     return lesson?.id || lesson?.Id || "";
 };
 
 export const getLessonName = (lesson) => {
-    return lesson?.name || lesson?.Name || "-";
+    return lesson?.name || lesson?.Name || lesson?.lessonName || "-";
+};
+
+export const getTeacherLessonClassroomId = (item) => {
+    return (
+        item?.classroomId ||
+        item?.ClassroomId ||
+        item?.classId ||
+        item?.ClassId ||
+        ""
+    );
+};
+
+export const getTeacherLessonTeacherId = (item) => {
+    return item?.teacherId || item?.TeacherId || "";
+};
+
+export const getTeacherLessonLessonId = (item) => {
+    return item?.lessonId || item?.LessonId || "";
+};
+
+export const getTeacherLessonLessonName = (item) => {
+    return (
+        item?.lessonName ||
+        item?.LessonName ||
+        item?.lesson?.name ||
+        item?.Lesson?.Name ||
+        "-"
+    );
+};
+
+export const getTeacherLessonIsActive = (item) => {
+    return item?.isActive !== false && item?.IsActive !== false;
 };
 
 export const getExamId = (exam) => {
@@ -82,14 +130,13 @@ export const getExamValue = (exam, key) => {
 export const normalizeGradeInput = (value) => {
     if (value === "" || value === null || value === undefined) return "";
 
-    const numericValue = Number(value);
+    const numberValue = Number(value);
 
-    if (Number.isNaN(numericValue)) return "";
+    if (Number.isNaN(numberValue)) return "";
+    if (numberValue < 0) return "0";
+    if (numberValue > 100) return "100";
 
-    if (numericValue < 0) return "0";
-    if (numericValue > 100) return "100";
-
-    return String(numericValue);
+    return String(numberValue);
 };
 
 export const normalizeGradeForPayload = (value) => {
@@ -98,15 +145,8 @@ export const normalizeGradeForPayload = (value) => {
 };
 
 export const calculateAverage = (grades) => {
-    const values = [
-        grades.exam1,
-        grades.exam2,
-        grades.project,
-        grades.activity1,
-        grades.activity2,
-        grades.activity3,
-    ]
-        .map(Number)
+    const values = examGradeFields
+        .map((field) => Number(grades[field.key]))
         .filter((value) => !Number.isNaN(value));
 
     if (!values.length) return 0;
@@ -118,26 +158,83 @@ export const getAverageLabel = (average) => {
     return average > 0 ? average.toFixed(2) : "-";
 };
 
-export const createClassroomOptions = (classrooms = []) => {
-    return [
-        {
-            label: "Tüm Sınıflar",
-            value: "all",
-        },
-        ...classrooms.map((classroom) => {
-            const id = getEntityId(classroom);
-            const grade = classroom?.grade || classroom?.Grade || "";
-            const section = classroom?.section || classroom?.Section || "";
+export const getCurrentUser = () => {
+    const rawUser = localStorage.getItem("edupulse_user");
 
-            return {
-                label: `${grade}/${section}`,
-                value: id,
-            };
-        }),
-    ];
+    if (!rawUser) return null;
+
+    try {
+        return JSON.parse(rawUser);
+    } catch {
+        return null;
+    }
 };
 
-export const createLessonOptions = (lessons = []) => {
+export const getCurrentUserRole = (currentUser) => {
+    return (
+        currentUser?.roleName ||
+        currentUser?.RoleName ||
+        currentUser?.role ||
+        currentUser?.Role ||
+        currentUser?.user?.roleName ||
+        currentUser?.user?.RoleName ||
+        ""
+    ).toLowerCase();
+};
+
+export const getCurrentTeacherId = (currentUser) => {
+    return (
+        currentUser?.teacherId ||
+        currentUser?.TeacherId ||
+        currentUser?.user?.teacherId ||
+        currentUser?.user?.TeacherId ||
+        currentUser?.teacher?.id ||
+        currentUser?.Teacher?.Id ||
+        ""
+    );
+};
+
+export const filterTeacherLessonsForClassroom = ({
+    teacherLessons = [],
+    classroomId,
+    currentUser,
+}) => {
+    const roleName = getCurrentUserRole(currentUser);
+    const currentTeacherId = getCurrentTeacherId(currentUser);
+
+    return teacherLessons.filter((item) => {
+        const itemClassroomId = getTeacherLessonClassroomId(item);
+        const isActive = getTeacherLessonIsActive(item);
+
+        if (itemClassroomId !== classroomId || !isActive) return false;
+
+        if (roleName === "teacher") {
+            if (!currentTeacherId) return false;
+            return getTeacherLessonTeacherId(item) === currentTeacherId;
+        }
+
+        return true;
+    });
+};
+
+export const createLessonOptionsFromTeacherLessons = (teacherLessons = []) => {
+    const uniqueLessons = new Map();
+
+    teacherLessons.forEach((item) => {
+        const lessonId = getTeacherLessonLessonId(item);
+
+        if (!lessonId) return;
+
+        uniqueLessons.set(lessonId, {
+            label: getTeacherLessonLessonName(item),
+            value: lessonId,
+        });
+    });
+
+    return Array.from(uniqueLessons.values());
+};
+
+export const createLessonOptionsFromLessons = (lessons = []) => {
     return [
         {
             label: "Ders seçiniz",
@@ -153,11 +250,15 @@ export const createLessonOptions = (lessons = []) => {
 export const buildExamRows = ({
     students = [],
     exams = [],
-    classrooms = [],
+    classroomId = "",
     selectedLessonId = "",
     editedGrades = {},
 }) => {
-    return students.map((student) => {
+    const classroomStudents = classroomId
+        ? students.filter((student) => getStudentClassroomId(student) === classroomId)
+        : students;
+
+    return classroomStudents.map((student) => {
         const studentId = getStudentId(student);
 
         const existingExam = exams.find((exam) => {
@@ -166,8 +267,6 @@ export const buildExamRows = ({
                 getExamLessonId(exam) === selectedLessonId
             );
         });
-
-        const examId = getExamId(existingExam);
 
         const backendGrades = existingExam
             ? {
@@ -181,16 +280,14 @@ export const buildExamRows = ({
             : emptyExamGrades;
 
         const rowGrades = editedGrades[studentId] || backendGrades;
-
         const average = calculateAverage(rowGrades);
 
         return {
             studentId,
-            examId,
+            examId: getExamId(existingExam),
             studentFullName: getStudentFullName(student),
             studentNumber: getStudentNumber(student),
             classroomId: getStudentClassroomId(student),
-            classroomName: getStudentClassroomName(student, classrooms),
             average,
             averageLabel: getAverageLabel(average),
             isDirty: Boolean(editedGrades[studentId]),
@@ -199,24 +296,16 @@ export const buildExamRows = ({
     });
 };
 
-export const filterExamRows = ({
-    rows = [],
-    search = "",
-    classroomFilter = "all",
-}) => {
+export const filterExamRows = (rows = [], search = "") => {
     const normalizedSearch = search.toLocaleLowerCase("tr-TR").trim();
 
+    if (!normalizedSearch) return rows;
+
     return rows.filter((row) => {
-        const matchesSearch =
-            !normalizedSearch ||
+        return (
             row.studentFullName.toLocaleLowerCase("tr-TR").includes(normalizedSearch) ||
-            String(row.studentNumber).toLocaleLowerCase("tr-TR").includes(normalizedSearch) ||
-            row.classroomName.toLocaleLowerCase("tr-TR").includes(normalizedSearch);
-
-        const matchesClassroom =
-            classroomFilter === "all" || row.classroomId === classroomFilter;
-
-        return matchesSearch && matchesClassroom;
+            String(row.studentNumber).toLocaleLowerCase("tr-TR").includes(normalizedSearch)
+        );
     });
 };
 

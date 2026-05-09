@@ -1,44 +1,59 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-import axiosInstance from "../../../api/axiosInstance";
-import { API_ENDPOINTS } from "../../../api/endpoints";
-import { lessonService } from "../../lessons/services/lessonService";
 import { classService } from "../../classes/services/classService";
+import { lessonService } from "../../lessons/services/lessonService";
+import { studentService } from "../../students/services/studentService";
+import { teacherLessonService } from "../../teacherLessons/services/teacherLessonService";
+
 import { exportToPdf } from "../../../utils/exportToPdf";
 
-import { examGradeFields } from "../constants/examConstants";
+import { emptyExamGrades, examGradeFields } from "../constants/examConstants";
 import { examPdfColumns } from "../constants/examTableColumns";
 import { examService } from "../services/examService";
 
 import {
     buildExamRows,
-    createClassroomOptions,
-    createLessonOptions,
+    createLessonOptionsFromLessons,
+    createLessonOptionsFromTeacherLessons,
     filterExamRows,
+    filterTeacherLessonsForClassroom,
+    getClassroomName,
+    getCurrentUser,
     getErrorMessage,
     normalizeGradeForPayload,
     normalizeGradeInput,
     normalizeResultData,
+    unwrapSingleData,
 } from "../utils/examFormatters";
 
 export function useExamsPage() {
+    const params = useParams();
+    const navigate = useNavigate();
+
+    const classroomId = params.classroomId || params.classId || params.id || "";
+    const isClassroomMode = Boolean(classroomId);
+
+    const [classroom, setClassroom] = useState(null);
     const [students, setStudents] = useState([]);
     const [exams, setExams] = useState([]);
     const [lessons, setLessons] = useState([]);
-    const [classrooms, setClassrooms] = useState([]);
+    const [teacherLessons, setTeacherLessons] = useState([]);
 
     const [selectedLessonId, setSelectedLessonId] = useState("");
-    const [classroomFilter, setClassroomFilter] = useState("all");
-    const [search, setSearch] = useState("");
-
     const [editedGrades, setEditedGrades] = useState({});
     const [savingRows, setSavingRows] = useState({});
     const [rowErrors, setRowErrors] = useState({});
+    const [search, setSearch] = useState("");
+
+    const [isLoading, setIsLoading] = useState(true);
 
     const [toast, setToast] = useState({
         message: "",
         type: "success",
     });
+
+    const currentUser = useMemo(() => getCurrentUser(), []);
 
     const showToast = (message, type = "success") => {
         setToast({
@@ -54,50 +69,88 @@ export function useExamsPage() {
         }, 2500);
     };
 
-    const getStudents = async () => {
-        const response = await axiosInstance.get(API_ENDPOINTS.STUDENTS);
-        return response.data;
-    };
-
-    const getPageData = async () => {
+    const loadPageData = async () => {
         try {
-            const [studentsResult, examsResult, lessonsResult, classroomsResult] =
-                await Promise.all([
-                    getStudents(),
-                    examService.getAll(),
-                    lessonService.getAll(),
-                    classService.getAll(),
-                ]);
+            setIsLoading(true);
+
+            const requests = [
+                studentService.getAll(),
+                examService.getAll(),
+                lessonService.getAll(),
+            ];
+
+            if (isClassroomMode) {
+                requests.push(classService.getById(classroomId));
+                requests.push(teacherLessonService.getAll());
+            }
+
+            const results = await Promise.all(requests);
+
+            const studentsResult = results[0];
+            const examsResult = results[1];
+            const lessonsResult = results[2];
 
             setStudents(normalizeResultData(studentsResult));
             setExams(normalizeResultData(examsResult));
             setLessons(normalizeResultData(lessonsResult));
-            setClassrooms(normalizeResultData(classroomsResult));
+
+            if (isClassroomMode) {
+                const classroomResult = results[3];
+                const teacherLessonsResult = results[4];
+
+                setClassroom(unwrapSingleData(classroomResult));
+                setTeacherLessons(normalizeResultData(teacherLessonsResult));
+            }
         } catch (error) {
             console.error(error);
             showToast(
-                getErrorMessage(error, "Sınav sayfası verileri getirilirken hata oluştu."),
+                getErrorMessage(error, "Sınav verileri yüklenirken hata oluştu."),
                 "error",
             );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        getPageData();
-    }, []);
+        loadPageData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classroomId]);
+
+    const availableTeacherLessons = useMemo(() => {
+        if (!isClassroomMode) return [];
+
+        return filterTeacherLessonsForClassroom({
+            teacherLessons,
+            classroomId,
+            currentUser,
+        });
+    }, [teacherLessons, classroomId, currentUser, isClassroomMode]);
+
+    const lessonOptions = useMemo(() => {
+        if (isClassroomMode) {
+            return createLessonOptionsFromTeacherLessons(availableTeacherLessons);
+        }
+
+        return createLessonOptionsFromLessons(lessons);
+    }, [isClassroomMode, availableTeacherLessons, lessons]);
+
+    useEffect(() => {
+        if (!lessonOptions.length) {
+            setSelectedLessonId("");
+            return;
+        }
+
+        setSelectedLessonId((prev) => {
+            const stillExists = lessonOptions.some((item) => item.value === prev);
+            return stillExists ? prev : lessonOptions[0].value;
+        });
+    }, [lessonOptions]);
 
     useEffect(() => {
         setEditedGrades({});
         setRowErrors({});
     }, [selectedLessonId]);
-
-    const lessonOptions = useMemo(() => {
-        return createLessonOptions(lessons);
-    }, [lessons]);
-
-    const classroomOptions = useMemo(() => {
-        return createClassroomOptions(classrooms);
-    }, [classrooms]);
 
     const examRows = useMemo(() => {
         if (!selectedLessonId) return [];
@@ -105,19 +158,26 @@ export function useExamsPage() {
         return buildExamRows({
             students,
             exams,
-            classrooms,
+            classroomId: isClassroomMode ? classroomId : "",
             selectedLessonId,
             editedGrades,
         });
-    }, [students, exams, classrooms, selectedLessonId, editedGrades]);
+    }, [
+        students,
+        exams,
+        classroomId,
+        isClassroomMode,
+        selectedLessonId,
+        editedGrades,
+    ]);
 
     const filteredRows = useMemo(() => {
-        return filterExamRows({
-            rows: examRows,
-            search,
-            classroomFilter,
-        });
-    }, [examRows, search, classroomFilter]);
+        return filterExamRows(examRows, search);
+    }, [examRows, search]);
+
+    const classroomName = useMemo(() => {
+        return getClassroomName(classroom);
+    }, [classroom]);
 
     const handleGradeChange = (studentId, field, value) => {
         const normalizedValue = normalizeGradeInput(value);
@@ -126,7 +186,7 @@ export function useExamsPage() {
             const currentRow =
                 prev[studentId] ||
                 examRows.find((row) => row.studentId === studentId) ||
-                {};
+                emptyExamGrades;
 
             return {
                 ...prev,
@@ -150,7 +210,9 @@ export function useExamsPage() {
 
     const validateRow = (row) => {
         if (!selectedLessonId) {
-            return "Önce ders seçmelisiniz.";
+            return isClassroomMode
+                ? "Bu sınıf için not girişi yapılabilecek ders bulunamadı."
+                : "Önce ders seçmelisiniz.";
         }
 
         const hasAnyGrade = examGradeFields.some((field) => {
@@ -202,17 +264,21 @@ export function useExamsPage() {
                 })
                 : await examService.create(payload);
 
-            if (!result.isSuccess && !result.IsSuccess) {
-                const message = result.message || result.Message || "Not kaydı başarısız.";
+            if (result?.isSuccess === false || result?.IsSuccess === false) {
+                const message =
+                    result?.message || result?.Message || "Not kaydı başarısız.";
+
                 setRowErrors((prev) => ({
                     ...prev,
                     [row.studentId]: message,
                 }));
+
                 showToast(message, "error");
                 return;
             }
 
-            await getPageData();
+            const refreshedExams = await examService.getAll();
+            setExams(normalizeResultData(refreshedExams));
 
             setEditedGrades((prev) => {
                 const next = { ...prev };
@@ -258,36 +324,42 @@ export function useExamsPage() {
         }));
     };
 
+    const handleBackToClasses = () => {
+        navigate(`/dashboard/classes/${classroomId}`);
+    };
+
     const handleExportExamsPdf = () => {
         exportToPdf({
-            title: "Sınav Notları Listesi",
-            fileName: "sinav-notlari-listesi.pdf",
+            title: isClassroomMode
+                ? `${classroomName} Sınav Notları`
+                : "Sınav Notları Listesi",
+            fileName: isClassroomMode
+                ? `${classroomName}-sinav-notlari.pdf`
+                : "sinav-notlari-listesi.pdf",
             columns: examPdfColumns,
             data: filteredRows,
         });
     };
 
     return {
-        students,
-        exams,
-        lessons,
-        classrooms,
+        isClassroomMode,
+        isLoading,
+        classroomId,
+        classroomName,
         selectedLessonId,
         setSelectedLessonId,
-        classroomFilter,
-        setClassroomFilter,
-        search,
-        setSearch,
         lessonOptions,
-        classroomOptions,
         examRows,
         filteredRows,
+        search,
+        setSearch,
         savingRows,
         rowErrors,
         toast,
         handleGradeChange,
         handleSaveRow,
         handleResetRow,
+        handleBackToClasses,
         handleExportExamsPdf,
     };
 }

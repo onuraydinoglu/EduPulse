@@ -9,28 +9,45 @@ import { useExamsPage } from "../hooks/useExamsPage";
 
 function ExamsPage() {
   const {
+    isClassroomMode,
+    isLoading,
+    classroomName,
     selectedLessonId,
     setSelectedLessonId,
-    classroomFilter,
-    setClassroomFilter,
-    search,
-    setSearch,
     lessonOptions,
-    classroomOptions,
     examRows,
     filteredRows,
+    search,
+    setSearch,
     savingRows,
     rowErrors,
     toast,
     handleGradeChange,
     handleSaveRow,
     handleResetRow,
+    handleBackToClasses,
     handleExportExamsPdf,
   } = useExamsPage();
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <ExamsPageHeader onExport={handleExportExamsPdf} />
+      <ExamsPageHeader
+        isClassroomMode={isClassroomMode}
+        classroomName={classroomName}
+        lessonOptions={lessonOptions}
+        selectedLessonId={selectedLessonId}
+        setSelectedLessonId={setSelectedLessonId}
+        onBack={handleBackToClasses}
+        onExport={handleExportExamsPdf}
+      />
 
       <ExamStatsCards items={getExamStats(examRows)} />
 
@@ -39,11 +56,7 @@ function ExamsPage() {
         search={search}
         setSearch={setSearch}
         selectedLessonId={selectedLessonId}
-        setSelectedLessonId={setSelectedLessonId}
-        lessonOptions={lessonOptions}
-        classroomFilter={classroomFilter}
-        setClassroomFilter={setClassroomFilter}
-        classroomOptions={classroomOptions}
+        isClassroomMode={isClassroomMode}
         savingRows={savingRows}
         rowErrors={rowErrors}
         onGradeChange={handleGradeChange}
