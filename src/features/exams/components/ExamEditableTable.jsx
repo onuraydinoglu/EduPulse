@@ -1,7 +1,8 @@
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
+
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import { examTableHeaders } from "../constants/examTableColumns";
 import ExamEditableTableRow from "./ExamEditableTableRow";
 
@@ -11,10 +12,10 @@ function ExamEditableTable({
     setSearch,
     selectedLessonId,
     isClassroomMode = false,
-    savingRows,
+    isSavingAll = false,
     rowErrors,
     onGradeChange,
-    onSave,
+    onSaveAll,
     onReset,
 }) {
     const {
@@ -29,14 +30,17 @@ function ExamEditableTable({
         endItem,
     } = usePagination(rows, 10);
 
+    const dirtyCount = rows.filter((row) => row.isDirty).length;
+    const hasDirtyRows = dirtyCount > 0;
+
     if (!selectedLessonId) {
         return (
-            <div className="rounded-3xl border border-base-300/70 bg-base-100 p-10 text-center shadow-sm">
-                <h3 className="text-lg font-bold text-base-content">
+            <div className="rounded-3xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
+                <h2 className="text-lg font-semibold text-base-content">
                     {isClassroomMode
                         ? "Bu sınıf için ders yetkisi bulunamadı"
                         : "Önce ders seçiniz"}
-                </h3>
+                </h2>
 
                 <p className="mt-2 text-sm text-base-content/60">
                     {isClassroomMode
@@ -48,32 +52,61 @@ function ExamEditableTable({
     }
 
     return (
-        <div className="rounded-3xl border border-base-300/70 bg-base-100 shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-base-300/70 p-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h2 className="text-lg font-bold text-base-content">
+                    <h2 className="text-base font-semibold text-base-content">
                         Öğrenci Notları
                     </h2>
+
                     <p className="mt-1 text-sm text-base-content/60">
-                        {rows.length} öğrenci listeleniyor. Notlar satır bazlı kaydedilir.
+                        {rows.length} öğrenci listeleniyor. Notları girip tek seferde
+                        kaydedebilirsiniz.
                     </p>
+
+                    {hasDirtyRows && (
+                        <p className="mt-2 text-xs font-medium text-warning">
+                            {dirtyCount} öğrencide kaydedilmemiş değişiklik var.
+                        </p>
+                    )}
                 </div>
 
-                <div className="w-full lg:max-w-md">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <SearchInput
                         value={search}
-                        onChange={setSearch}
-                        placeholder="Öğrenci adı veya numara ara..."
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Öğrenci ara..."
                     />
+
+                    <button
+                        type="button"
+                        onClick={onSaveAll}
+                        disabled={!hasDirtyRows || isSavingAll}
+                        className="btn btn-primary rounded-xl"
+                    >
+                        {isSavingAll ? (
+                            <span className="loading loading-spinner loading-sm" />
+                        ) : (
+                            <CheckCircleIcon className="h-5 w-5" />
+                        )}
+                        Tümünü Kaydet
+                    </button>
                 </div>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="table">
-                    <thead>
+                    <thead className="bg-base-200/70">
                         <tr>
                             {examTableHeaders.map((header) => (
-                                <th key={header} className="text-xs uppercase tracking-wide">
+                                <th
+                                    key={header}
+                                    className={
+                                        header === "İşlem"
+                                            ? "text-right text-sm"
+                                            : "text-sm"
+                                    }
+                                >
                                     {header}
                                 </th>
                             ))}
@@ -85,11 +118,9 @@ function ExamEditableTable({
                             <ExamEditableTableRow
                                 key={row.studentId}
                                 row={row}
-                                isSaving={savingRows[row.studentId]}
-                                error={rowErrors[row.studentId]}
                                 onGradeChange={onGradeChange}
-                                onSave={onSave}
                                 onReset={onReset}
+                                error={rowErrors[row.studentId]}
                             />
                         ))}
 
@@ -107,18 +138,16 @@ function ExamEditableTable({
                 </table>
             </div>
 
-            <div className="border-t border-base-300/70 p-4">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalItems}
-                    startItem={startItem}
-                    endItem={endItem}
-                    pageSize={pageSize}
-                    setPageSize={setPageSize}
-                    onPageChange={setCurrentPage}
-                />
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                startItem={startItem}
+                endItem={endItem}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+            />
         </div>
     );
 }

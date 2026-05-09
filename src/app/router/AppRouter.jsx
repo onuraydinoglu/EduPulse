@@ -10,22 +10,18 @@ import SchoolsPage from "../../features/schools/pages/SchoolsPage";
 import TeachersPage from "../../features/teachers/pages/TeachersPage";
 import OfficersPage from "../../features/officers/pages/OfficersPage";
 import ClassesPage from "../../features/classes/pages/ClassesPage";
+import ClassroomWorkspacePage from "../../features/classes/pages/ClassroomWorkspacePage";
 import StudentsPage from "../../features/students/pages/StudentsPage";
 import LessonsPage from "../../features/lessons/pages/LessonsPage";
-
 import ExamsPage from "../../features/exams/pages/ExamsPage";
 import TrialExamsPage from "../../features/trialExams/pages/TrialExamsPage";
-
 import ClubsPage from "../../features/clubs/pages/ClubsPage";
 import ClubMembersPage from "../../features/clubMembers/pages/ClubMembersPage";
-
 import PrincipalReportsPage from "../../features/reports/pages/PrincipalReportsPage";
 import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage";
-
 import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
 import EventsPage from "../../features/events/pages/EventsPage";
 import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
-import ClassroomWorkspacePage from "../../features/classes/pages/ClassroomWorkspacePage";
 
 function AppRouter() {
   return (
@@ -34,20 +30,21 @@ function AppRouter() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterSchoolPage />} />
+        <Route path="/register-school" element={<RegisterSchoolPage />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
 
           <Route path="schools" element={<SchoolsPage />} />
+
           <Route path="teachers" element={<TeachersPage />} />
+          <Route path="students" element={<StudentsPage />} />
           <Route path="officers" element={<OfficersPage />} />
 
           <Route path="classes" element={<ClassesPage />} />
           <Route path="classes/:classId" element={<ClassroomWorkspacePage />} />
-          <Route path="classes/:classroomId/exams" element={<ExamsPage />} />
+          <Route path="classes/:classId/exams" element={<ExamsPage />} />
 
-          <Route path="students" element={<StudentsPage />} />
           <Route path="lessons" element={<LessonsPage />} />
           <Route path="teacher-lessons" element={<TeacherLessonsPage />} />
 
@@ -60,11 +57,13 @@ function AppRouter() {
           <Route path="events" element={<EventsPage />} />
           <Route path="event-members" element={<EventMembersPage />} />
 
-          <Route path="reports/principal" element={<PrincipalReportsPage />} />
-          <Route path="reports/teacher" element={<TeacherReportsPage />} />
+          <Route path="principal-reports" element={<PrincipalReportsPage />} />
+          <Route path="teacher-reports" element={<TeacherReportsPage />} />
+
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

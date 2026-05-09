@@ -7,11 +7,9 @@ import { studentService } from "../../students/services/studentService";
 import { teacherLessonService } from "../../teacherLessons/services/teacherLessonService";
 
 import { exportToPdf } from "../../../utils/exportToPdf";
-
 import { emptyExamGrades, examGradeFields } from "../constants/examConstants";
 import { examPdfColumns } from "../constants/examTableColumns";
 import { examService } from "../services/examService";
-
 import {
     buildExamRows,
     createLessonOptionsFromLessons,
@@ -42,12 +40,11 @@ export function useExamsPage() {
 
     const [selectedLessonId, setSelectedLessonId] = useState("");
     const [editedGrades, setEditedGrades] = useState({});
-    const [savingRows, setSavingRows] = useState({});
+    const [isSavingAll, setIsSavingAll] = useState(false);
     const [rowErrors, setRowErrors] = useState({});
     const [search, setSearch] = useState("");
 
     const [isLoading, setIsLoading] = useState(true);
-
     const [toast, setToast] = useState({
         message: "",
         type: "success",
@@ -103,6 +100,7 @@ export function useExamsPage() {
             }
         } catch (error) {
             console.error(error);
+
             showToast(
                 getErrorMessage(error, "Sınav verileri yüklenirken hata oluştu."),
                 "error",
@@ -226,20 +224,8 @@ export function useExamsPage() {
         return "";
     };
 
-    const handleSaveRow = async (row) => {
-        const validationMessage = validateRow(row);
-
-        if (validationMessage) {
-            setRowErrors((prev) => ({
-                ...prev,
-                [row.studentId]: validationMessage,
-            }));
-
-            showToast(validationMessage, "error");
-            return;
-        }
-
-        const payload = {
+    const createPayloadFromRow = (row) => {
+        return {
             studentId: row.studentId,
             lessonId: selectedLessonId,
             exam1: normalizeGradeForPayload(row.exam1),
@@ -250,64 +236,84 @@ export function useExamsPage() {
             activity3: normalizeGradeForPayload(row.activity3),
             isActive: true,
         };
+    };
 
-        try {
-            setSavingRows((prev) => ({
+    const handleSaveAllGrades = async () => {
+        const changedRows = examRows.filter((row) => row.isDirty);
+
+        if (!changedRows.length) {
+            showToast("Kaydedilecek değişiklik bulunmuyor.", "info");
+            return;
+        }
+
+        const nextErrors = {};
+
+        changedRows.forEach((row) => {
+            const validationMessage = validateRow(row);
+
+            if (validationMessage) {
+                nextErrors[row.studentId] = validationMessage;
+            }
+        });
+
+        if (Object.keys(nextErrors).length > 0) {
+            setRowErrors((prev) => ({
                 ...prev,
-                [row.studentId]: true,
+                ...nextErrors,
             }));
 
-            const result = row.examId
-                ? await examService.update({
-                    id: row.examId,
-                    ...payload,
-                })
-                : await examService.create(payload);
+            showToast("Bazı öğrencilerin not bilgileri eksik veya hatalı.", "error");
+            return;
+        }
 
-            if (result?.isSuccess === false || result?.IsSuccess === false) {
-                const message =
-                    result?.message || result?.Message || "Not kaydı başarısız.";
+        try {
+            setIsSavingAll(true);
+            setRowErrors({});
 
-                setRowErrors((prev) => ({
-                    ...prev,
-                    [row.studentId]: message,
-                }));
+            const results = await Promise.all(
+                changedRows.map((row) => {
+                    const payload = createPayloadFromRow(row);
 
-                showToast(message, "error");
+                    if (row.examId) {
+                        return examService.update({
+                            id: row.examId,
+                            ...payload,
+                        });
+                    }
+
+                    return examService.create(payload);
+                }),
+            );
+
+            const failedResults = results.filter((result) => {
+                return result?.isSuccess === false || result?.IsSuccess === false;
+            });
+
+            if (failedResults.length > 0) {
+                const firstMessage =
+                    failedResults[0]?.message ||
+                    failedResults[0]?.Message ||
+                    "Bazı not kayıtları kaydedilemedi.";
+
+                showToast(firstMessage, "error");
                 return;
             }
 
             const refreshedExams = await examService.getAll();
             setExams(normalizeResultData(refreshedExams));
+            setEditedGrades({});
+            setRowErrors({});
 
-            setEditedGrades((prev) => {
-                const next = { ...prev };
-                delete next[row.studentId];
-                return next;
-            });
-
-            setRowErrors((prev) => ({
-                ...prev,
-                [row.studentId]: "",
-            }));
-
-            showToast("Not bilgileri başarıyla kaydedildi.");
+            showToast(`${changedRows.length} öğrencinin notu başarıyla kaydedildi.`);
         } catch (error) {
             console.error(error);
 
-            const message = getErrorMessage(error, "Not kaydedilirken hata oluştu.");
-
-            setRowErrors((prev) => ({
-                ...prev,
-                [row.studentId]: message,
-            }));
-
-            showToast(message, "error");
+            showToast(
+                getErrorMessage(error, "Notlar kaydedilirken hata oluştu."),
+                "error",
+            );
         } finally {
-            setSavingRows((prev) => ({
-                ...prev,
-                [row.studentId]: false,
-            }));
+            setIsSavingAll(false);
         }
     };
 
@@ -325,7 +331,12 @@ export function useExamsPage() {
     };
 
     const handleBackToClasses = () => {
-        navigate(`/dashboard/classes/${classroomId}`);
+        if (classroomId) {
+            navigate(`/dashboard/classes/${classroomId}`);
+            return;
+        }
+
+        navigate("/dashboard/classes");
     };
 
     const handleExportExamsPdf = () => {
@@ -353,11 +364,11 @@ export function useExamsPage() {
         filteredRows,
         search,
         setSearch,
-        savingRows,
+        isSavingAll,
         rowErrors,
         toast,
         handleGradeChange,
-        handleSaveRow,
+        handleSaveAllGrades,
         handleResetRow,
         handleBackToClasses,
         handleExportExamsPdf,

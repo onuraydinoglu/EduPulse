@@ -1,10 +1,8 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
-
 import { usePagination } from "../../../hooks/usePagination";
 import { classGradeFilterOptions } from "../constants/classFilters";
-
 import ClassTableRow from "./ClassTableRow";
 
 function ClassTable({
@@ -31,28 +29,27 @@ function ClassTable({
   } = usePagination(classes, 5);
 
   return (
-    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
+    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-base-content">Sınıf Listesi</h2>
-
-          <p className="text-sm text-base-content/60">
+          <h2 className="text-base font-semibold text-base-content">
+            Sınıf Listesi
+          </h2>
+          <p className="mt-1 text-sm text-base-content/60">
             {classes.length} kayıt listeleniyor.
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:w-auto">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchInput
             value={search}
-            onChange={setSearch}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Sınıf veya öğretmen ara..."
           />
 
           <FilterSelect
             value={gradeFilter}
-            onChange={setGradeFilter}
-            hideLabel
-            placeholder="Sınıf seviyesi"
+            onChange={(event) => setGradeFilter(event.target.value)}
             options={classGradeFilterOptions}
           />
         </div>
@@ -60,13 +57,13 @@ function ClassTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead>
-            <tr className="text-xs uppercase text-base-content/50">
-              <th>Sınıf</th>
-              <th>Sınıf Öğretmeni</th>
-              <th>Öğrenci Sayısı</th>
-              <th>Sınıf Alanı</th>
-              <th className="text-right">İşlemler</th>
+          <thead className="bg-base-200/70">
+            <tr>
+              <th className="text-sm">Sınıf</th>
+              <th className="text-sm">Sınıf Öğretmeni</th>
+              <th className="text-sm">Öğrenci Sayısı</th>
+              <th className="text-sm">Sınıf İşlemi</th>
+              {canManage && <th className="text-right text-sm">İşlemler</th>}
             </tr>
           </thead>
 
@@ -84,7 +81,10 @@ function ClassTable({
 
             {classes.length === 0 && (
               <tr>
-                <td colSpan="5" className="py-10 text-center text-base-content/50">
+                <td
+                  colSpan={canManage ? 5 : 4}
+                  className="py-10 text-center text-sm text-base-content/60"
+                >
                   Sınıf kaydı bulunamadı.
                 </td>
               </tr>
@@ -93,18 +93,16 @@ function ClassTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          startItem={startItem}
-          endItem={endItem}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }

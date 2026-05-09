@@ -10,8 +10,10 @@ import ClassroomStudentCreateModal from "../components/workspace/ClassroomStuden
 import { useClassroomWorkspace } from "../hooks/useClassroomWorkspace";
 
 function ClassroomWorkspacePage() {
-  const { classId } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
+
+  const classId = params.classId || params.classroomId || params.id;
 
   const {
     activeTab,
@@ -30,6 +32,10 @@ function ClassroomWorkspacePage() {
     resetStudentForm,
     createStudent,
   } = useClassroomWorkspace(classId);
+
+  const handleBackToClasses = () => {
+    navigate("/dashboard/classes");
+  };
 
   const handleOpenStudentModal = () => {
     if (!canManageStudents) return;
@@ -51,6 +57,12 @@ function ClassroomWorkspacePage() {
     }
   };
 
+  const handleOpenGrades = () => {
+    if (!classId) return;
+
+    navigate(`/dashboard/classes/${classId}/exams`);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -67,9 +79,9 @@ function ClassroomWorkspacePage() {
         <ClassroomWorkspaceHeader
           classroom={classroom}
           teachers={teachers}
-          onBack={() => navigate("/dashboard/classes")}
+          onBack={handleBackToClasses}
           onOpenStudentModal={handleOpenStudentModal}
-          onOpenGrades={() => setActiveTab("grades")}
+          onOpenGrades={handleOpenGrades}
           canManageStudents={canManageStudents}
         />
 

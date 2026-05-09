@@ -1,16 +1,11 @@
-import {
-    ArrowPathIcon,
-    CheckIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 import { examGradeFields } from "../constants/examConstants";
 
 function ExamEditableTableRow({
     row,
     onGradeChange,
-    onSave,
     onReset,
-    isSaving = false,
     error = "",
 }) {
     const averageColor =
@@ -22,15 +17,15 @@ function ExamEditableTableRow({
 
     return (
         <>
-            <tr className="transition hover:bg-base-200/60">
+            <tr className="transition hover:bg-base-200/50">
                 <td>
                     <div>
-                        <p className="font-semibold text-base-content">
+                        <div className="font-semibold text-base-content">
                             {row.studentFullName}
-                        </p>
-                        <p className="text-xs text-base-content/50">
+                        </div>
+                        <div className="text-xs text-base-content/50">
                             No: {row.studentNumber}
-                        </p>
+                        </div>
                     </div>
                 </td>
 
@@ -51,36 +46,33 @@ function ExamEditableTableRow({
                 ))}
 
                 <td>
-                    <span className={`font-bold ${averageColor}`}>
+                    <span className={`font-semibold ${averageColor}`}>
                         {row.averageLabel}
                     </span>
                 </td>
 
-                <td>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            disabled={isSaving}
-                            onClick={() => onSave(row)}
-                            className="btn btn-sm rounded-xl bg-primary text-primary-content hover:bg-primary/90"
-                        >
-                            {isSaving ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <CheckIcon className="h-4 w-4" />
-                            )}
-                            Kaydet
-                        </button>
+                <td className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                        {row.isDirty ? (
+                            <>
+                                <span className="badge badge-warning badge-outline rounded-xl">
+                                    Bekliyor
+                                </span>
 
-                        {row.isDirty && (
-                            <button
-                                type="button"
-                                disabled={isSaving}
-                                onClick={() => onReset(row.studentId)}
-                                className="btn btn-ghost btn-sm rounded-xl text-base-content/60"
-                            >
-                                <ArrowPathIcon className="h-4 w-4" />
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() => onReset(row.studentId)}
+                                    className="btn btn-ghost btn-sm rounded-xl text-base-content/60"
+                                    title="Değişikliği geri al"
+                                >
+                                    <ArrowPathIcon className="h-4 w-4" />
+                                </button>
+                            </>
+                        ) : (
+                            <span className="badge badge-success badge-outline rounded-xl">
+                                <CheckCircleIcon className="h-4 w-4" />
+                                Kayıtlı
+                            </span>
                         )}
                     </div>
                 </td>
@@ -88,7 +80,10 @@ function ExamEditableTableRow({
 
             {error && (
                 <tr>
-                    <td colSpan={9} className="bg-error/5 px-4 py-2 text-sm text-error">
+                    <td
+                        colSpan={9}
+                        className="bg-error/5 px-4 py-2 text-sm text-error"
+                    >
                         {error}
                     </td>
                 </tr>
