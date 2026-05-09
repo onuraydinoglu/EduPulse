@@ -8,7 +8,9 @@ export const examService = {
   },
 
   getById: async (id) => {
-    const response = await axiosInstance.get(`${API_ENDPOINTS.STUDENT_GRADES}/${id}`);
+    const response = await axiosInstance.get(
+      `${API_ENDPOINTS.STUDENT_GRADES}/${id}`
+    );
     return response.data;
   },
 
@@ -23,7 +25,9 @@ export const examService = {
   },
 
   delete: async (id) => {
-    const response = await axiosInstance.delete(`${API_ENDPOINTS.STUDENT_GRADES}/${id}`);
+    const response = await axiosInstance.delete(
+      `${API_ENDPOINTS.STUDENT_GRADES}/${id}`
+    );
     return response.data;
   },
 };

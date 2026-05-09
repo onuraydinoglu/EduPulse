@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import StudentTable from "../../../students/components/StudentTable";
 
 function ClassroomWorkspaceTabs({
@@ -12,24 +11,22 @@ function ClassroomWorkspaceTabs({
   onDeleteStudent,
 }) {
   const [studentSearch, setStudentSearch] = useState("");
-  const [studentStatusFilter, setStudentStatusFilter] = useState("all");
   const [studentClassroomFilter, setStudentClassroomFilter] = useState("all");
 
   const classroomId = classroom?.id || classroom?.Id;
 
   const classroomOptions = classroom
     ? [
-        {
-          value: classroomId,
-          label:
-            classroom.name ||
-            classroom.className ||
-            classroom.ClassName ||
-            `${classroom.grade || classroom.Grade || ""}-${
-              classroom.section || classroom.Section || ""
-            }`,
-        },
-      ]
+      {
+        value: classroomId,
+        label:
+          classroom.name ||
+          classroom.className ||
+          classroom.ClassName ||
+          `${classroom.grade || classroom.Grade || ""}-${classroom.section || classroom.Section || ""
+          }`,
+      },
+    ]
     : [];
 
   return (
@@ -39,11 +36,10 @@ function ClassroomWorkspaceTabs({
           students={students}
           search={studentSearch}
           setSearch={setStudentSearch}
-          statusFilter={studentStatusFilter}
-          setStatusFilter={setStudentStatusFilter}
           classroomFilter={studentClassroomFilter}
           setClassroomFilter={setStudentClassroomFilter}
           classroomOptions={classroomOptions}
+          showStatusFilter={false}
           onEdit={onEditStudent}
           onDelete={onDeleteStudent}
         />

@@ -1,6 +1,7 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
+
 import { usePagination } from "../../../hooks/usePagination";
 
 import {
@@ -19,6 +20,7 @@ function StudentTable({
   classroomFilter,
   setClassroomFilter,
   classroomOptions = [],
+  showStatusFilter = true,
   onEdit,
   onDelete,
 }) {
@@ -47,7 +49,10 @@ function StudentTable({
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3 xl:w-auto">
+        <div
+          className={`grid w-full grid-cols-1 gap-3 ${showStatusFilter ? "md:grid-cols-3" : "md:grid-cols-2"
+            } xl:w-auto`}
+        >
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -62,13 +67,15 @@ function StudentTable({
             options={[defaultClassroomFilterOption, ...classroomOptions]}
           />
 
-          <FilterSelect
-            value={statusFilter}
-            onChange={setStatusFilter}
-            hideLabel
-            placeholder="Durum filtresi"
-            options={studentStatusFilterOptions}
-          />
+          {showStatusFilter && (
+            <FilterSelect
+              value={statusFilter}
+              onChange={setStatusFilter}
+              hideLabel
+              placeholder="Durum filtresi"
+              options={studentStatusFilterOptions}
+            />
+          )}
         </div>
       </div>
 

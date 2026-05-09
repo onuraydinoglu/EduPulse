@@ -1,51 +1,105 @@
-import FormInput from "../../../components/ui/FormInput";
-import FormSelect from "../../../components/ui/FormSelect";
+import FormFields from "../../../components/common/FormFields";
 
-function ExamForm({ formData, setFormData }) {
-  const updateField = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+import {
+    getLessonId,
+    getLessonName,
+    getStudentFullName,
+    getStudentId,
+    normalizeSelectOptions,
+} from "../utils/examFormatters";
 
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <FormInput
-        label="Sınav Adı"
-        placeholder="Örn: TYT Deneme Sınavı"
-        value={formData.name}
-        onChange={(value) => updateField("name", value)}
-      />
+function ExamForm({
+    formData,
+    setFormData,
+    students = [],
+    lessons = [],
+    errors = {},
+    isEditing = false,
+}) {
+    const studentOptions = [
+        {
+            label: "Öğrenci seçiniz",
+            value: "",
+        },
+        ...normalizeSelectOptions(students, getStudentFullName, getStudentId),
+    ];
 
-      <FormSelect
-        label="Sınıf"
-        value={formData.className}
-        onChange={(value) => updateField("className", value)}
-        options={[
-          { label: "9. Sınıf", value: "9. Sınıf" },
-          { label: "10. Sınıf", value: "10. Sınıf" },
-          { label: "11. Sınıf", value: "11. Sınıf" },
-          { label: "12. Sınıf", value: "12. Sınıf" },
-        ]}
-      />
+    const lessonOptions = [
+        {
+            label: "Ders seçiniz",
+            value: "",
+        },
+        ...normalizeSelectOptions(lessons, getLessonName, getLessonId),
+    ];
 
-      <FormInput
-        label="Tarih"
-        type="date"
-        value={formData.date}
-        onChange={(value) => updateField("date", value)}
-      />
+    const examFields = [
+        {
+            name: "studentId",
+            label: "Öğrenci",
+            type: "select",
+            options: studentOptions,
+        },
+        {
+            name: "lessonId",
+            label: "Ders",
+            type: "select",
+            options: lessonOptions,
+        },
+        {
+            name: "exam1",
+            label: "1. Sınav",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+        {
+            name: "exam2",
+            label: "2. Sınav",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+        {
+            name: "project",
+            label: "Proje",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+        {
+            name: "activity1",
+            label: "Sınıf İçi 1",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+        {
+            name: "activity2",
+            label: "Sınıf İçi 2",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+        {
+            name: "activity3",
+            label: "Sınıf İçi 3",
+            type: "number",
+            placeholder: "0 - 100",
+        },
+    ];
 
-      <FormInput
-        label="Ortalama"
-        type="number"
-        placeholder="Örn: 72"
-        value={formData.average}
-        onChange={(value) => updateField("average", value)}
-      />
-    </div>
-  );
+    return (
+        <div className="space-y-4">
+            {errors?.general && (
+                <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+                    {errors.general}
+                </div>
+            )}
+
+            <FormFields
+                fields={examFields}
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+                isEditing={isEditing}
+            />
+        </div>
+    );
 }
 
 export default ExamForm;
