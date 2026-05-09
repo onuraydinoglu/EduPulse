@@ -1,3 +1,67 @@
+import { emptyExamGrades } from "../constants/examConstants";
+
+export const normalizeResultData = (result) => {
+    return result?.data || result?.Data || [];
+};
+
+export const getEntityId = (entity) => {
+    return entity?.id || entity?.Id || "";
+};
+
+export const getStudentId = (student) => {
+    return student?.id || student?.Id || "";
+};
+
+export const getStudentNumber = (student) => {
+    return student?.studentNumber || student?.StudentNumber || "-";
+};
+
+export const getStudentFullName = (student) => {
+    const fullName = student?.fullName || student?.FullName;
+
+    if (fullName) return fullName;
+
+    const firstName = student?.firstName || student?.FirstName || "";
+    const lastName = student?.lastName || student?.LastName || "";
+
+    return `${firstName} ${lastName}`.trim() || "-";
+};
+
+export const getStudentClassroomId = (student) => {
+    return student?.classroomId || student?.ClassroomId || "";
+};
+
+export const getStudentClassroomName = (student, classrooms = []) => {
+    const directName =
+        student?.classroomName ||
+        student?.ClassroomName ||
+        student?.className ||
+        student?.ClassName;
+
+    if (directName) return directName;
+
+    const classroomId = getStudentClassroomId(student);
+
+    const classroom = classrooms.find((item) => {
+        return getEntityId(item) === classroomId;
+    });
+
+    if (!classroom) return "-";
+
+    const grade = classroom?.grade || classroom?.Grade || "";
+    const section = classroom?.section || classroom?.Section || "";
+
+    return `${grade}/${section}`.trim() || "-";
+};
+
+export const getLessonId = (lesson) => {
+    return lesson?.id || lesson?.Id || "";
+};
+
+export const getLessonName = (lesson) => {
+    return lesson?.name || lesson?.Name || "-";
+};
+
 export const getExamId = (exam) => {
     return exam?.id || exam?.Id || "";
 };
@@ -10,55 +74,37 @@ export const getExamLessonId = (exam) => {
     return exam?.lessonId || exam?.LessonId || "";
 };
 
-export const getExamStudentFullName = (exam) => {
-    return (
-        exam?.studentFullName ||
-        exam?.StudentFullName ||
-        exam?.studentName ||
-        exam?.StudentName ||
-        "-"
-    );
-};
-
-export const getExamLessonName = (exam) => {
-    return exam?.lessonName || exam?.LessonName || "-";
-};
-
-export const getExamClassroomName = (exam) => {
-    return (
-        exam?.classroomName ||
-        exam?.ClassroomName ||
-        exam?.className ||
-        exam?.ClassName ||
-        "-"
-    );
-};
-
 export const getExamValue = (exam, key) => {
-    return exam?.[key] ?? exam?.[key.charAt(0).toUpperCase() + key.slice(1)] ?? "";
+    const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+    return exam?.[key] ?? exam?.[pascalKey] ?? "";
 };
 
-export const getExam1 = (exam) => getExamValue(exam, "exam1");
-export const getExam2 = (exam) => getExamValue(exam, "exam2");
-export const getExamProject = (exam) => getExamValue(exam, "project");
-export const getExamActivity1 = (exam) => getExamValue(exam, "activity1");
-export const getExamActivity2 = (exam) => getExamValue(exam, "activity2");
-export const getExamActivity3 = (exam) => getExamValue(exam, "activity3");
+export const normalizeGradeInput = (value) => {
+    if (value === "" || value === null || value === undefined) return "";
 
-export const getExamAverage = (exam) => {
-    const average = exam?.average ?? exam?.Average;
+    const numericValue = Number(value);
 
-    if (average !== undefined && average !== null && average !== "") {
-        return Number(average);
-    }
+    if (Number.isNaN(numericValue)) return "";
 
+    if (numericValue < 0) return "0";
+    if (numericValue > 100) return "100";
+
+    return String(numericValue);
+};
+
+export const normalizeGradeForPayload = (value) => {
+    if (value === "" || value === null || value === undefined) return null;
+    return Number(value);
+};
+
+export const calculateAverage = (grades) => {
     const values = [
-        getExam1(exam),
-        getExam2(exam),
-        getExamProject(exam),
-        getExamActivity1(exam),
-        getExamActivity2(exam),
-        getExamActivity3(exam),
+        grades.exam1,
+        grades.exam2,
+        grades.project,
+        grades.activity1,
+        grades.activity2,
+        grades.activity3,
     ]
         .map(Number)
         .filter((value) => !Number.isNaN(value));
@@ -68,88 +114,109 @@ export const getExamAverage = (exam) => {
     return values.reduce((total, value) => total + value, 0) / values.length;
 };
 
-export const getExamAverageLabel = (exam) => {
-    const average = getExamAverage(exam);
-    return average ? average.toFixed(2) : "-";
+export const getAverageLabel = (average) => {
+    return average > 0 ? average.toFixed(2) : "-";
 };
 
-export const getExamIsActive = (exam) => {
-    return exam?.isActive !== false && exam?.IsActive !== false;
+export const createClassroomOptions = (classrooms = []) => {
+    return [
+        {
+            label: "Tüm Sınıflar",
+            value: "all",
+        },
+        ...classrooms.map((classroom) => {
+            const id = getEntityId(classroom);
+            const grade = classroom?.grade || classroom?.Grade || "";
+            const section = classroom?.section || classroom?.Section || "";
+
+            return {
+                label: `${grade}/${section}`,
+                value: id,
+            };
+        }),
+    ];
 };
 
-export const getExamStatus = (exam) => {
-    return getExamIsActive(exam) ? "aktif" : "pasif";
+export const createLessonOptions = (lessons = []) => {
+    return [
+        {
+            label: "Ders seçiniz",
+            value: "",
+        },
+        ...lessons.map((lesson) => ({
+            label: getLessonName(lesson),
+            value: getLessonId(lesson),
+        })),
+    ];
 };
 
-export const getExamStatusLabel = (exam) => {
-    return getExamIsActive(exam) ? "Aktif" : "Pasif";
-};
-
-export const getExamResultStatus = (exam) => {
-    return getExamAverage(exam) >= 50 ? "Geçti" : "Kaldı";
-};
-
-export const normalizeSelectOptions = (items = [], labelGetter, valueGetter) => {
-    return items.map((item) => ({
-        label: labelGetter(item),
-        value: valueGetter(item),
-    }));
-};
-
-export const getStudentId = (student) => {
-    return student?.id || student?.Id || "";
-};
-
-export const getStudentFullName = (student) => {
-    return (
-        student?.fullName ||
-        student?.FullName ||
-        `${student?.firstName || student?.FirstName || ""} ${student?.lastName || student?.LastName || ""
-            }`.trim() ||
-        "-"
-    );
-};
-
-export const getLessonId = (lesson) => {
-    return lesson?.id || lesson?.Id || "";
-};
-
-export const getLessonName = (lesson) => {
-    return lesson?.name || lesson?.Name || "-";
-};
-
-export const filterExams = (
+export const buildExamRows = ({
+    students = [],
     exams = [],
+    classrooms = [],
+    selectedLessonId = "",
+    editedGrades = {},
+}) => {
+    return students.map((student) => {
+        const studentId = getStudentId(student);
+
+        const existingExam = exams.find((exam) => {
+            return (
+                getExamStudentId(exam) === studentId &&
+                getExamLessonId(exam) === selectedLessonId
+            );
+        });
+
+        const examId = getExamId(existingExam);
+
+        const backendGrades = existingExam
+            ? {
+                exam1: getExamValue(existingExam, "exam1"),
+                exam2: getExamValue(existingExam, "exam2"),
+                project: getExamValue(existingExam, "project"),
+                activity1: getExamValue(existingExam, "activity1"),
+                activity2: getExamValue(existingExam, "activity2"),
+                activity3: getExamValue(existingExam, "activity3"),
+            }
+            : emptyExamGrades;
+
+        const rowGrades = editedGrades[studentId] || backendGrades;
+
+        const average = calculateAverage(rowGrades);
+
+        return {
+            studentId,
+            examId,
+            studentFullName: getStudentFullName(student),
+            studentNumber: getStudentNumber(student),
+            classroomId: getStudentClassroomId(student),
+            classroomName: getStudentClassroomName(student, classrooms),
+            average,
+            averageLabel: getAverageLabel(average),
+            isDirty: Boolean(editedGrades[studentId]),
+            ...rowGrades,
+        };
+    });
+};
+
+export const filterExamRows = ({
+    rows = [],
     search = "",
-    statusFilter = "all",
-    averageFilter = "all",
-) => {
+    classroomFilter = "all",
+}) => {
     const normalizedSearch = search.toLocaleLowerCase("tr-TR").trim();
 
-    return exams.filter((exam) => {
-        const studentName = getExamStudentFullName(exam).toLocaleLowerCase("tr-TR");
-        const lessonName = getExamLessonName(exam).toLocaleLowerCase("tr-TR");
-        const classroomName = getExamClassroomName(exam).toLocaleLowerCase("tr-TR");
-        const average = getExamAverage(exam);
-        const isActive = getExamIsActive(exam);
-
+    return rows.filter((row) => {
         const matchesSearch =
             !normalizedSearch ||
-            studentName.includes(normalizedSearch) ||
-            lessonName.includes(normalizedSearch) ||
-            classroomName.includes(normalizedSearch);
+            row.studentFullName.toLocaleLowerCase("tr-TR").includes(normalizedSearch) ||
+            String(row.studentNumber).toLocaleLowerCase("tr-TR").includes(normalizedSearch) ||
+            row.classroomName.toLocaleLowerCase("tr-TR").includes(normalizedSearch);
 
-        const matchesStatus =
-            statusFilter === "all" ||
-            (statusFilter === "active" && isActive) ||
-            (statusFilter === "passive" && !isActive);
+        const matchesClassroom =
+            classroomFilter === "all" || row.classroomId === classroomFilter;
 
-        const matchesAverage =
-            averageFilter === "all" ||
-            (averageFilter === "passed" && average >= 50) ||
-            (averageFilter === "failed" && average < 50);
-
-        return matchesSearch && matchesStatus && matchesAverage;
+        return matchesSearch && matchesClassroom;
     });
 };
 
@@ -169,20 +236,4 @@ export const getErrorMessage = (error, fallback) => {
         error?.message ||
         fallback
     );
-};
-
-export const getBackendFieldErrors = (error) => {
-    const data = error?.response?.data || error;
-    const backendErrors = data?.errors || data?.Errors;
-
-    if (!backendErrors || Array.isArray(backendErrors)) return {};
-
-    const fieldErrors = {};
-
-    Object.entries(backendErrors).forEach(([key, value]) => {
-        const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
-        fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
-    });
-
-    return fieldErrors;
 };

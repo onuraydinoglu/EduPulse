@@ -1,79 +1,54 @@
 import Toast from "../../../components/ui/Toast";
 
-import ExamDeleteModal from "../components/ExamDeleteModal";
-import ExamFormModal from "../components/ExamFormModal";
-import ExamTable from "../components/ExamTable";
+import ExamEditableTable from "../components/ExamEditableTable";
+import ExamStatsCards from "../components/ExamStatsCards";
 import ExamsPageHeader from "../components/ExamsPageHeader";
 
-import {
-  EXAM_DELETE_MODAL_ID,
-  EXAM_MODAL_ID,
-} from "../constants/examConstants";
 import { getExamStats } from "../constants/examTableColumns";
 import { useExamsPage } from "../hooks/useExamsPage";
 
 function ExamsPage() {
   const {
-    exams,
-    filteredExams,
-    students,
-    lessons,
-    formData,
-    setFormData,
-    errors,
-    isEditing,
-    toast,
+    selectedLessonId,
+    setSelectedLessonId,
+    classroomFilter,
+    setClassroomFilter,
     search,
     setSearch,
-    statusFilter,
-    setStatusFilter,
-    averageFilter,
-    setAverageFilter,
-    handleOpenCreateModal,
-    handleOpenEditModal,
-    handleCloseExamModal,
-    handleOpenDeleteModal,
-    handleCloseDeleteModal,
-    handleDelete,
-    handleSubmit,
+    lessonOptions,
+    classroomOptions,
+    examRows,
+    filteredRows,
+    savingRows,
+    rowErrors,
+    toast,
+    handleGradeChange,
+    handleSaveRow,
+    handleResetRow,
     handleExportExamsPdf,
   } = useExamsPage();
 
   return (
     <div className="space-y-6">
-      <ExamsPageHeader
-        onCreate={() => handleOpenCreateModal(EXAM_MODAL_ID)}
-        onExport={handleExportExamsPdf}
-      />
+      <ExamsPageHeader onExport={handleExportExamsPdf} />
 
-      <ExamTable
-        exams={filteredExams}
+      <ExamStatsCards items={getExamStats(examRows)} />
+
+      <ExamEditableTable
+        rows={filteredRows}
         search={search}
         setSearch={setSearch}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        averageFilter={averageFilter}
-        setAverageFilter={setAverageFilter}
-        onEdit={(exam) => handleOpenEditModal(exam, EXAM_MODAL_ID)}
-        onDelete={(id) => handleOpenDeleteModal(id, EXAM_DELETE_MODAL_ID)}
-      />
-
-      <ExamFormModal
-        modalId={EXAM_MODAL_ID}
-        isEditing={isEditing}
-        formData={formData}
-        setFormData={setFormData}
-        students={students}
-        lessons={lessons}
-        errors={errors}
-        onClose={() => handleCloseExamModal(EXAM_MODAL_ID)}
-        onSubmit={() => handleSubmit(EXAM_MODAL_ID)}
-      />
-
-      <ExamDeleteModal
-        modalId={EXAM_DELETE_MODAL_ID}
-        onClose={() => handleCloseDeleteModal(EXAM_DELETE_MODAL_ID)}
-        onConfirm={() => handleDelete(EXAM_DELETE_MODAL_ID)}
+        selectedLessonId={selectedLessonId}
+        setSelectedLessonId={setSelectedLessonId}
+        lessonOptions={lessonOptions}
+        classroomFilter={classroomFilter}
+        setClassroomFilter={setClassroomFilter}
+        classroomOptions={classroomOptions}
+        savingRows={savingRows}
+        rowErrors={rowErrors}
+        onGradeChange={handleGradeChange}
+        onSave={handleSaveRow}
+        onReset={handleResetRow}
       />
 
       {toast.message && <Toast message={toast.message} type={toast.type} />}

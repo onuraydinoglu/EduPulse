@@ -1,80 +1,44 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { classService } from "../../classes/services/classService";
+import axiosInstance from "../../../api/axiosInstance";
+import { API_ENDPOINTS } from "../../../api/endpoints";
 import { lessonService } from "../../lessons/services/lessonService";
-import { studentService } from "../../students/services/studentService";
+import { classService } from "../../classes/services/classService";
 import { exportToPdf } from "../../../utils/exportToPdf";
-import { hasValidationError, validateForm } from "../../../validations/validationRules";
 
-import { emptyExamForm } from "../constants/examConstants";
+import { examGradeFields } from "../constants/examConstants";
 import { examPdfColumns } from "../constants/examTableColumns";
 import { examService } from "../services/examService";
 
 import {
-    filterExams,
-    getBackendFieldErrors,
+    buildExamRows,
+    createClassroomOptions,
+    createLessonOptions,
+    filterExamRows,
     getErrorMessage,
-    getExamActivity1,
-    getExamActivity2,
-    getExamActivity3,
-    getExamId,
-    getExamIsActive,
-    getExamLessonId,
-    getExamProject,
-    getExamStudentId,
-    getExam1,
-    getExam2,
+    normalizeGradeForPayload,
+    normalizeGradeInput,
+    normalizeResultData,
 } from "../utils/examFormatters";
 
-const gradeValidationSchema = {
-    studentId: [(value) => (!value ? "Öğrenci seçilmelidir." : "")],
-    lessonId: [(value) => (!value ? "Ders seçilmelidir." : "")],
-    exam1: [(value) => validateGradeValue(value, "1. sınav")],
-    exam2: [(value) => validateGradeValue(value, "2. sınav")],
-    project: [(value) => validateGradeValue(value, "Proje")],
-    activity1: [(value) => validateGradeValue(value, "Sınıf içi 1")],
-    activity2: [(value) => validateGradeValue(value, "Sınıf içi 2")],
-    activity3: [(value) => validateGradeValue(value, "Sınıf içi 3")],
-};
-
-function validateGradeValue(value, label) {
-    if (value === "" || value === null || value === undefined) return "";
-
-    const numberValue = Number(value);
-
-    if (Number.isNaN(numberValue)) {
-        return `${label} notu sayı olmalıdır.`;
-    }
-
-    if (numberValue < 0 || numberValue > 100) {
-        return `${label} notu 0 ile 100 arasında olmalıdır.`;
-    }
-
-    return "";
-}
-
 export function useExamsPage() {
-    const [exams, setExams] = useState([]);
     const [students, setStudents] = useState([]);
+    const [exams, setExams] = useState([]);
     const [lessons, setLessons] = useState([]);
     const [classrooms, setClassrooms] = useState([]);
 
-    const [formData, setFormData] = useState(emptyExamForm);
-    const [errors, setErrors] = useState({});
+    const [selectedLessonId, setSelectedLessonId] = useState("");
+    const [classroomFilter, setClassroomFilter] = useState("all");
+    const [search, setSearch] = useState("");
 
-    const [editingExamId, setEditingExamId] = useState(null);
-    const [deletingExamId, setDeletingExamId] = useState(null);
+    const [editedGrades, setEditedGrades] = useState({});
+    const [savingRows, setSavingRows] = useState({});
+    const [rowErrors, setRowErrors] = useState({});
 
     const [toast, setToast] = useState({
         message: "",
         type: "success",
     });
-
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [averageFilter, setAverageFilter] = useState("all");
-
-    const isEditing = editingExamId !== null;
 
     const showToast = (message, type = "success") => {
         setToast({
@@ -90,201 +54,208 @@ export function useExamsPage() {
         }, 2500);
     };
 
-    const openModal = (id) => {
-        document.getElementById(id)?.showModal();
+    const getStudents = async () => {
+        const response = await axiosInstance.get(API_ENDPOINTS.STUDENTS);
+        return response.data;
     };
 
-    const closeModal = (id) => {
-        document.getElementById(id)?.close();
-    };
-
-    const normalizeResultData = (result) => {
-        return result?.data || result?.Data || [];
-    };
-
-    const getExams = async () => {
+    const getPageData = async () => {
         try {
-            const result = await examService.getAll();
+            const [studentsResult, examsResult, lessonsResult, classroomsResult] =
+                await Promise.all([
+                    getStudents(),
+                    examService.getAll(),
+                    lessonService.getAll(),
+                    classService.getAll(),
+                ]);
 
-            if (result.isSuccess || result.IsSuccess) {
-                setExams(normalizeResultData(result));
-            } else {
-                showToast(result.message || result.Message || "Sınav notları getirilemedi.", "error");
-            }
+            setStudents(normalizeResultData(studentsResult));
+            setExams(normalizeResultData(examsResult));
+            setLessons(normalizeResultData(lessonsResult));
+            setClassrooms(normalizeResultData(classroomsResult));
         } catch (error) {
             console.error(error);
-            showToast(getErrorMessage(error, "Sınav notları getirilirken hata oluştu."), "error");
-        }
-    };
-
-    const getLookupData = async () => {
-        try {
-            const [studentsResult, lessonsResult, classroomsResult] = await Promise.all([
-                studentService.getAll(),
-                lessonService.getAll(),
-                classService.getAll(),
-            ]);
-
-            if (studentsResult.isSuccess || studentsResult.IsSuccess) {
-                setStudents(normalizeResultData(studentsResult));
-            }
-
-            if (lessonsResult.isSuccess || lessonsResult.IsSuccess) {
-                setLessons(normalizeResultData(lessonsResult));
-            }
-
-            if (classroomsResult.isSuccess || classroomsResult.IsSuccess) {
-                setClassrooms(normalizeResultData(classroomsResult));
-            }
-        } catch (error) {
-            console.error(error);
-            showToast(getErrorMessage(error, "Liste verileri getirilirken hata oluştu."), "error");
+            showToast(
+                getErrorMessage(error, "Sınav sayfası verileri getirilirken hata oluştu."),
+                "error",
+            );
         }
     };
 
     useEffect(() => {
-        const fetchPageData = async () => {
-            await Promise.all([getExams(), getLookupData()]);
-        };
-
-        fetchPageData();
+        getPageData();
     }, []);
 
-    const filteredExams = useMemo(() => {
-        return filterExams(exams, search, statusFilter, averageFilter);
-    }, [exams, search, statusFilter, averageFilter]);
+    useEffect(() => {
+        setEditedGrades({});
+        setRowErrors({});
+    }, [selectedLessonId]);
 
-    const handleOpenCreateModal = (modalId) => {
-        setEditingExamId(null);
-        setFormData(emptyExamForm);
-        setErrors({});
-        openModal(modalId);
-    };
+    const lessonOptions = useMemo(() => {
+        return createLessonOptions(lessons);
+    }, [lessons]);
 
-    const handleOpenEditModal = (exam, modalId) => {
-        setEditingExamId(getExamId(exam));
-        setErrors({});
+    const classroomOptions = useMemo(() => {
+        return createClassroomOptions(classrooms);
+    }, [classrooms]);
 
-        setFormData({
-            studentId: getExamStudentId(exam),
-            lessonId: getExamLessonId(exam),
-            exam1: getExam1(exam),
-            exam2: getExam2(exam),
-            project: getExamProject(exam),
-            activity1: getExamActivity1(exam),
-            activity2: getExamActivity2(exam),
-            activity3: getExamActivity3(exam),
-            isActive: getExamIsActive(exam),
+    const examRows = useMemo(() => {
+        if (!selectedLessonId) return [];
+
+        return buildExamRows({
+            students,
+            exams,
+            classrooms,
+            selectedLessonId,
+            editedGrades,
+        });
+    }, [students, exams, classrooms, selectedLessonId, editedGrades]);
+
+    const filteredRows = useMemo(() => {
+        return filterExamRows({
+            rows: examRows,
+            search,
+            classroomFilter,
+        });
+    }, [examRows, search, classroomFilter]);
+
+    const handleGradeChange = (studentId, field, value) => {
+        const normalizedValue = normalizeGradeInput(value);
+
+        setEditedGrades((prev) => {
+            const currentRow =
+                prev[studentId] ||
+                examRows.find((row) => row.studentId === studentId) ||
+                {};
+
+            return {
+                ...prev,
+                [studentId]: {
+                    exam1: currentRow.exam1 || "",
+                    exam2: currentRow.exam2 || "",
+                    project: currentRow.project || "",
+                    activity1: currentRow.activity1 || "",
+                    activity2: currentRow.activity2 || "",
+                    activity3: currentRow.activity3 || "",
+                    [field]: normalizedValue,
+                },
+            };
         });
 
-        openModal(modalId);
+        setRowErrors((prev) => ({
+            ...prev,
+            [studentId]: "",
+        }));
     };
 
-    const handleCloseExamModal = (modalId) => {
-        setEditingExamId(null);
-        setFormData(emptyExamForm);
-        setErrors({});
-        closeModal(modalId);
+    const validateRow = (row) => {
+        if (!selectedLessonId) {
+            return "Önce ders seçmelisiniz.";
+        }
+
+        const hasAnyGrade = examGradeFields.some((field) => {
+            return row[field.key] !== "" && row[field.key] !== null;
+        });
+
+        if (!hasAnyGrade) {
+            return "En az bir not alanı girilmelidir.";
+        }
+
+        return "";
     };
 
-    const handleOpenDeleteModal = (id, modalId) => {
-        setDeletingExamId(id);
-        openModal(modalId);
-    };
+    const handleSaveRow = async (row) => {
+        const validationMessage = validateRow(row);
 
-    const handleCloseDeleteModal = (modalId) => {
-        setDeletingExamId(null);
-        closeModal(modalId);
-    };
+        if (validationMessage) {
+            setRowErrors((prev) => ({
+                ...prev,
+                [row.studentId]: validationMessage,
+            }));
 
-    const normalizeGradeValue = (value) => {
-        if (value === "" || value === null || value === undefined) return null;
-        return Number(value);
-    };
-
-    const prepareExamPayload = () => {
-        return {
-            studentId: formData.studentId,
-            lessonId: formData.lessonId,
-            exam1: normalizeGradeValue(formData.exam1),
-            exam2: normalizeGradeValue(formData.exam2),
-            project: normalizeGradeValue(formData.project),
-            activity1: normalizeGradeValue(formData.activity1),
-            activity2: normalizeGradeValue(formData.activity2),
-            activity3: normalizeGradeValue(formData.activity3),
-            isActive: isEditing ? formData.isActive : true,
-        };
-    };
-
-    const handleSubmit = async (modalId) => {
-        const validationErrors = validateForm(formData, gradeValidationSchema);
-        setErrors(validationErrors);
-
-        if (hasValidationError(validationErrors)) {
-            showToast("Eksik veya hatalı alanlar var.", "error");
+            showToast(validationMessage, "error");
             return;
         }
 
-        const preparedExam = prepareExamPayload();
+        const payload = {
+            studentId: row.studentId,
+            lessonId: selectedLessonId,
+            exam1: normalizeGradeForPayload(row.exam1),
+            exam2: normalizeGradeForPayload(row.exam2),
+            project: normalizeGradeForPayload(row.project),
+            activity1: normalizeGradeForPayload(row.activity1),
+            activity2: normalizeGradeForPayload(row.activity2),
+            activity3: normalizeGradeForPayload(row.activity3),
+            isActive: true,
+        };
 
         try {
-            const result = isEditing
+            setSavingRows((prev) => ({
+                ...prev,
+                [row.studentId]: true,
+            }));
+
+            const result = row.examId
                 ? await examService.update({
-                    id: editingExamId,
-                    ...preparedExam,
+                    id: row.examId,
+                    ...payload,
                 })
-                : await examService.create(preparedExam);
+                : await examService.create(payload);
 
             if (!result.isSuccess && !result.IsSuccess) {
-                const message = result.message || result.Message || "İşlem başarısız.";
-                setErrors({
-                    general: message,
-                });
+                const message = result.message || result.Message || "Not kaydı başarısız.";
+                setRowErrors((prev) => ({
+                    ...prev,
+                    [row.studentId]: message,
+                }));
                 showToast(message, "error");
                 return;
             }
 
-            await getExams();
-            handleCloseExamModal(modalId);
+            await getPageData();
 
-            showToast(
-                isEditing
-                    ? "Sınav notu başarıyla güncellendi."
-                    : "Yeni sınav notu başarıyla eklendi.",
-            );
+            setEditedGrades((prev) => {
+                const next = { ...prev };
+                delete next[row.studentId];
+                return next;
+            });
+
+            setRowErrors((prev) => ({
+                ...prev,
+                [row.studentId]: "",
+            }));
+
+            showToast("Not bilgileri başarıyla kaydedildi.");
         } catch (error) {
             console.error(error);
 
-            const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
-            const backendFieldErrors = getBackendFieldErrors(error);
+            const message = getErrorMessage(error, "Not kaydedilirken hata oluştu.");
 
-            setErrors({
-                ...backendFieldErrors,
-                general: message,
-            });
+            setRowErrors((prev) => ({
+                ...prev,
+                [row.studentId]: message,
+            }));
 
             showToast(message, "error");
+        } finally {
+            setSavingRows((prev) => ({
+                ...prev,
+                [row.studentId]: false,
+            }));
         }
     };
 
-    const handleDelete = async (modalId) => {
-        if (!deletingExamId) return;
+    const handleResetRow = (studentId) => {
+        setEditedGrades((prev) => {
+            const next = { ...prev };
+            delete next[studentId];
+            return next;
+        });
 
-        try {
-            const result = await examService.delete(deletingExamId);
-
-            if (!result.isSuccess && !result.IsSuccess) {
-                showToast(result.message || result.Message || "Sınav notu silinemedi.", "error");
-                return;
-            }
-
-            await getExams();
-            handleCloseDeleteModal(modalId);
-            showToast("Sınav notu başarıyla silindi.");
-        } catch (error) {
-            console.error(error);
-            showToast(getErrorMessage(error, "Sınav notu silinirken hata oluştu."), "error");
-        }
+        setRowErrors((prev) => ({
+            ...prev,
+            [studentId]: "",
+        }));
     };
 
     const handleExportExamsPdf = () => {
@@ -292,35 +263,31 @@ export function useExamsPage() {
             title: "Sınav Notları Listesi",
             fileName: "sinav-notlari-listesi.pdf",
             columns: examPdfColumns,
-            data: exams,
+            data: filteredRows,
         });
     };
 
     return {
-        exams,
-        filteredExams,
         students,
+        exams,
         lessons,
         classrooms,
-        formData,
-        setFormData,
-        errors,
-        isEditing,
-        deletingExamId,
-        toast,
+        selectedLessonId,
+        setSelectedLessonId,
+        classroomFilter,
+        setClassroomFilter,
         search,
         setSearch,
-        statusFilter,
-        setStatusFilter,
-        averageFilter,
-        setAverageFilter,
-        handleOpenCreateModal,
-        handleOpenEditModal,
-        handleCloseExamModal,
-        handleOpenDeleteModal,
-        handleCloseDeleteModal,
-        handleDelete,
-        handleSubmit,
+        lessonOptions,
+        classroomOptions,
+        examRows,
+        filteredRows,
+        savingRows,
+        rowErrors,
+        toast,
+        handleGradeChange,
+        handleSaveRow,
+        handleResetRow,
         handleExportExamsPdf,
     };
 }

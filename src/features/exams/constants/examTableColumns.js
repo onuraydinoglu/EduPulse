@@ -2,16 +2,62 @@ import {
     AcademicCapIcon,
     CheckCircleIcon,
     ClipboardDocumentCheckIcon,
-    XCircleIcon,
+    PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
-import {
-    getExamAverageLabel,
-    getExamClassroomName,
-    getExamLessonName,
-    getExamStatusLabel,
-    getExamStudentFullName,
-} from "../utils/examFormatters";
+export const examTableHeaders = [
+    "Öğrenci",
+    "Sınıf",
+    "1. Sınav",
+    "2. Sınav",
+    "Proje",
+    "Sınıf İçi 1",
+    "Sınıf İçi 2",
+    "Sınıf İçi 3",
+    "Ortalama",
+    "İşlem",
+];
+
+export const getExamStats = (rows = []) => {
+    const savedCount = rows.filter((row) => row.examId).length;
+
+    const changedCount = rows.filter((row) => row.isDirty).length;
+
+    const passedCount = rows.filter((row) => {
+        return Number(row.average || 0) >= 50;
+    }).length;
+
+    return [
+        {
+            title: "Toplam Öğrenci",
+            value: rows.length,
+            description: "Not girişi yapılabilecek öğrenci",
+            icon: AcademicCapIcon,
+            color: "primary",
+        },
+        {
+            title: "Kayıtlı Not",
+            value: savedCount,
+            description: "Seçili derste kayıtlı not satırı",
+            icon: CheckCircleIcon,
+            color: "success",
+        },
+        {
+            title: "Değişiklik",
+            value: changedCount,
+            description: "Kaydedilmeyi bekleyen satır",
+            icon: PencilSquareIcon,
+            color: "warning",
+        },
+        {
+            title: "Başarılı",
+            value: passedCount,
+            description: "Ortalaması 50 ve üzeri",
+            icon: ClipboardDocumentCheckIcon,
+            color: "info",
+        },
+    ];
+};
 
 export const examPdfColumns = [
     {
@@ -20,78 +66,26 @@ export const examPdfColumns = [
     },
     {
         header: "Öğrenci",
-        accessor: getExamStudentFullName,
+        accessor: (row) => row.studentFullName,
     },
     {
         header: "Sınıf",
-        accessor: getExamClassroomName,
+        accessor: (row) => row.classroomName,
     },
     {
-        header: "Ders",
-        accessor: getExamLessonName,
+        header: "1. Sınav",
+        accessor: (row) => row.exam1 || "-",
+    },
+    {
+        header: "2. Sınav",
+        accessor: (row) => row.exam2 || "-",
+    },
+    {
+        header: "Proje",
+        accessor: (row) => row.project || "-",
     },
     {
         header: "Ortalama",
-        accessor: getExamAverageLabel,
-    },
-    {
-        header: "Durum",
-        accessor: getExamStatusLabel,
+        accessor: (row) => row.averageLabel,
     },
 ];
-
-export const getExamStats = (exams = []) => {
-    const activeCount = exams.filter((exam) => {
-        return exam.isActive !== false && exam.IsActive !== false;
-    }).length;
-
-    const passiveCount = exams.length - activeCount;
-
-    const passedCount = exams.filter((exam) => {
-        const average = Number(exam.average ?? exam.Average ?? 0);
-        return average >= 50;
-    }).length;
-
-    return [
-        {
-            title: "Toplam Not Kaydı",
-            value: exams.length,
-            description: "Sistemde kayıtlı not girişi",
-            icon: ClipboardDocumentCheckIcon,
-            color: "primary",
-        },
-        {
-            title: "Aktif Kayıt",
-            value: activeCount,
-            description: "Aktif durumda olan notlar",
-            icon: CheckCircleIcon,
-            color: "success",
-        },
-        {
-            title: "Pasif Kayıt",
-            value: passiveCount,
-            description: "Pasif durumda olan notlar",
-            icon: XCircleIcon,
-            color: "error",
-        },
-        {
-            title: "Başarılı Öğrenci",
-            value: passedCount,
-            description: "Ortalaması 50 ve üzeri",
-            icon: AcademicCapIcon,
-            color: "info",
-        },
-    ];
-};
-
-export const examTableHeaders = [
-    "Öğrenci",
-    "Sınıf",
-    "Ders",
-    "Sınavlar",
-    "Ortalama",
-    "Durum",
-    "İşlemler",
-];
-
-export const examHeaderIcon = ClipboardDocumentCheckIcon;
