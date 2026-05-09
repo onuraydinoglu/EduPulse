@@ -90,9 +90,11 @@ export function useClassesPage() {
     try {
       const result = await teacherService.getAll();
 
-      if (result?.isSuccess === false) {
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
         showToast(
-          result.message || "Öğretmenler yüklenirken hata oluştu.",
+          result.message ||
+          result.Message ||
+          "Öğretmenler yüklenirken hata oluştu.",
           "error",
         );
         return;
@@ -107,6 +109,13 @@ export function useClassesPage() {
       setTeachers(activeTeachers);
     } catch (error) {
       console.error(error);
+
+      const statusCode = error?.response?.status;
+
+      if (statusCode === 403) {
+        setTeachers([]);
+        return;
+      }
 
       showToast(
         getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."),

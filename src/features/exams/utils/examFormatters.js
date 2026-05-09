@@ -2,13 +2,10 @@ import { emptyExamGrades, examGradeFields } from "../constants/examConstants";
 
 export const normalizeResultData = (result) => {
     if (Array.isArray(result)) return result;
-
     if (Array.isArray(result?.data)) return result.data;
     if (Array.isArray(result?.Data)) return result.Data;
-
     if (Array.isArray(result?.data?.data)) return result.data.data;
     if (Array.isArray(result?.Data?.Data)) return result.Data.Data;
-
     return [];
 };
 
@@ -170,7 +167,41 @@ export const getCurrentUser = () => {
     }
 };
 
+export const decodeJwtPayload = (token) => {
+    if (!token) return {};
+
+    try {
+        const payload = token.split(".")[1];
+
+        if (!payload) return {};
+
+        const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const decodedPayload = atob(normalizedPayload);
+
+        return JSON.parse(decodedPayload);
+    } catch {
+        return {};
+    }
+};
+
+export const getCurrentUserToken = (currentUser) => {
+    return (
+        currentUser?.token ||
+        currentUser?.Token ||
+        currentUser?.accessToken ||
+        currentUser?.AccessToken ||
+        currentUser?.jwtToken ||
+        currentUser?.JwtToken ||
+        currentUser?.user?.token ||
+        currentUser?.user?.Token ||
+        ""
+    );
+};
+
 export const getCurrentUserRole = (currentUser) => {
+    const token = getCurrentUserToken(currentUser);
+    const payload = decodeJwtPayload(token);
+
     return (
         currentUser?.roleName ||
         currentUser?.RoleName ||
@@ -178,11 +209,19 @@ export const getCurrentUserRole = (currentUser) => {
         currentUser?.Role ||
         currentUser?.user?.roleName ||
         currentUser?.user?.RoleName ||
+        payload?.role ||
+        payload?.Role ||
+        payload?.[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ] ||
         ""
     ).toLowerCase();
 };
 
 export const getCurrentTeacherId = (currentUser) => {
+    const token = getCurrentUserToken(currentUser);
+    const payload = decodeJwtPayload(token);
+
     return (
         currentUser?.teacherId ||
         currentUser?.TeacherId ||
@@ -190,6 +229,8 @@ export const getCurrentTeacherId = (currentUser) => {
         currentUser?.user?.TeacherId ||
         currentUser?.teacher?.id ||
         currentUser?.Teacher?.Id ||
+        payload?.teacherId ||
+        payload?.TeacherId ||
         ""
     );
 };
@@ -204,13 +245,15 @@ export const filterTeacherLessonsForClassroom = ({
 
     return teacherLessons.filter((item) => {
         const itemClassroomId = getTeacherLessonClassroomId(item);
+        const itemTeacherId = getTeacherLessonTeacherId(item);
         const isActive = getTeacherLessonIsActive(item);
 
-        if (itemClassroomId !== classroomId || !isActive) return false;
+        if (itemClassroomId !== classroomId || !isActive) {
+            return false;
+        }
 
         if (roleName === "teacher") {
-            if (!currentTeacherId) return false;
-            return getTeacherLessonTeacherId(item) === currentTeacherId;
+            return Boolean(currentTeacherId) && itemTeacherId === currentTeacherId;
         }
 
         return true;

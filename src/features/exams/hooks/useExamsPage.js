@@ -66,35 +66,50 @@ export function useExamsPage() {
         }, 2500);
     };
 
+    const safeRequest = async (request, fallback) => {
+        try {
+            return await request();
+        } catch (error) {
+            console.error(error);
+            return fallback;
+        }
+    };
+
     const loadPageData = async () => {
         try {
             setIsLoading(true);
 
-            const requests = [
-                studentService.getAll(),
-                examService.getAll(),
-                lessonService.getAll(),
-            ];
+            const studentsRequest = studentService.getAll();
+            const lessonsRequest = lessonService.getAll();
 
-            if (isClassroomMode) {
-                requests.push(classService.getById(classroomId));
-                requests.push(teacherLessonService.getAll());
-            }
+            const examsRequest = safeRequest(() => examService.getAll(), []);
+            const classroomRequest = isClassroomMode
+                ? classService.getById(classroomId)
+                : Promise.resolve(null);
 
-            const results = await Promise.all(requests);
+            const teacherLessonsRequest = isClassroomMode
+                ? teacherLessonService.getAll()
+                : Promise.resolve([]);
 
-            const studentsResult = results[0];
-            const examsResult = results[1];
-            const lessonsResult = results[2];
+            const [
+                studentsResult,
+                examsResult,
+                lessonsResult,
+                classroomResult,
+                teacherLessonsResult,
+            ] = await Promise.all([
+                studentsRequest,
+                examsRequest,
+                lessonsRequest,
+                classroomRequest,
+                teacherLessonsRequest,
+            ]);
 
             setStudents(normalizeResultData(studentsResult));
             setExams(normalizeResultData(examsResult));
             setLessons(normalizeResultData(lessonsResult));
 
             if (isClassroomMode) {
-                const classroomResult = results[3];
-                const teacherLessonsResult = results[4];
-
                 setClassroom(unwrapSingleData(classroomResult));
                 setTeacherLessons(normalizeResultData(teacherLessonsResult));
             }
@@ -238,6 +253,11 @@ export function useExamsPage() {
         };
     };
 
+    const refreshExams = async () => {
+        const refreshedExams = await safeRequest(() => examService.getAll(), []);
+        setExams(normalizeResultData(refreshedExams));
+    };
+
     const handleSaveAllGrades = async () => {
         const changedRows = examRows.filter((row) => row.isDirty);
 
@@ -299,8 +319,8 @@ export function useExamsPage() {
                 return;
             }
 
-            const refreshedExams = await examService.getAll();
-            setExams(normalizeResultData(refreshedExams));
+            await refreshExams();
+
             setEditedGrades({});
             setRowErrors({});
 
