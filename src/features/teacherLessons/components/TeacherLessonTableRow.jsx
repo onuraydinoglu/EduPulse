@@ -1,25 +1,37 @@
-import TableActions from "../../../components/ui/TableActions";
 import StatusBadge from "../../../components/ui/StatusBadge";
+import TableActions from "../../../components/ui/TableActions";
 
-function TeacherLessonTableRow({ item, onEdit, onDelete }) {
-  const isActive = item.isActive ?? item.IsActive ?? true;
+import {
+  getTeacherLessonClassroomName,
+  getTeacherLessonId,
+  getTeacherLessonLessonName,
+  getTeacherLessonStatus,
+  getTeacherLessonTeacherName,
+} from "../utils/teacherLessonFormatters";
+
+function TeacherLessonTableRow({ teacherLesson, onEdit, onDelete }) {
+  const teacherLessonId = getTeacherLessonId(teacherLesson);
 
   return (
-    <tr className="hover:bg-base-200/60">
-      <td className="font-medium">{item.teacherFullName || "-"}</td>
+    <tr className="transition hover:bg-base-200/40">
+      <td>
+        <div className="font-semibold text-base-content">
+          {getTeacherLessonTeacherName(teacherLesson)}
+        </div>
+      </td>
 
-      <td>{item.lessonName || "-"}</td>
+      <td>{getTeacherLessonLessonName(teacherLesson)}</td>
 
-      <td>{item.classroomName || "-"}</td>
+      <td>{getTeacherLessonClassroomName(teacherLesson)}</td>
 
       <td>
-        <StatusBadge status={isActive ? "Aktif" : "Pasif"} />
+        <StatusBadge status={getTeacherLessonStatus(teacherLesson)} />
       </td>
 
       <td className="text-right">
         <TableActions
-          onEdit={() => onEdit(item)}
-          onDelete={() => onDelete(item.id)}
+          onEdit={() => onEdit(teacherLesson)}
+          onDelete={() => onDelete(teacherLessonId)}
         />
       </td>
     </tr>

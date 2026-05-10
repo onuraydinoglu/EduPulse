@@ -1,12 +1,74 @@
+import FilterSelect from "../../../components/ui/FilterSelect";
+import Pagination from "../../../components/ui/Pagination";
+import SearchInput from "../../../components/ui/SearchInput";
+
+import { usePagination } from "../../../hooks/usePagination";
+import { teacherLessonStatusFilterOptions } from "../constants/teacherLessonFilters";
+
 import TeacherLessonTableRow from "./TeacherLessonTableRow";
 
-function TeacherLessonTable({ items, onEdit, onDelete }) {
+function TeacherLessonTable({
+  teacherLessons,
+  items,
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  onEdit,
+  onDelete,
+}) {
+  const safeTeacherLessons = Array.isArray(teacherLessons)
+    ? teacherLessons
+    : Array.isArray(items)
+      ? items
+      : [];
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+  } = usePagination(safeTeacherLessons, 5);
+
   return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-base-content">
+            Öğretmen Ders Atama Listesi
+          </h2>
+
+          <p className="text-sm text-base-content/60">
+            {safeTeacherLessons.length} kayıt listeleniyor.
+          </p>
+        </div>
+
+        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:w-auto">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Öğretmen, ders veya sınıf ara..."
+          />
+
+          <FilterSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            hideLabel
+            placeholder="Durum filtresi"
+            options={teacherLessonStatusFilterOptions}
+          />
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
-            <tr>
+            <tr className="text-xs uppercase text-base-content/50">
               <th>Öğretmen</th>
               <th>Ders</th>
               <th>Sınıf</th>
@@ -16,24 +78,40 @@ function TeacherLessonTable({ items, onEdit, onDelete }) {
           </thead>
 
           <tbody>
-            {items.map((item) => (
+            {paginatedItems.map((teacherLesson) => (
               <TeacherLessonTableRow
-                key={item.id}
-                item={item}
+                key={teacherLesson.id || teacherLesson.Id}
+                teacherLesson={teacherLesson}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
             ))}
 
-            {items.length === 0 && (
+            {safeTeacherLessons.length === 0 && (
               <tr>
-                <td colSpan="5" className="py-8 text-center text-gray-500">
-                  Atama bulunamadı.
+                <td
+                  colSpan="5"
+                  className="py-10 text-center text-base-content/50"
+                >
+                  Öğretmen ders ataması bulunamadı.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="border-t border-base-300/60 p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

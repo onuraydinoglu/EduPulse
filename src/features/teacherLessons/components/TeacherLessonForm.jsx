@@ -7,9 +7,13 @@ function TeacherLessonForm({
   teachers = [],
   lessons = [],
   classrooms = [],
+  errors = {},
   onSubmit,
   isEdit = false,
+  isEditing = false,
 }) {
+  const editMode = isEdit || isEditing;
+
   const handleChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -37,32 +41,49 @@ function TeacherLessonForm({
   const getClassroomLabel = (classroom) => {
     return (
       classroom.name ||
+      classroom.Name ||
       classroom.classroomName ||
-      `${classroom.grade || ""}-${classroom.section || ""}`.trim() ||
+      classroom.ClassroomName ||
+      `${classroom.grade || classroom.Grade || ""}-${classroom.section || classroom.Section || ""
+        }`.trim() ||
       "-"
     );
   };
 
   const teacherOptions = [
     { value: "", label: "Öğretmen seçiniz" },
-    ...teachers.map((teacher) => ({
-      value: teacher.id,
-      label: `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim(),
-    })),
+    ...teachers.map((teacher) => {
+      const firstName = teacher.firstName || teacher.FirstName || "";
+      const lastName = teacher.lastName || teacher.LastName || "";
+
+      return {
+        value: teacher.id || teacher.Id,
+        label:
+          teacher.fullName ||
+          teacher.FullName ||
+          `${firstName} ${lastName}`.trim() ||
+          "-",
+      };
+    }),
   ];
 
   const lessonOptions = [
     { value: "", label: "Ders seçiniz" },
     ...lessons.map((lesson) => ({
-      value: lesson.id,
-      label: lesson.name || lesson.lessonName || "-",
+      value: lesson.id || lesson.Id,
+      label:
+        lesson.name ||
+        lesson.Name ||
+        lesson.lessonName ||
+        lesson.LessonName ||
+        "-",
     })),
   ];
 
   const classroomOptions = [
     { value: "", label: "Sınıf seçiniz" },
     ...classrooms.map((classroom) => ({
-      value: classroom.id,
+      value: classroom.id || classroom.Id,
       label: getClassroomLabel(classroom),
     })),
   ];
@@ -73,11 +94,18 @@ function TeacherLessonForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {errors?.general && (
+        <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+          {errors.general}
+        </div>
+      )}
+
       <FormSelect
         label="Öğretmen"
         value={formData.teacherId || ""}
         onChange={(value) => handleChange("teacherId", value)}
         options={teacherOptions}
+        error={errors.teacherId}
       />
 
       <FormSelect
@@ -85,14 +113,16 @@ function TeacherLessonForm({
         value={formData.lessonId || ""}
         onChange={(value) => handleChange("lessonId", value)}
         options={lessonOptions}
+        error={errors.lessonId}
       />
 
-      {isEdit ? (
+      {editMode ? (
         <FormSelect
           label="Sınıf"
           value={formData.classroomId || ""}
           onChange={(value) => handleChange("classroomId", value)}
           options={classroomOptions}
+          error={errors.classroomId}
         />
       ) : (
         <div className="space-y-2">
@@ -116,11 +146,12 @@ function TeacherLessonForm({
             ) : (
               <div className="grid gap-2 sm:grid-cols-2">
                 {classrooms.map((classroom) => {
-                  const checked = selectedClassroomIds.includes(classroom.id);
+                  const classroomId = classroom.id || classroom.Id;
+                  const checked = selectedClassroomIds.includes(classroomId);
 
                   return (
                     <label
-                      key={classroom.id}
+                      key={classroomId}
                       className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition ${checked
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-base-300 bg-base-100 text-base-content hover:bg-base-200/60"
@@ -130,7 +161,7 @@ function TeacherLessonForm({
                         type="checkbox"
                         className="checkbox checkbox-primary checkbox-sm"
                         checked={checked}
-                        onChange={() => handleClassroomToggle(classroom.id)}
+                        onChange={() => handleClassroomToggle(classroomId)}
                       />
 
                       <span className="font-medium">
@@ -143,13 +174,17 @@ function TeacherLessonForm({
             )}
           </div>
 
+          {errors.classroomIds && (
+            <p className="text-xs text-error">{errors.classroomIds}</p>
+          )}
+
           <p className="text-xs text-base-content/50">
             Aynı öğretmen ve ders için birden fazla sınıf seçebilirsiniz.
           </p>
         </div>
       )}
 
-      {isEdit && (
+      {editMode && (
         <ActiveCheckbox
           checked={formData.isActive !== false}
           onChange={(value) => handleChange("isActive", value)}
