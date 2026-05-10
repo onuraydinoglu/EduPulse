@@ -5,43 +5,61 @@ import {
 } from "@heroicons/react/24/outline";
 
 import Toast from "../../../components/ui/Toast";
-
 import TeacherTable from "../components/TeacherTable";
 import TableStatsCards from "../components/TableStatsCards";
 import TeachersPageHeader from "../components/TeachersPageHeader";
 import TeacherFormModal from "../components/TeacherFormModal";
 import TeacherDeleteModal from "../components/TeacherDeleteModal";
+import TeacherLessonAssignModal from "../components/TeacherLessonAssignModal";
 
 import { useTeachers } from "../hooks/useTeachers";
+
 import {
   TEACHER_DELETE_MODAL_ID,
   TEACHER_MODAL_ID,
 } from "../constants/teacherConstants";
+
+const TEACHER_LESSON_ASSIGN_MODAL_ID = "teacher_lesson_assign_modal";
 
 function TeachersPage() {
   const {
     teachers,
     filteredTeachers,
     lessons,
+    classrooms,
+
     formData,
     setFormData,
     errors,
     isEditing,
+
     temporaryPasswords,
     toast,
+
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
 
+    selectedTeacherForLesson,
+    lessonAssignFormData,
+    setLessonAssignFormData,
+    lessonAssignErrors,
+
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseTeacherModal,
+
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDelete,
+
     handleSubmit,
     handleExportTeachersPdf,
+
+    handleOpenLessonAssignModal,
+    handleCloseLessonAssignModal,
+    handleLessonAssignSubmit,
   } = useTeachers();
 
   return (
@@ -54,11 +72,11 @@ function TeachersPage() {
       />
 
       <TableStatsCards
-        items={[
+        cards={[
           {
             title: "Toplam Öğretmen",
             value: teachers.length,
-            description: "Sistemde kayıtlı öğretmen",
+            description: "Sisteme kayıtlı öğretmen",
             icon: UserGroupIcon,
             color: "primary",
           },
@@ -92,15 +110,18 @@ function TeachersPage() {
         setStatusFilter={setStatusFilter}
         onEdit={(teacher) => handleOpenEditModal(teacher, TEACHER_MODAL_ID)}
         onDelete={(id) => handleOpenDeleteModal(id, TEACHER_DELETE_MODAL_ID)}
+        onAssignLesson={(teacher) =>
+          handleOpenLessonAssignModal(teacher, TEACHER_LESSON_ASSIGN_MODAL_ID)
+        }
       />
 
       <TeacherFormModal
         modalId={TEACHER_MODAL_ID}
-        isEditing={isEditing}
+        lessons={lessons}
         formData={formData}
         setFormData={setFormData}
-        lessons={lessons}
         errors={errors}
+        isEditing={isEditing}
         onClose={() => handleCloseTeacherModal(TEACHER_MODAL_ID)}
         onSubmit={() => handleSubmit(TEACHER_MODAL_ID)}
       />
@@ -109,6 +130,20 @@ function TeachersPage() {
         modalId={TEACHER_DELETE_MODAL_ID}
         onClose={() => handleCloseDeleteModal(TEACHER_DELETE_MODAL_ID)}
         onConfirm={() => handleDelete(TEACHER_DELETE_MODAL_ID)}
+      />
+
+      <TeacherLessonAssignModal
+        modalId={TEACHER_LESSON_ASSIGN_MODAL_ID}
+        teacher={selectedTeacherForLesson}
+        formData={lessonAssignFormData}
+        setFormData={setLessonAssignFormData}
+        lessons={lessons}
+        classrooms={classrooms}
+        errors={lessonAssignErrors}
+        onClose={() =>
+          handleCloseLessonAssignModal(TEACHER_LESSON_ASSIGN_MODAL_ID)
+        }
+        onSubmit={() => handleLessonAssignSubmit(TEACHER_LESSON_ASSIGN_MODAL_ID)}
       />
     </div>
   );

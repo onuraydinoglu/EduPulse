@@ -2,7 +2,6 @@ import SearchInput from "../../../components/ui/SearchInput";
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import { usePagination } from "../../../hooks/usePagination";
-
 import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({
@@ -14,6 +13,7 @@ function TeacherTable({
   setStatusFilter,
   onEdit,
   onDelete,
+  onAssignLesson,
 }) {
   const {
     currentPage,
@@ -70,7 +70,7 @@ function TeacherTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-100 ">
+          <thead className="bg-base-100">
             <tr className="border-b border-base-300">
               <th className="px-6 py-5 text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
@@ -113,11 +113,12 @@ function TeacherTable({
           <tbody>
             {paginatedItems.map((teacher) => (
               <TeacherTableRow
-                key={teacher.id}
+                key={teacher.id || teacher.Id}
                 teacher={teacher}
                 temporaryPassword={temporaryPasswords[teacher.email]}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onAssignLesson={onAssignLesson}
               />
             ))}
 

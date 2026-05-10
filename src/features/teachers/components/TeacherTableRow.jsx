@@ -1,3 +1,5 @@
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
@@ -12,9 +14,7 @@ const getTeacherName = (teacher) => {
 };
 
 const getTeacherBranch = (teacher) => {
-  const branchLessonName =
-    teacher.branchLessonName || teacher.BranchLessonName;
-
+  const branchLessonName = teacher.branchLessonName || teacher.BranchLessonName;
   const department = teacher.department || teacher.Department;
 
   return branchLessonName || department || "Branş atanmadı";
@@ -32,39 +32,44 @@ const getTeacherStatus = (teacher) => {
   return "aktif";
 };
 
-function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
+function TeacherTableRow({
+  teacher,
+  temporaryPassword,
+  onEdit,
+  onDelete,
+  onAssignLesson,
+}) {
   const fullName = getTeacherName(teacher);
   const branch = getTeacherBranch(teacher);
   const status = getTeacherStatus(teacher);
+  const teacherId = teacher.id || teacher.Id;
 
   return (
-    <tr className="border-b border-base-300 transition hover:bg-base-200/40">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40">
       <td className="px-6 py-4">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-base-content xl:text-[15px]">
-            {fullName}
-          </p>
+        <div>
+          <div className="font-semibold text-base-content">{fullName}</div>
 
           {temporaryPassword && (
-            <p className="mt-0.5 truncate text-xs text-warning">
+            <div className="mt-1 rounded-lg bg-warning/10 px-2 py-1 text-xs font-medium text-warning">
               Şifre: {temporaryPassword}
-            </p>
+            </div>
           )}
         </div>
       </td>
 
       <td className="px-6 py-4">
-        <span className="inline-flex max-w-full items-center rounded-full bg-base-200 px-2.5 py-1 text-xs font-medium text-base-content/70 xl:px-3 xl:text-sm">
-          <span className="truncate">{branch}</span>
+        <span className="text-sm text-base-content/70">{branch}</span>
+      </td>
+
+      <td className="px-6 py-4">
+        <span className="text-sm text-base-content/70">
+          {teacher.email || teacher.Email || "-"}
         </span>
       </td>
 
-      <td className="px-6 py-4 text-xs text-base-content/70 xl:text-sm">
-        <span className="block truncate">{teacher.email || teacher.Email || "-"}</span>
-      </td>
-
-      <td className="px-6 py-4 text-xs text-base-content/70 xl:text-sm">
-        <span className="block truncate">
+      <td className="px-6 py-4">
+        <span className="text-sm text-base-content/70">
           {teacher.phoneNumber || teacher.PhoneNumber || "-"}
         </span>
       </td>
@@ -73,11 +78,23 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
         <StatusBadge status={status} />
       </td>
 
-      <td className="px-6 py-4 text-right">
-        <TableActions
-          onEdit={() => onEdit(teacher)}
-          onDelete={() => onDelete(teacher.id || teacher.Id)}
-        />
+      <td className="px-6 py-4">
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => onAssignLesson(teacher)}
+            className="inline-flex h-9 items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-content"
+            title="Ders ata"
+          >
+            <BookOpenIcon className="h-4 w-4" />
+            Ders Ata
+          </button>
+
+          <TableActions
+            onEdit={() => onEdit(teacher)}
+            onDelete={() => onDelete(teacherId)}
+          />
+        </div>
       </td>
     </tr>
   );
