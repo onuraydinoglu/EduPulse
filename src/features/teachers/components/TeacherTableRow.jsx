@@ -5,19 +5,19 @@ const getTeacherName = (teacher) => {
   return (
     teacher.fullName ||
     teacher.FullName ||
-    `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() ||
+    `${teacher.firstName || teacher.FirstName || ""} ${teacher.lastName || teacher.LastName || ""
+      }`.trim() ||
     "-"
   );
 };
 
 const getTeacherBranch = (teacher) => {
-  return (
-    teacher.branch ||
-    teacher.branchName ||
-    teacher.lessonName ||
-    teacher.department ||
-    "Branş atanmadı"
-  );
+  const branchLessonName =
+    teacher.branchLessonName || teacher.BranchLessonName;
+
+  const department = teacher.department || teacher.Department;
+
+  return branchLessonName || department || "Branş atanmadı";
 };
 
 const getTeacherStatus = (teacher) => {
@@ -60,11 +60,13 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
       </td>
 
       <td className="px-6 py-4 text-xs text-base-content/70 xl:text-sm">
-        <span className="block truncate">{teacher.email || "-"}</span>
+        <span className="block truncate">{teacher.email || teacher.Email || "-"}</span>
       </td>
 
       <td className="px-6 py-4 text-xs text-base-content/70 xl:text-sm">
-        <span className="block truncate">{teacher.phoneNumber || "-"}</span>
+        <span className="block truncate">
+          {teacher.phoneNumber || teacher.PhoneNumber || "-"}
+        </span>
       </td>
 
       <td className="px-6 py-4">
@@ -74,7 +76,7 @@ function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
       <td className="px-6 py-4 text-right">
         <TableActions
           onEdit={() => onEdit(teacher)}
-          onDelete={() => onDelete(teacher.id)}
+          onDelete={() => onDelete(teacher.id || teacher.Id)}
         />
       </td>
     </tr>

@@ -30,7 +30,7 @@ function AppRouter() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register-school" element={<RegisterSchoolPage />} />
+        <Route path="/register" element={<RegisterSchoolPage />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
