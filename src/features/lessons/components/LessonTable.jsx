@@ -11,10 +11,11 @@ function LessonTable({ lessons, onEdit, onDelete, onDetail }) {
 
   return (
     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {lessons.map((lesson) => (
+      {lessons.map((lesson, index) => (
         <LessonTableRow
-          key={lesson.id}
+          key={lesson.id || lesson.Id}
           lesson={lesson}
+          index={index}
           onEdit={onEdit}
           onDelete={onDelete}
           onDetail={onDetail}

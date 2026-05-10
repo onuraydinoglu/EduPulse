@@ -117,7 +117,7 @@ function StudentTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

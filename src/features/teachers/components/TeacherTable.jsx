@@ -1,7 +1,9 @@
-import SearchInput from "../../../components/ui/SearchInput";
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
+import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
+
+import { teacherStatusFilterOptions } from "../constants/teacherFilters";
 import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({
@@ -34,7 +36,6 @@ function TeacherTable({
           <h2 className="text-lg font-bold text-base-content">
             Öğretmen Listesi
           </h2>
-
           <p className="text-sm text-base-content/60">
             {teachers.length} kayıt listeleniyor.
           </p>
@@ -44,7 +45,7 @@ function TeacherTable({
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Öğretmen, telefon veya email ara..."
+            placeholder="Öğretmen, branş, telefon veya email ara..."
             className="h-11 w-full sm:w-80"
           />
 
@@ -53,11 +54,7 @@ function TeacherTable({
             onChange={setStatusFilter}
             hideLabel
             className="w-full sm:w-44"
-            options={[
-              { label: "Tüm Durumlar", value: "all" },
-              { label: "Aktif", value: "active" },
-              { label: "İzinde", value: "leave" },
-            ]}
+            options={teacherStatusFilterOptions}
           />
         </div>
       </div>
@@ -80,7 +77,7 @@ function TeacherTable({
 
               <th className="px-6 py-5 text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
-                  Email
+                  E-Posta
                 </span>
               </th>
 
@@ -105,24 +102,32 @@ function TeacherTable({
           </thead>
 
           <tbody>
-            {paginatedItems.map((teacher) => (
-              <TeacherTableRow
-                key={teacher.id || teacher.Id}
-                teacher={teacher}
-                temporaryPassword={temporaryPasswords[teacher.email]}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onAssignLesson={onAssignLesson}
-              />
-            ))}
+            {paginatedItems.map((teacher) => {
+              const teacherId = teacher.id || teacher.Id;
+              const email = teacher.email || teacher.Email;
+
+              return (
+                <TeacherTableRow
+                  key={teacherId}
+                  teacher={teacher}
+                  temporaryPassword={
+                    temporaryPasswords[email] ||
+                    temporaryPasswords[email?.toLowerCase?.()]
+                  }
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onAssignLesson={onAssignLesson}
+                />
+              );
+            })}
 
             {teachers.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
-                  className="py-10 text-center text-sm text-base-content/50"
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
-                  Kayıt bulunamadı.
+                  Öğretmen kaydı bulunamadı.
                 </td>
               </tr>
             )}
@@ -130,18 +135,16 @@ function TeacherTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          startItem={startItem}
-          endItem={endItem}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

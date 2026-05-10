@@ -3,34 +3,14 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
-const getTeacherName = (teacher) => {
-  return (
-    teacher.fullName ||
-    teacher.FullName ||
-    `${teacher.firstName || teacher.FirstName || ""} ${teacher.lastName || teacher.LastName || ""
-      }`.trim() ||
-    "-"
-  );
-};
-
-const getTeacherBranch = (teacher) => {
-  const branchLessonName = teacher.branchLessonName || teacher.BranchLessonName;
-  const department = teacher.department || teacher.Department;
-
-  return branchLessonName || department || "Branş atanmadı";
-};
-
-const getTeacherStatus = (teacher) => {
-  const status = teacher.status || teacher.Status;
-
-  if (status) return status;
-
-  if (teacher.isActive === false || teacher.IsActive === false) {
-    return "izinde";
-  }
-
-  return "aktif";
-};
+import {
+  getTeacherBranch,
+  getTeacherEmail,
+  getTeacherFullName,
+  getTeacherId,
+  getTeacherPhoneNumber,
+  getTeacherStatus,
+} from "../utils/teacherFormatters";
 
 function TeacherTableRow({
   teacher,
@@ -39,10 +19,12 @@ function TeacherTableRow({
   onDelete,
   onAssignLesson,
 }) {
-  const fullName = getTeacherName(teacher);
+  const teacherId = getTeacherId(teacher);
+  const fullName = getTeacherFullName(teacher);
   const branch = getTeacherBranch(teacher);
+  const email = getTeacherEmail(teacher);
+  const phoneNumber = getTeacherPhoneNumber(teacher);
   const status = getTeacherStatus(teacher);
-  const teacherId = teacher.id || teacher.Id;
 
   return (
     <tr className="border-b border-base-200 transition hover:bg-base-200/40">
@@ -51,7 +33,7 @@ function TeacherTableRow({
           <div className="font-semibold text-base-content">{fullName}</div>
 
           {temporaryPassword && (
-            <div className="mt-1 rounded-lg bg-warning/10 px-2 py-1 text-xs font-medium text-warning">
+            <div className="mt-1 inline-flex rounded-lg bg-warning/10 px-2 py-1 text-xs font-medium text-warning">
               Şifre: {temporaryPassword}
             </div>
           )}
@@ -64,13 +46,13 @@ function TeacherTableRow({
 
       <td className="px-6 py-4">
         <span className="text-sm text-base-content/70">
-          {teacher.email || teacher.Email || "-"}
+          {email || "-"}
         </span>
       </td>
 
       <td className="px-6 py-4">
         <span className="text-sm text-base-content/70">
-          {teacher.phoneNumber || teacher.PhoneNumber || "-"}
+          {phoneNumber || "-"}
         </span>
       </td>
 

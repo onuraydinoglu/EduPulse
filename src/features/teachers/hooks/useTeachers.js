@@ -1,50 +1,37 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { teacherService } from "../services/teacherService";
-import { lessonService } from "../../lessons/services/lessonService";
 import { classService } from "../../classes/services/classService";
+import { lessonService } from "../../lessons/services/lessonService";
 import { teacherLessonService } from "../../teacherLessons/services/teacherLessonService";
+import { teacherService } from "../services/teacherService";
 
 import {
-  validateForm,
-  hasValidationError,
-} from "../../../validations/validationRules";
-import { userValidationSchema } from "../../../validations/schemas";
-
-import { cleanPhone } from "../../../utils/phoneFormatter";
-import { exportToPdf } from "../../../utils/exportToPdf";
-
-import { emptyTeacherForm } from "../constants/teacherConstants";
+  emptyTeacherForm,
+  emptyTeacherLessonAssignForm,
+} from "../constants/teacherConstants";
 
 import {
   filterTeachers,
-  getBackendFieldErrors,
-  getErrorMessage,
-} from "../utils/teacherHelpers";
+  getTeacherEmail,
+  getTeacherId,
+} from "../utils/teacherFormatters";
 
-const emptyLessonAssignForm = {
-  teacherId: "",
-  lessonId: "",
-  classroomIds: [],
-};
-
-export function useTeachers() {
+export function useTeachersPage() {
   const [teachers, setTeachers] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
 
   const [formData, setFormData] = useState(emptyTeacherForm);
+  const [assignFormData, setAssignFormData] = useState(
+    emptyTeacherLessonAssignForm
+  );
+
   const [errors, setErrors] = useState({});
+  const [assignErrors, setAssignErrors] = useState({});
 
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [deletingTeacherId, setDeletingTeacherId] = useState(null);
-
-  const [selectedTeacherForLesson, setSelectedTeacherForLesson] =
-    useState(null);
-  const [lessonAssignFormData, setLessonAssignFormData] = useState(
-    emptyLessonAssignForm,
-  );
-  const [lessonAssignErrors, setLessonAssignErrors] = useState({});
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
 
   const [temporaryPasswords, setTemporaryPasswords] = useState({});
   const [toast, setToast] = useState({ message: "", type: "success" });
@@ -62,9 +49,7 @@ export function useTeachers() {
     }, 2500);
   };
 
-  const getListData = (result) => {
-    if (Array.isArray(result)) return result;
-    if (result?.isSuccess) return result.data || result.Data || [];
+  const normalizeResultData = (result) => {
     return result?.data || result?.Data || [];
   };
 
@@ -72,14 +57,22 @@ export function useTeachers() {
     try {
       const result = await teacherService.getAll();
 
-      if (result.isSuccess) {
-        setTeachers(result.data || []);
-      } else {
+      if (!result.isSuccess) {
         showToast(result.message || "Öğretmenler getirilemedi.", "error");
+        return;
       }
+
+      const data = normalizeResultData(result);
+
+      const onlyTeachers = data.filter((teacher) => {
+        const roleName = teacher.roleName || teacher.RoleName;
+        return !roleName || roleName.toLowerCase() === "teacher";
+      });
+
+      setTeachers(onlyTeachers);
     } catch (error) {
       console.error(error);
-      showToast(getErrorMessage(error, "Sunucu hatası oluştu."), "error");
+      showToast(error.message || "Sunucu hatası oluştu.", "error");
     }
   };
 
@@ -88,45 +81,43 @@ export function useTeachers() {
       const result = await lessonService.getAll();
 
       if (result.isSuccess) {
-        setLessons(result.data || []);
-      } else {
-        showToast(result.message || "Dersler getirilemedi.", "error");
+        setLessons(normalizeResultData(result));
       }
     } catch (error) {
       console.error(error);
-      showToast(getErrorMessage(error, "Dersler getirilemedi."), "error");
     }
   };
 
   const getClassrooms = async () => {
     try {
       const result = await classService.getAll();
-      setClassrooms(getListData(result));
+
+      if (result.isSuccess) {
+        setClassrooms(normalizeResultData(result));
+      }
     } catch (error) {
       console.error(error);
-      showToast(getErrorMessage(error, "Sınıflar getirilemedi."), "error");
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await getTeachers();
-      await getLessons();
-    };
+  const fetchInitialData = async () => {
+    await Promise.all([getTeachers(), getLessons(), getClassrooms()]);
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchInitialData();
   }, []);
 
   const filteredTeachers = useMemo(() => {
     return filterTeachers(teachers, search, statusFilter);
   }, [teachers, search, statusFilter]);
 
-  const openModal = (id) => {
-    document.getElementById(id)?.showModal();
+  const openModal = (modalId) => {
+    document.getElementById(modalId)?.showModal();
   };
 
-  const closeModal = (id) => {
-    document.getElementById(id)?.close();
+  const closeModal = (modalId) => {
+    document.getElementById(modalId)?.close();
   };
 
   const handleOpenCreateModal = (modalId) => {
@@ -137,19 +128,19 @@ export function useTeachers() {
   };
 
   const handleOpenEditModal = (teacher, modalId) => {
-    setEditingTeacherId(teacher.id);
-    setErrors({});
+    setEditingTeacherId(getTeacherId(teacher));
 
     setFormData({
-      firstName: teacher.firstName || "",
-      lastName: teacher.lastName || "",
-      phoneNumber: teacher.phoneNumber || "",
-      email: teacher.email || "",
-      branchLessonId: teacher.branchLessonId || "",
-      department: teacher.department || "",
-      isActive: teacher.isActive !== false,
+      firstName: teacher.firstName || teacher.FirstName || "",
+      lastName: teacher.lastName || teacher.LastName || "",
+      phoneNumber: teacher.phoneNumber || teacher.PhoneNumber || "",
+      email: teacher.email || teacher.Email || "",
+      branchLessonId: teacher.branchLessonId || teacher.BranchLessonId || "",
+      department: teacher.department || teacher.Department || "",
+      isActive: teacher.isActive ?? teacher.IsActive ?? true,
     });
 
+    setErrors({});
     openModal(modalId);
   };
 
@@ -170,47 +161,41 @@ export function useTeachers() {
     closeModal(modalId);
   };
 
-  const handleDelete = async (modalId) => {
-    if (!deletingTeacherId) return;
+  const validateTeacherForm = () => {
+    const nextErrors = {};
 
-    try {
-      const result = await teacherService.delete(deletingTeacherId);
-
-      if (!result.isSuccess) {
-        showToast(result.message || "Öğretmen silinemedi.", "error");
-        return;
-      }
-
-      await getTeachers();
-      handleCloseDeleteModal(modalId);
-      showToast("Öğretmen başarıyla silindi.");
-    } catch (error) {
-      console.error(error);
-
-      showToast(
-        getErrorMessage(error, "Öğretmen silinirken hata oluştu."),
-        "error",
-      );
+    if (!formData.firstName?.trim()) {
+      nextErrors.firstName = "Ad alanı zorunludur.";
     }
+
+    if (!formData.lastName?.trim()) {
+      nextErrors.lastName = "Soyad alanı zorunludur.";
+    }
+
+    if (!formData.phoneNumber?.trim()) {
+      nextErrors.phoneNumber = "Telefon alanı zorunludur.";
+    }
+
+    if (!formData.email?.trim()) {
+      nextErrors.email = "Email alanı zorunludur.";
+    }
+
+    setErrors(nextErrors);
+
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (modalId) => {
-    const validationErrors = validateForm(formData, userValidationSchema);
-    setErrors(validationErrors);
-
-    if (hasValidationError(validationErrors)) {
-      showToast("Eksik veya hatalı alanlar var.", "error");
-      return;
-    }
+    if (!validateTeacherForm()) return;
 
     const preparedTeacher = {
       firstName: formData.firstName.trim(),
       lastName: formData.lastName.trim(),
-      phoneNumber: cleanPhone(formData.phoneNumber),
+      phoneNumber: formData.phoneNumber.trim(),
       email: formData.email.trim(),
       branchLessonId: formData.branchLessonId || null,
-      department: formData.department.trim() || null,
-      isActive: isEditing ? formData.isActive : true,
+      department: formData.department?.trim() || null,
+      isActive: formData.isActive ?? true,
     };
 
     try {
@@ -222,11 +207,7 @@ export function useTeachers() {
         : await teacherService.create(preparedTeacher);
 
       if (!result.isSuccess) {
-        const message = result.message || "İşlem başarısız.";
-
-        setErrors({ general: message });
-        showToast(message, "error");
-
+        setErrors({ general: result.message || "İşlem başarısız." });
         return;
       }
 
@@ -237,158 +218,119 @@ export function useTeachers() {
           setTemporaryPasswords((prev) => ({
             ...prev,
             [preparedTeacher.email]: temporaryPassword,
+            [preparedTeacher.email.toLowerCase()]: temporaryPassword,
           }));
         }
       }
 
       await getTeachers();
-      handleCloseTeacherModal(modalId);
+
+      setFormData(emptyTeacherForm);
+      setEditingTeacherId(null);
+      setErrors({});
+      closeModal(modalId);
 
       showToast(
         isEditing
           ? "Öğretmen bilgileri başarıyla güncellendi."
-          : "Yeni öğretmen başarıyla eklendi.",
+          : "Yeni öğretmen başarıyla eklendi."
       );
     } catch (error) {
       console.error(error);
-
-      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
-      const backendFieldErrors = getBackendFieldErrors(error);
-
-      setErrors({
-        ...backendFieldErrors,
-        general: message,
-      });
-
-      showToast(message, "error");
+      setErrors({ general: error.message || "Sunucu hatası oluştu." });
     }
   };
 
-  const handleOpenLessonAssignModal = async (teacher, modalId) => {
-    const teacherId = teacher.id || teacher.Id;
-    const branchLessonId = teacher.branchLessonId || teacher.BranchLessonId || "";
-
+  const handleDelete = async (modalId) => {
     try {
-      await Promise.all([getLessons(), getClassrooms()]);
+      const result = await teacherService.delete(deletingTeacherId);
 
-      setSelectedTeacherForLesson(teacher);
-      setLessonAssignErrors({});
-
-      setLessonAssignFormData({
-        teacherId,
-        lessonId: branchLessonId,
-        classroomIds: [],
-      });
-
-      openModal(modalId);
-    } catch (error) {
-      console.error(error);
-      showToast("Ders atama formu açılırken hata oluştu.", "error");
-    }
-  };
-
-  const handleCloseLessonAssignModal = (modalId) => {
-    setSelectedTeacherForLesson(null);
-    setLessonAssignFormData(emptyLessonAssignForm);
-    setLessonAssignErrors({});
-    closeModal(modalId);
-  };
-
-  const handleLessonAssignSubmit = async (modalId) => {
-    const selectedClassroomIds = Array.isArray(lessonAssignFormData.classroomIds)
-      ? lessonAssignFormData.classroomIds
-      : [];
-
-    const fieldErrors = {};
-
-    if (!lessonAssignFormData.teacherId) {
-      fieldErrors.general = "Öğretmen bilgisi bulunamadı.";
-    }
-
-    if (!lessonAssignFormData.lessonId) {
-      fieldErrors.lessonId = "Ders seçiniz.";
-    }
-
-    if (selectedClassroomIds.length === 0) {
-      fieldErrors.classroomIds = "En az bir sınıf seçiniz.";
-    }
-
-    if (Object.keys(fieldErrors).length > 0) {
-      setLessonAssignErrors(fieldErrors);
-      showToast("Eksik alanlar var.", "error");
-      return;
-    }
-
-    try {
-      const results = await Promise.all(
-        selectedClassroomIds.map((classroomId) =>
-          teacherLessonService.create({
-            teacherId: lessonAssignFormData.teacherId,
-            lessonId: lessonAssignFormData.lessonId,
-            classroomId,
-          }),
-        ),
-      );
-
-      const failedResult = results.find((result) => result?.isSuccess === false);
-
-      if (failedResult) {
-        const message =
-          failedResult.message || "Bazı sınıflar için ders atama işlemi başarısız.";
-
-        setLessonAssignErrors({ general: message });
-        showToast(message, "error");
-
+      if (!result.isSuccess) {
+        showToast(result.message || "Öğretmen silinemedi.", "error");
         return;
       }
 
-      handleCloseLessonAssignModal(modalId);
-      showToast("Ders atama işlemi başarıyla oluşturuldu.");
+      await getTeachers();
+
+      setDeletingTeacherId(null);
+      closeModal(modalId);
+      showToast("Öğretmen başarıyla silindi.");
     } catch (error) {
       console.error(error);
+      showToast(error.message || "Sunucu hatası oluştu.", "error");
+    }
+  };
 
-      const message = getErrorMessage(
-        error,
-        "Ders atama işlemi sırasında hata oluştu.",
+  const handleOpenAssignLessonModal = (teacher, modalId) => {
+    setSelectedTeacher(teacher);
+    setAssignFormData(emptyTeacherLessonAssignForm);
+    setAssignErrors({});
+    openModal(modalId);
+  };
+
+  const handleCloseAssignLessonModal = (modalId) => {
+    setSelectedTeacher(null);
+    setAssignFormData(emptyTeacherLessonAssignForm);
+    setAssignErrors({});
+    closeModal(modalId);
+  };
+
+  const validateAssignForm = () => {
+    const nextErrors = {};
+
+    if (!assignFormData.lessonId) {
+      nextErrors.lessonId = "Ders seçimi zorunludur.";
+    }
+
+    if (!assignFormData.classroomIds?.length) {
+      nextErrors.classroomIds = "En az bir sınıf seçmelisiniz.";
+    }
+
+    setAssignErrors(nextErrors);
+
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleAssignLessonSubmit = async (modalId) => {
+    if (!validateAssignForm()) return;
+
+    const teacherId = getTeacherId(selectedTeacher);
+
+    try {
+      const requests = assignFormData.classroomIds.map((classroomId) =>
+        teacherLessonService.create({
+          teacherId,
+          lessonId: assignFormData.lessonId,
+          classroomId,
+        })
       );
 
-      setLessonAssignErrors({ general: message });
-      showToast(message, "error");
+      const results = await Promise.all(requests);
+      const failedResult = results.find((result) => !result.isSuccess);
+
+      if (failedResult) {
+        setAssignErrors({
+          general: failedResult.message || "Ders atama işlemi başarısız.",
+        });
+        return;
+      }
+
+      setSelectedTeacher(null);
+      setAssignFormData(emptyTeacherLessonAssignForm);
+      setAssignErrors({});
+      closeModal(modalId);
+
+      showToast("Ders atama işlemi başarıyla tamamlandı.");
+    } catch (error) {
+      console.error(error);
+      setAssignErrors({
+        general: error.message || "Sunucu hatası oluştu.",
+      });
     }
   };
 
   const handleExportTeachersPdf = () => {
-    exportToPdf({
-      title: "Öğretmen Listesi",
-      fileName: "ogretmen-listesi.pdf",
-      columns: [
-        { header: "#", accessor: "index" },
-        {
-          header: "Öğretmen",
-          accessor: (x) =>
-            x.fullName ||
-            `${x.firstName || ""} ${x.lastName || ""}`.trim() ||
-            "-",
-        },
-        {
-          header: "Branş / Departman",
-          accessor: (x) => x.branchLessonName || x.department || "-",
-        },
-        {
-          header: "Email",
-          accessor: (x) => x.email || "-",
-        },
-        {
-          header: "Telefon",
-          accessor: (x) => x.phoneNumber || "-",
-        },
-        {
-          header: "Durum",
-          accessor: (x) => (x.isActive === false ? "İzinde" : "Aktif"),
-        },
-      ],
-      rows: filteredTeachers,
-    });
+    showToast("PDF indirme işlemi daha sonra bağlanacak.", "info");
   };
 
   return {
@@ -396,38 +338,33 @@ export function useTeachers() {
     filteredTeachers,
     lessons,
     classrooms,
-
     formData,
     setFormData,
+    assignFormData,
+    setAssignFormData,
     errors,
+    assignErrors,
     isEditing,
-
+    selectedTeacher,
     temporaryPasswords,
     toast,
-
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
-
-    selectedTeacherForLesson,
-    lessonAssignFormData,
-    setLessonAssignFormData,
-    lessonAssignErrors,
-
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseTeacherModal,
-
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDelete,
-
     handleSubmit,
+    handleOpenAssignLessonModal,
+    handleCloseAssignLessonModal,
+    handleAssignLessonSubmit,
     handleExportTeachersPdf,
-
-    handleOpenLessonAssignModal,
-    handleCloseLessonAssignModal,
-    handleLessonAssignSubmit,
+    getTeacherEmail,
   };
 }
+
+export default useTeachersPage;

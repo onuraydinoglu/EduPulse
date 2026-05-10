@@ -1,25 +1,20 @@
-import {
-  AcademicCapIcon,
-  ClipboardDocumentCheckIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
-
 import Toast from "../../../components/ui/Toast";
-import TeacherTable from "../components/TeacherTable";
-import TableStatsCards from "../components/TableStatsCards";
-import TeachersPageHeader from "../components/TeachersPageHeader";
-import TeacherFormModal from "../components/TeacherFormModal";
-import TeacherDeleteModal from "../components/TeacherDeleteModal";
-import TeacherLessonAssignModal from "../components/TeacherLessonAssignModal";
 
-import { useTeachers } from "../hooks/useTeachers";
+import TeacherDeleteModal from "../components/TeacherDeleteModal";
+import TeacherFormModal from "../components/TeacherFormModal";
+import TeacherLessonAssignModal from "../components/TeacherLessonAssignModal";
+import TeacherStatsCards from "../components/TeacherStatsCards";
+import TeacherTable from "../components/TeacherTable";
+import TeachersPageHeader from "../components/TeachersPageHeader";
 
 import {
   TEACHER_DELETE_MODAL_ID,
+  TEACHER_LESSON_ASSIGN_MODAL_ID,
   TEACHER_MODAL_ID,
 } from "../constants/teacherConstants";
 
-const TEACHER_LESSON_ASSIGN_MODAL_ID = "teacher_lesson_assign_modal";
+import { getTeacherStats } from "../constants/teacherTableColumns";
+import { useTeachersPage } from "../hooks/useTeachers";
 
 function TeachersPage() {
   const {
@@ -27,40 +22,32 @@ function TeachersPage() {
     filteredTeachers,
     lessons,
     classrooms,
-
     formData,
     setFormData,
+    assignFormData,
+    setAssignFormData,
     errors,
+    assignErrors,
     isEditing,
-
+    selectedTeacher,
     temporaryPasswords,
     toast,
-
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
-
-    selectedTeacherForLesson,
-    lessonAssignFormData,
-    setLessonAssignFormData,
-    lessonAssignErrors,
-
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseTeacherModal,
-
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDelete,
-
     handleSubmit,
+    handleOpenAssignLessonModal,
+    handleCloseAssignLessonModal,
+    handleAssignLessonSubmit,
     handleExportTeachersPdf,
-
-    handleOpenLessonAssignModal,
-    handleCloseLessonAssignModal,
-    handleLessonAssignSubmit,
-  } = useTeachers();
+  } = useTeachersPage();
 
   return (
     <div className="space-y-6">
@@ -71,43 +58,8 @@ function TeachersPage() {
         onExport={handleExportTeachersPdf}
       />
 
-      <TableStatsCards
-        items={[
-          {
-            title: "Toplam Öğretmen",
-            value: teachers.length,
-            description: "Sisteme kayıtlı öğretmen",
-            icon: UserGroupIcon,
-            color: "primary",
-          },
-          {
-            title: "Aktif Öğretmen",
-            value: teachers.filter(
-              (teacher) =>
-                teacher.isActive !== false && teacher.IsActive !== false,
-            ).length,
-            description: "Görevde olan öğretmen",
-            icon: AcademicCapIcon,
-            color: "success",
-          },
-          {
-            title: "Toplam Branş / Departman",
-            value: new Set(
-              teachers
-                .map(
-                  (teacher) =>
-                    teacher.branchLessonName ||
-                    teacher.BranchLessonName ||
-                    teacher.department ||
-                    teacher.Department,
-                )
-                .filter(Boolean),
-            ).size,
-            description: "Benzersiz branş ve departman",
-            icon: ClipboardDocumentCheckIcon,
-            color: "warning",
-          },
-        ]}
+      <TeacherStatsCards
+        items={getTeacherStats(teachers, temporaryPasswords)}
       />
 
       <TeacherTable
@@ -118,41 +70,48 @@ function TeachersPage() {
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
         onEdit={(teacher) => handleOpenEditModal(teacher, TEACHER_MODAL_ID)}
-        onDelete={(id) => handleOpenDeleteModal(id, TEACHER_DELETE_MODAL_ID)}
+        onDelete={(id) =>
+          handleOpenDeleteModal(id, TEACHER_DELETE_MODAL_ID)
+        }
         onAssignLesson={(teacher) =>
-          handleOpenLessonAssignModal(teacher, TEACHER_LESSON_ASSIGN_MODAL_ID)
+          handleOpenAssignLessonModal(
+            teacher,
+            TEACHER_LESSON_ASSIGN_MODAL_ID
+          )
         }
       />
 
       <TeacherFormModal
         modalId={TEACHER_MODAL_ID}
-        lessons={lessons}
+        isEditing={isEditing}
         formData={formData}
         setFormData={setFormData}
+        lessons={lessons}
         errors={errors}
-        isEditing={isEditing}
         onClose={() => handleCloseTeacherModal(TEACHER_MODAL_ID)}
         onSubmit={() => handleSubmit(TEACHER_MODAL_ID)}
+      />
+
+      <TeacherLessonAssignModal
+        modalId={TEACHER_LESSON_ASSIGN_MODAL_ID}
+        teacher={selectedTeacher}
+        formData={assignFormData}
+        setFormData={setAssignFormData}
+        lessons={lessons}
+        classrooms={classrooms}
+        errors={assignErrors}
+        onClose={() =>
+          handleCloseAssignLessonModal(TEACHER_LESSON_ASSIGN_MODAL_ID)
+        }
+        onSubmit={() =>
+          handleAssignLessonSubmit(TEACHER_LESSON_ASSIGN_MODAL_ID)
+        }
       />
 
       <TeacherDeleteModal
         modalId={TEACHER_DELETE_MODAL_ID}
         onClose={() => handleCloseDeleteModal(TEACHER_DELETE_MODAL_ID)}
         onConfirm={() => handleDelete(TEACHER_DELETE_MODAL_ID)}
-      />
-
-      <TeacherLessonAssignModal
-        modalId={TEACHER_LESSON_ASSIGN_MODAL_ID}
-        teacher={selectedTeacherForLesson}
-        formData={lessonAssignFormData}
-        setFormData={setLessonAssignFormData}
-        lessons={lessons}
-        classrooms={classrooms}
-        errors={lessonAssignErrors}
-        onClose={() =>
-          handleCloseLessonAssignModal(TEACHER_LESSON_ASSIGN_MODAL_ID)
-        }
-        onSubmit={() => handleLessonAssignSubmit(TEACHER_LESSON_ASSIGN_MODAL_ID)}
       />
     </div>
   );
