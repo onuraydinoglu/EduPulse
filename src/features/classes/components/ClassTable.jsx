@@ -93,16 +93,18 @@ function ClassTable({
         </table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalItems={totalItems}
-        startItem={startItem}
-        endItem={endItem}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
+      <div className="border-t border-base-300/60 p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 }

@@ -31,18 +31,12 @@ function TeacherTable({
     <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
       <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-base-content">
-              Öğretmen Listesi
-            </h2>
+          <h2 className="text-lg font-bold text-base-content">
+            Öğretmen Listesi
+          </h2>
 
-            <span className="text-sm text-base-content/60">
-              - {teachers.length} Kayıt
-            </span>
-          </div>
-
-          <p className="mt-1 text-sm text-base-content/60">
-            Kayıtlı öğretmenlerin temel bilgileri ve durumları.
+          <p className="text-sm text-base-content/60">
+            {teachers.length} kayıt listeleniyor.
           </p>
         </div>
 
@@ -136,7 +130,7 @@ function TeacherTable({
         </table>
       </div>
 
-      <div className="overflow-hidden rounded-b-3xl">
+      <div className="border-t border-base-300/60 p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
