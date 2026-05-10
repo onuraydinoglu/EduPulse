@@ -371,12 +371,17 @@ function DashboardMessagesWidget() {
             >
               <option value="">Alıcı seçiniz</option>
 
-              {users.map((user) => (
-                <option key={user.id || user.Id} value={user.id || user.Id}>
-                  {user.fullName || user.FullName} -{" "}
-                  {user.roleName || user.RoleName}
-                </option>
-              ))}
+              {users.map((user) => {
+                const userId = user.userId || user.UserId;
+                const fullName = user.fullName || user.FullName;
+                const roleName = user.roleName || user.RoleName;
+
+                return (
+                  <option key={userId} value={userId}>
+                    {fullName} - {roleName}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

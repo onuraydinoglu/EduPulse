@@ -23,7 +23,7 @@ export const messageService = {
 
   getConversation: async (otherUserId) => {
     const response = await axiosInstance.get(
-      `${API_ENDPOINTS.MESSAGES.CONVERSATION}/${otherUserId}`,
+      `${API_ENDPOINTS.MESSAGES.CONVERSATION}/${otherUserId}`
     );
 
     return getData(response);
@@ -32,14 +32,15 @@ export const messageService = {
   send: async (data) => {
     const response = await axiosInstance.post(
       API_ENDPOINTS.MESSAGES.BASE,
-      data,
+      data
     );
+
     return getData(response);
   },
 
   markAsRead: async (id) => {
     const response = await axiosInstance.put(
-      `${API_ENDPOINTS.MESSAGES.BASE}/${id}/read`,
+      `${API_ENDPOINTS.MESSAGES.BASE}/${id}/read`
     );
 
     return getData(response);
@@ -47,7 +48,7 @@ export const messageService = {
 
   delete: async (id) => {
     const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.MESSAGES.BASE}/${id}`,
+      `${API_ENDPOINTS.MESSAGES.BASE}/${id}`
     );
 
     return getData(response);

@@ -99,7 +99,7 @@ export const menuItems = [
 
   // ✅ BURASI ÖNEMLİ
   {
-    title: "Sosyal Etkinlikler",
+    title: "Kulüp Etkinlikler",
     icon: Squares2X2Icon,
     roles: ["schooladmin"],
     children: [
@@ -119,17 +119,24 @@ export const menuItems = [
   },
 
   {
-    title: "Etkinlikler",
-    path: "/dashboard/events",
-    icon: CalendarDaysIcon,
-    roles: ["schooladmin", "officer"],
-  },
+    title: "Sosyal Etkinlikler",
+    icon: Squares2X2Icon,
+    roles: ["schooladmin"],
+    children: [
+      {
+        title: "Etkinlikler",
+        path: "/dashboard/events",
+        icon: CalendarDaysIcon,
+        roles: ["schooladmin", "officer"],
+      },
 
-  {
-    title: "Etkinlik Katılımcıları",
-    path: "/dashboard/event-members",
-    icon: UserGroupIcon,
-    roles: ["schooladmin", "officer"],
+      {
+        title: "Etkinlik Katılımcıları",
+        path: "/dashboard/event-members",
+        icon: UserGroupIcon,
+        roles: ["schooladmin", "officer"],
+      },
+    ],
   },
 
   {
