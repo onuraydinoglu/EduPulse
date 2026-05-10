@@ -3,17 +3,19 @@ import FormFields from "../../../components/common/FormFields";
 import {
   classGradeOptions,
   classStatusOptions,
+  emptyClassForm,
 } from "../constants/classConstants";
 
 import { mapTeachersToOptions } from "../utils/classFormatters";
 
 function ClassForm({
-  formData,
+  formData = emptyClassForm,
   setFormData,
   teachers = [],
   errors = {},
   isEditing = false,
 }) {
+  const safeFormData = formData || emptyClassForm;
   const teacherOptions = mapTeachersToOptions(teachers);
 
   const classFields = [
@@ -47,8 +49,8 @@ function ClassForm({
   const handleStatusChange = (event) => {
     const value = event.target.value;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData?.((prev) => ({
+      ...(prev || emptyClassForm),
       isActive: value === "true",
     }));
   };
@@ -61,7 +63,7 @@ function ClassForm({
 
       <FormFields
         fields={classFields}
-        formData={formData}
+        formData={safeFormData}
         setFormData={setFormData}
         errors={errors}
       />
@@ -74,7 +76,7 @@ function ClassForm({
 
           <select
             className="select select-bordered w-full"
-            value={String(formData.isActive ?? true)}
+            value={String(safeFormData.isActive ?? true)}
             onChange={handleStatusChange}
           >
             {classStatusOptions.map((option) => (

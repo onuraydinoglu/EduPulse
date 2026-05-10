@@ -70,8 +70,13 @@ export function useClassesPage() {
     try {
       const result = await classService.getAll();
 
-      if (result?.isSuccess === false) {
-        showToast(result.message || "Sınıflar yüklenirken hata oluştu.", "error");
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        showToast(
+          result.message ||
+          result.Message ||
+          "Sınıflar yüklenirken hata oluştu.",
+          "error",
+        );
         return;
       }
 
@@ -88,25 +93,19 @@ export function useClassesPage() {
 
   const loadTeachers = async () => {
     try {
-      const result = await teacherService.getAll();
+      const result = await teacherService.getActive();
 
       if (result?.isSuccess === false || result?.IsSuccess === false) {
         showToast(
           result.message ||
           result.Message ||
-          "Öğretmenler yüklenirken hata oluştu.",
+          "Aktif öğretmenler yüklenirken hata oluştu.",
           "error",
         );
         return;
       }
 
-      const teacherData = result.data || result.Data || [];
-
-      const activeTeachers = teacherData.filter((teacher) => {
-        return teacher.isActive !== false && teacher.IsActive !== false;
-      });
-
-      setTeachers(activeTeachers);
+      setTeachers(result.data || result.Data || []);
     } catch (error) {
       console.error(error);
 
@@ -118,7 +117,7 @@ export function useClassesPage() {
       }
 
       showToast(
-        getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."),
+        getErrorMessage(error, "Aktif öğretmenler yüklenirken hata oluştu."),
         "error",
       );
     }
@@ -144,16 +143,16 @@ export function useClassesPage() {
   };
 
   const handleOpenEditModal = (classItem, modalId) => {
-    setEditingClassId(getClassId(classItem));
-    setErrors({});
+    const classId = getClassId(classItem);
 
+    setEditingClassId(classId);
     setFormData({
       grade: String(getClassGrade(classItem) || ""),
       section: getClassSection(classItem) || "",
       teacherId: getClassTeacherId(classItem) || "",
-      isActive: getClassIsActive(classItem),
+      isActive: String(getClassIsActive(classItem)),
     });
-
+    setErrors({});
     openModal(modalId);
   };
 
@@ -175,14 +174,17 @@ export function useClassesPage() {
   };
 
   const prepareClassPayload = () => {
-    return {
+    const payload = {
       grade: Number(formData.grade),
       section: formData.section.trim().toUpperCase(),
       teacherId: formData.teacherId || null,
-      isActive: isEditing
-        ? formData.isActive === true || formData.isActive === "true"
-        : true,
     };
+
+    if (editingClassId) {
+      payload.isActive = formData.isActive === "true";
+    }
+
+    return payload;
   };
 
   const handleSubmit = async (modalId) => {
@@ -204,8 +206,9 @@ export function useClassesPage() {
         })
         : await classService.create(preparedData);
 
-      if (result?.isSuccess === false) {
-        const message = result.message || "İşlem başarısız.";
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        const message =
+          result.message || result.Message || "İşlem başarısız.";
 
         setErrors({
           general: message,
@@ -240,8 +243,11 @@ export function useClassesPage() {
     try {
       const result = await classService.delete(deletingClassId);
 
-      if (result?.isSuccess === false) {
-        showToast(result.message || "Sınıf silinemedi.", "error");
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        showToast(
+          result.message || result.Message || "Sınıf silinemedi.",
+          "error",
+        );
         return;
       }
 

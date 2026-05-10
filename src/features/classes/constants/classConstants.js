@@ -5,7 +5,7 @@ export const emptyClassForm = {
   grade: "",
   section: "",
   teacherId: "",
-  isActive: true,
+  isActive: "true",
 };
 
 export const classGradeOptions = [

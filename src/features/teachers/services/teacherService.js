@@ -8,9 +8,7 @@ export const teacherService = {
   },
 
   getActive: async () => {
-    const response = await axiosInstance.get(
-      `${API_ENDPOINTS.TEACHERS}/active`,
-    );
+    const response = await axiosInstance.get(`${API_ENDPOINTS.TEACHERS}/active`);
     return response.data;
   },
 
@@ -30,9 +28,7 @@ export const teacherService = {
   },
 
   delete: async (id) => {
-    const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.TEACHERS}/${id}`,
-    );
+    const response = await axiosInstance.delete(`${API_ENDPOINTS.TEACHERS}/${id}`);
     return response.data;
   },
 };

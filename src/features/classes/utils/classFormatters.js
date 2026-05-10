@@ -93,6 +93,8 @@ export const findClassTeacher = (classItem, teachers = []) => {
 
 export const getClassTeacherName = (classItem, teachers = []) => {
   const backendTeacherName =
+    classItem?.teacherFullName ||
+    classItem?.TeacherFullName ||
     classItem?.teacher ||
     classItem?.Teacher ||
     classItem?.teacherName ||
@@ -109,7 +111,7 @@ export const getClassTeacherName = (classItem, teachers = []) => {
 
 export const mapTeachersToOptions = (teachers = []) => {
   return teachers.map((teacher) => ({
-    value: getTeacherUserId(teacher) || getTeacherId(teacher),
+    value: getTeacherId(teacher),
     label: getTeacherFullName(teacher),
   }));
 };
