@@ -72,7 +72,7 @@ function TeachersPage() {
       />
 
       <TableStatsCards
-        cards={[
+        items={[
           {
             title: "Toplam Öğretmen",
             value: teachers.length,
@@ -82,7 +82,10 @@ function TeachersPage() {
           },
           {
             title: "Aktif Öğretmen",
-            value: teachers.filter((x) => x.isActive !== false).length,
+            value: teachers.filter(
+              (teacher) =>
+                teacher.isActive !== false && teacher.IsActive !== false,
+            ).length,
             description: "Görevde olan öğretmen",
             icon: AcademicCapIcon,
             color: "success",
@@ -91,7 +94,13 @@ function TeachersPage() {
             title: "Toplam Branş / Departman",
             value: new Set(
               teachers
-                .map((x) => x.branchLessonName || x.department)
+                .map(
+                  (teacher) =>
+                    teacher.branchLessonName ||
+                    teacher.BranchLessonName ||
+                    teacher.department ||
+                    teacher.Department,
+                )
                 .filter(Boolean),
             ).size,
             description: "Benzersiz branş ve departman",
