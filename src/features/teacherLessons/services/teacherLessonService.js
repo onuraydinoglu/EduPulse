@@ -1,8 +1,7 @@
 import axiosInstance from "../../../api/axiosInstance";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 
-const unwrap = (response) =>
-  response.data?.data ?? response.data?.Data ?? response.data;
+const unwrap = (response) => response.data?.data ?? response.data?.Data ?? response.data;
 
 export const teacherLessonService = {
   getAll: async () => {
@@ -18,10 +17,16 @@ export const teacherLessonService = {
   },
 
   create: async (data) => {
+    const classroomIds = Array.isArray(data.classroomIds)
+      ? data.classroomIds
+      : data.classroomId
+        ? [data.classroomId]
+        : [];
+
     const response = await axiosInstance.post(API_ENDPOINTS.TEACHER_LESSONS, {
       teacherId: data.teacherId,
       lessonId: data.lessonId,
-      classroomId: data.classroomId,
+      classroomIds,
     });
 
     return response.data;
@@ -43,7 +48,6 @@ export const teacherLessonService = {
     const response = await axiosInstance.delete(
       `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`,
     );
-
     return response.data;
   },
 };

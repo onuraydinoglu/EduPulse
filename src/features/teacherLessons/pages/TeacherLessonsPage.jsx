@@ -23,6 +23,7 @@ const emptyForm = {
   teacherId: "",
   lessonId: "",
   classroomId: "",
+  classroomIds: [],
   isActive: true,
 };
 
@@ -133,6 +134,7 @@ function TeacherLessonsPage() {
       teacherId: item.teacherId || "",
       lessonId: item.lessonId || "",
       classroomId: item.classroomId || "",
+      classroomIds: item.classroomId ? [item.classroomId] : [],
       isActive: item.isActive ?? item.IsActive ?? true,
     });
 
@@ -178,11 +180,17 @@ function TeacherLessonsPage() {
 
   const handleSubmit = async () => {
     try {
-      const payload = {
-        teacherId: formData.teacherId,
-        lessonId: formData.lessonId,
-        classroomId: formData.classroomId,
-      };
+      const payload = isEditing
+        ? {
+          teacherId: formData.teacherId,
+          lessonId: formData.lessonId,
+          classroomId: formData.classroomId,
+        }
+        : {
+          teacherId: formData.teacherId,
+          lessonId: formData.lessonId,
+          classroomIds: formData.classroomIds || [],
+        };
 
       const result = isEditing
         ? await teacherLessonService.update({
@@ -199,7 +207,6 @@ function TeacherLessonsPage() {
 
       await refreshTeacherLessons();
       handleCloseModal();
-
       showToast(isEditing ? "Atama güncellendi." : "Yeni atama oluşturuldu.");
     } catch (error) {
       console.error(error);
