@@ -1,68 +1,84 @@
 import {
-    UserGroupIcon,
     AcademicCapIcon,
     CheckCircleIcon,
-    XCircleIcon,
+    UserGroupIcon,
+    UsersIcon,
 } from "@heroicons/react/24/outline";
 
 import {
+    getClubAdvisorTeacherId,
     getClubAdvisorTeacherName,
-    getClubIsActive,
     getClubMemberCount,
     getClubName,
 } from "../utils/clubFormatters";
 
+export const clubPdfColumns = [
+    {
+        header: "#",
+        accessor: "index",
+    },
+    {
+        header: "Kulüp",
+        accessor: getClubName,
+    },
+    {
+        header: "Sorumlu Öğretmen",
+        accessor: getClubAdvisorTeacherName,
+    },
+    {
+        header: "Üye Sayısı",
+        accessor: getClubMemberCount,
+    },
+];
+
 export const getClubStats = (clubs = []) => {
-    const activeCount = clubs.filter((club) => getClubIsActive(club)).length;
-    const passiveCount = clubs.filter((club) => !getClubIsActive(club)).length;
-    const totalMembers = clubs.reduce(
-        (total, club) => total + Number(getClubMemberCount(club) || 0),
-        0,
-    );
+    const totalMemberCount = clubs.reduce((total, club) => {
+        return total + Number(getClubMemberCount(club) || 0);
+    }, 0);
+
+    const assignedTeacherCount = clubs.filter((club) => {
+        return getClubAdvisorTeacherId(club);
+    }).length;
+
+    const activeClubCount = clubs.filter((club) => {
+        return club.isActive !== false && club.IsActive !== false;
+    }).length;
 
     return [
         {
             title: "Toplam Kulüp",
             value: clubs.length,
+            description: "Sistemde kayıtlı kulüp",
             icon: UserGroupIcon,
-            color: "blue",
+            color: "primary",
+        },
+        {
+            title: "Üye Sayısı",
+            value: totalMemberCount,
+            description: "Kulüplere bağlı toplam üye",
+            icon: UsersIcon,
+            color: "success",
         },
         {
             title: "Aktif Kulüp",
-            value: activeCount,
+            value: activeClubCount,
+            description: "Aktif durumda olan kulüp",
             icon: CheckCircleIcon,
-            color: "green",
+            color: "warning",
         },
         {
-            title: "Pasif Kulüp",
-            value: passiveCount,
-            icon: XCircleIcon,
-            color: "red",
-        },
-        {
-            title: "Toplam Üye",
-            value: totalMembers,
+            title: "Danışman Atanan",
+            value: assignedTeacherCount,
+            description: "Öğretmen atanmış kulüp",
             icon: AcademicCapIcon,
-            color: "purple",
+            color: "info",
         },
     ];
 };
 
-export const clubPdfColumns = [
-    {
-        header: "Kulüp",
-        accessor: (club) => getClubName(club),
-    },
-    {
-        header: "Sorumlu Öğretmen",
-        accessor: (club) => getClubAdvisorTeacherName(club),
-    },
-    {
-        header: "Üye Sayısı",
-        accessor: (club) => getClubMemberCount(club),
-    },
-    {
-        header: "Durum",
-        accessor: (club) => (getClubIsActive(club) ? "Aktif" : "Pasif"),
-    },
+export const clubTableHeaders = [
+    "Kulüp",
+    "Sorumlu Öğretmen",
+    "Üye Sayısı",
+    "İşlemler",
 ];

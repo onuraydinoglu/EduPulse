@@ -53,7 +53,7 @@ function AppRouter() {
           <Route path="trial-exams" element={<TrialExamsPage />} />
 
           <Route path="clubs" element={<ClubsPage />} />
-          <Route path="club-members" element={<ClubMembersPage />} />
+          <Route path="clubs/:clubId/members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
           <Route path="event-members" element={<EventMembersPage />} />

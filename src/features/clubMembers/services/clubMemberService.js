@@ -15,6 +15,7 @@ export const clubMemberService = {
     const response = await axiosInstance.get(
       `${API_ENDPOINTS.CLUB_MEMBERS}/club/${clubId}`,
     );
+
     return getData(response);
   },
 
@@ -27,6 +28,7 @@ export const clubMemberService = {
     const response = await axiosInstance.delete(
       `${API_ENDPOINTS.CLUB_MEMBERS}/${id}`,
     );
+
     return getData(response);
   },
 };

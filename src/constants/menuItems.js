@@ -97,25 +97,12 @@ export const menuItems = [
     ],
   },
 
-  // ✅ BURASI ÖNEMLİ
+
   {
-    title: "Kulüp Etkinlikler",
+    title: "Kulüpler",
+    path: "/dashboard/clubs",
     icon: Squares2X2Icon,
     roles: ["schooladmin"],
-    children: [
-      {
-        title: "Kulüpler",
-        path: "/dashboard/clubs",
-        icon: Squares2X2Icon,
-        roles: ["schooladmin"],
-      },
-      {
-        title: "Kulüp Üyeleri",
-        path: "/dashboard/club-members",
-        icon: UserPlusIcon,
-        roles: ["schooladmin"],
-      },
-    ],
   },
 
   {
