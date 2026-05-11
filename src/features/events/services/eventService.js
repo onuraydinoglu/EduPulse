@@ -11,6 +11,11 @@ export const eventService = {
     return getData(response);
   },
 
+  getById: async (id) => {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.EVENTS}/${id}`);
+    return getData(response);
+  },
+
   create: async (data) => {
     const response = await axiosInstance.post(API_ENDPOINTS.EVENTS, data);
     return getData(response);
@@ -22,9 +27,7 @@ export const eventService = {
   },
 
   delete: async (id) => {
-    const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.EVENTS}/${id}`,
-    );
+    const response = await axiosInstance.delete(`${API_ENDPOINTS.EVENTS}/${id}`);
     return getData(response);
   },
 };

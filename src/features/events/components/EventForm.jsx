@@ -1,26 +1,26 @@
 import FormInput from "../../../components/ui/FormInput";
 import FormSelect from "../../../components/ui/FormSelect";
+import {
+  eventPaymentOptions,
+  eventStatusOptions,
+} from "../constants/eventConstants";
+import { getTeacherSelectOptions } from "../utils/eventFormatters";
 
 function EventForm({
   formData,
   setFormData,
   teachers = [],
+  errors = {},
   isEditing = false,
 }) {
-  const teacherOptions = teachers.map((teacher) => ({
-    value: teacher.id || teacher.Id,
-    label:
-      teacher.fullName ||
-      teacher.FullName ||
-      `${teacher.firstName || teacher.FirstName || ""} ${teacher.lastName || teacher.LastName || ""
-        }`.trim(),
-  }));
-
-  const handleChange = (name, value) => {
+  const updateField = (field, value) => {
     setFormData((prev) => {
-      const next = { ...prev, [name]: value };
+      const next = {
+        ...prev,
+        [field]: value,
+      };
 
-      if (name === "isPaid" && value === false) {
+      if (field === "isPaid" && value === "false") {
         next.pricePerStudent = "";
       }
 
@@ -42,105 +42,122 @@ function EventForm({
     });
   };
 
+  const teacherOptions = getTeacherSelectOptions(teachers);
+  const isPaid = formData.isPaid === true || formData.isPaid === "true";
+
   return (
     <div className="space-y-4">
+      {errors.general && (
+        <div className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+          {errors.general}
+        </div>
+      )}
+
       <FormInput
         label="Etkinlik Adı"
-        placeholder="Örn: Bilim Gezisi"
+        placeholder="Örn: Bilim Şenliği"
         value={formData.name}
-        onChange={(value) => handleChange("name", value)}
+        error={errors.name}
+        onChange={(value) => updateField("name", value)}
       />
 
       <FormInput
         label="Etkinlik Yeri"
         placeholder="Örn: Konferans Salonu"
         value={formData.location}
-        onChange={(value) => handleChange("location", value)}
+        error={errors.location}
+        onChange={(value) => updateField("location", value)}
       />
 
       <div className="grid gap-4 md:grid-cols-2">
         <FormInput
-          label="Tarih"
           type="date"
+          label="Etkinlik Tarihi"
           value={formData.eventDate}
-          onChange={(value) => handleChange("eventDate", value)}
+          error={errors.eventDate}
+          onChange={(value) => updateField("eventDate", value)}
         />
 
         <FormInput
-          label="Saat"
           type="time"
+          label="Etkinlik Saati"
           value={formData.startTime}
-          onChange={(value) => handleChange("startTime", value)}
+          error={errors.startTime}
+          onChange={(value) => updateField("startTime", value)}
         />
       </div>
 
-      <FormSelect
-        label="Ücret Durumu"
-        value={formData.isPaid ? "paid" : "free"}
-        onChange={(value) => handleChange("isPaid", value === "paid")}
-        options={[
-          { label: "Ücretsiz", value: "free" },
-          { label: "Ücretli", value: "paid" },
-        ]}
-      />
-
-      {formData.isPaid && (
-        <FormInput
-          label="Kişi Başı Ücret"
-          type="number"
-          placeholder="Örn: 250"
-          value={formData.pricePerStudent}
-          onChange={(value) => handleChange("pricePerStudent", value)}
+      <div className="grid gap-4 md:grid-cols-2">
+        <FormSelect
+          label="Ücret Durumu"
+          value={String(formData.isPaid)}
+          error={errors.isPaid}
+          options={eventPaymentOptions}
+          onChange={(value) => updateField("isPaid", value)}
         />
-      )}
 
-      <div>
-        <label className="label">
-          <span className="label-text font-medium">Sorumlu Öğretmenler</span>
-        </label>
+        {isPaid && (
+          <FormInput
+            type="number"
+            label="Kişi Başı Ücret"
+            placeholder="Örn: 250"
+            value={formData.pricePerStudent}
+            error={errors.pricePerStudent}
+            onChange={(value) => updateField("pricePerStudent", value)}
+          />
+        )}
+      </div>
 
-        <div className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-gray-200 bg-white p-3">
-          {teacherOptions.length === 0 ? (
-            <p className="text-sm text-gray-500">Öğretmen bulunamadı.</p>
-          ) : (
-            teacherOptions.map((teacher) => (
-              <label
-                key={teacher.value}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-blue-50"
-              >
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-primary checkbox-sm"
-                  checked={(formData.responsibleTeacherIds || []).includes(
-                    teacher.value,
-                  )}
-                  onChange={() => toggleTeacher(teacher.value)}
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  {teacher.label}
-                </span>
-              </label>
-            ))
-          )}
+      <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
+        <div className="mb-3">
+          <h4 className="text-sm font-semibold text-base-content">
+            Sorumlu Öğretmenler
+          </h4>
+          <p className="text-xs text-base-content/50">
+            Birden fazla öğretmen seçilebilir. Zorunlu değildir.
+          </p>
         </div>
 
-        <p className="mt-1 text-xs text-gray-400">
-          Sorumlu öğretmen zorunlu değil, daha sonra da atanabilir.
-        </p>
+        {teacherOptions.length === 0 ? (
+          <p className="rounded-xl bg-base-200 px-4 py-3 text-sm text-base-content/60">
+            Aktif öğretmen bulunamadı.
+          </p>
+        ) : (
+          <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+            {teacherOptions.map((teacher) => {
+              const checked = formData.responsibleTeacherIds?.includes(
+                teacher.value,
+              );
+
+              return (
+                <label
+                  key={teacher.value}
+                  className="flex cursor-pointer items-center gap-3 rounded-xl border border-base-300 px-4 py-3 transition hover:bg-base-200/60"
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary checkbox-sm"
+                    checked={checked}
+                    onChange={() => toggleTeacher(teacher.value)}
+                  />
+                  <span className="text-sm font-medium text-base-content">
+                    {teacher.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {isEditing && (
-        <label className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-primary checkbox-sm"
-            checked={formData.isActive}
-            onChange={(e) => handleChange("isActive", e.target.checked)}
-          />
-          <span className="text-sm font-medium text-gray-700">
-            Etkinlik aktif
-          </span>
-        </label>
+        <FormSelect
+          label="Durum"
+          value={String(formData.isActive)}
+          error={errors.isActive}
+          options={eventStatusOptions}
+          onChange={(value) => updateField("isActive", value)}
+        />
       )}
     </div>
   );

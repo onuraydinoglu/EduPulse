@@ -56,7 +56,7 @@ function AppRouter() {
           <Route path="clubs/:clubId/members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
-          <Route path="event-members" element={<EventMembersPage />} />
+          <Route path="/dashboard/events/:eventId/members" element={<EventMembersPage />} />
 
           <Route path="principal-reports" element={<PrincipalReportsPage />} />
           <Route path="teacher-reports" element={<TeacherReportsPage />} />
