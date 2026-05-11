@@ -138,17 +138,27 @@ export const normalizeGradeInput = (value) => {
 
 export const normalizeGradeForPayload = (value) => {
     if (value === "" || value === null || value === undefined) return null;
-    return Number(value);
+
+    const numberValue = Number(value);
+
+    if (Number.isNaN(numberValue)) return null;
+
+    return numberValue;
 };
 
 export const calculateAverage = (grades) => {
     const values = examGradeFields
-        .map((field) => Number(grades[field.key]))
+        .map((field) => grades[field.key])
+        .filter((value) => value !== "" && value !== null && value !== undefined)
+        .map((value) => Number(value))
         .filter((value) => !Number.isNaN(value));
 
     if (!values.length) return 0;
 
-    return values.reduce((total, value) => total + value, 0) / values.length;
+    const average =
+        values.reduce((total, value) => total + value, 0) / values.length;
+
+    return Number(average.toFixed(2));
 };
 
 export const getAverageLabel = (average) => {
@@ -156,7 +166,9 @@ export const getAverageLabel = (average) => {
 };
 
 export const getCurrentUser = () => {
-    const rawUser = localStorage.getItem("edupulse_user");
+    const rawUser =
+        localStorage.getItem("edupulse_user") ||
+        localStorage.getItem("okulpro_user");
 
     if (!rawUser) return null;
 
@@ -194,6 +206,9 @@ export const getCurrentUserToken = (currentUser) => {
         currentUser?.JwtToken ||
         currentUser?.user?.token ||
         currentUser?.user?.Token ||
+        currentUser?.data?.token ||
+        currentUser?.data?.Token ||
+        currentUser?.Data?.Token ||
         ""
     );
 };
@@ -209,6 +224,9 @@ export const getCurrentUserRole = (currentUser) => {
         currentUser?.Role ||
         currentUser?.user?.roleName ||
         currentUser?.user?.RoleName ||
+        currentUser?.data?.roleName ||
+        currentUser?.data?.RoleName ||
+        currentUser?.Data?.RoleName ||
         payload?.role ||
         payload?.Role ||
         payload?.[
@@ -227,6 +245,9 @@ export const getCurrentTeacherId = (currentUser) => {
         currentUser?.TeacherId ||
         currentUser?.user?.teacherId ||
         currentUser?.user?.TeacherId ||
+        currentUser?.data?.teacherId ||
+        currentUser?.data?.TeacherId ||
+        currentUser?.Data?.TeacherId ||
         currentUser?.teacher?.id ||
         currentUser?.Teacher?.Id ||
         payload?.teacherId ||

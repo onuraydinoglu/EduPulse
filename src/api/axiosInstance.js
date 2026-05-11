@@ -8,9 +8,44 @@ const axiosInstance = axios.create({
   },
 });
 
+const getTokenFromUser = (user) => {
+  return (
+    user?.token ||
+    user?.Token ||
+    user?.accessToken ||
+    user?.AccessToken ||
+    user?.jwtToken ||
+    user?.JwtToken ||
+    user?.user?.token ||
+    user?.user?.Token ||
+    user?.data?.token ||
+    user?.data?.Token ||
+    user?.Data?.Token ||
+    ""
+  );
+};
+
+const getErrorMessage = (error) => {
+  const responseData = error?.response?.data;
+
+  if (typeof responseData === "string") return responseData;
+
+  return (
+    responseData?.message ||
+    responseData?.Message ||
+    responseData?.error ||
+    responseData?.Error ||
+    responseData?.title ||
+    responseData?.errors?.[0] ||
+    responseData?.Errors?.[0] ||
+    error?.message ||
+    "Beklenmeyen bir hata oluştu."
+  );
+};
+
 axiosInstance.interceptors.request.use((config) => {
   const user = authStorage.getUser();
-  const token = user?.token || user?.accessToken || user?.jwtToken;
+  const token = getTokenFromUser(user);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -22,19 +57,12 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const responseData = error.response?.data;
-
-    const message =
-      responseData?.message ||
-      responseData?.Message ||
-      responseData?.errors?.[0] ||
-      responseData?.Errors?.[0] ||
-      "Beklenmeyen bir hata oluştu.";
-
     return Promise.reject({
-      statusCode: error.response?.status,
-      message,
-      errors: responseData?.errors || responseData?.Errors,
+      statusCode: error?.response?.status,
+      message: getErrorMessage(error),
+      errors: error?.response?.data?.errors || error?.response?.data?.Errors,
+      response: error?.response,
+      originalError: error,
     });
   },
 );

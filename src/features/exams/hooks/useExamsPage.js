@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { classService } from "../../classes/services/classService";
 import { lessonService } from "../../lessons/services/lessonService";
 import { studentService } from "../../students/services/studentService";
 import { teacherLessonService } from "../../teacherLessons/services/teacherLessonService";
-
 import { exportToPdf } from "../../../utils/exportToPdf";
 import { emptyExamGrades, examGradeFields } from "../constants/examConstants";
 import { examPdfColumns } from "../constants/examTableColumns";
@@ -37,14 +35,13 @@ export function useExamsPage() {
     const [exams, setExams] = useState([]);
     const [lessons, setLessons] = useState([]);
     const [teacherLessons, setTeacherLessons] = useState([]);
-
     const [selectedLessonId, setSelectedLessonId] = useState("");
     const [editedGrades, setEditedGrades] = useState({});
     const [isSavingAll, setIsSavingAll] = useState(false);
     const [rowErrors, setRowErrors] = useState({});
     const [search, setSearch] = useState("");
-
     const [isLoading, setIsLoading] = useState(true);
+
     const [toast, setToast] = useState({
         message: "",
         type: "success",
@@ -70,7 +67,7 @@ export function useExamsPage() {
         try {
             return await request();
         } catch (error) {
-            console.error(error);
+            console.error("İstek hatası:", error);
             return fallback;
         }
     };
@@ -81,12 +78,10 @@ export function useExamsPage() {
 
             const studentsRequest = studentService.getAll();
             const lessonsRequest = lessonService.getAll();
-
             const examsRequest = safeRequest(() => examService.getAll(), []);
             const classroomRequest = isClassroomMode
                 ? classService.getById(classroomId)
                 : Promise.resolve(null);
-
             const teacherLessonsRequest = isClassroomMode
                 ? teacherLessonService.getAll()
                 : Promise.resolve([]);
@@ -114,7 +109,7 @@ export function useExamsPage() {
                 setTeacherLessons(normalizeResultData(teacherLessonsResult));
             }
         } catch (error) {
-            console.error(error);
+            console.error("Sınav verileri yüklenirken hata:", error);
 
             showToast(
                 getErrorMessage(error, "Sınav verileri yüklenirken hata oluştu."),
@@ -204,12 +199,12 @@ export function useExamsPage() {
             return {
                 ...prev,
                 [studentId]: {
-                    exam1: currentRow.exam1 || "",
-                    exam2: currentRow.exam2 || "",
-                    project: currentRow.project || "",
-                    activity1: currentRow.activity1 || "",
-                    activity2: currentRow.activity2 || "",
-                    activity3: currentRow.activity3 || "",
+                    exam1: currentRow.exam1 ?? "",
+                    exam2: currentRow.exam2 ?? "",
+                    project: currentRow.project ?? "",
+                    activity1: currentRow.activity1 ?? "",
+                    activity2: currentRow.activity2 ?? "",
+                    activity3: currentRow.activity3 ?? "",
                     [field]: normalizedValue,
                 },
             };
@@ -326,7 +321,7 @@ export function useExamsPage() {
 
             showToast(`${changedRows.length} öğrencinin notu başarıyla kaydedildi.`);
         } catch (error) {
-            console.error(error);
+            console.error("Not kaydetme hatası:", error);
 
             showToast(
                 getErrorMessage(error, "Notlar kaydedilirken hata oluştu."),
