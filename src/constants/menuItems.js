@@ -63,12 +63,6 @@ export const menuItems = [
         roles: ["schooladmin", "officer", "teacher"],
       },
       {
-        title: "Sınıflar",
-        path: "/dashboard/classes",
-        icon: RectangleGroupIcon,
-        roles: ["schooladmin", "teacher"],
-      },
-      {
         title: "Ders Atamaları",
         path: "/dashboard/teacher-lessons",
         icon: AcademicCapIcon,
@@ -77,24 +71,19 @@ export const menuItems = [
     ],
   },
 
+
   {
-    title: "Sınav Yönetimi",
-    icon: ClipboardDocumentCheckIcon,
+    title: "Sınıflar",
+    path: "/dashboard/classes",
+    icon: RectangleGroupIcon,
     roles: ["schooladmin", "teacher"],
-    children: [
-      {
-        title: "Sınavlar",
-        path: "/dashboard/exams",
-        icon: ClipboardDocumentListIcon,
-        roles: ["schooladmin", "teacher"],
-      },
-      {
-        title: "Deneme Sınavları",
-        path: "/dashboard/trial-exams",
-        icon: DocumentChartBarIcon,
-        roles: ["schooladmin", "teacher"],
-      },
-    ],
+  },
+
+  {
+    title: "Deneme Sınavları (Sınıflardan Ulaşım olacak daha sonra kalkacak)",
+    path: "/dashboard/trial-exams",
+    icon: DocumentChartBarIcon,
+    roles: ["schooladmin", "teacher"],
   },
 
 
@@ -104,26 +93,11 @@ export const menuItems = [
     icon: Squares2X2Icon,
     roles: ["schooladmin"],
   },
-
   {
-    title: "Sosyal Etkinlikler",
-    icon: Squares2X2Icon,
-    roles: ["schooladmin"],
-    children: [
-      {
-        title: "Etkinlikler",
-        path: "/dashboard/events",
-        icon: CalendarDaysIcon,
-        roles: ["schooladmin", "officer"],
-      },
-
-      {
-        title: "Etkinlik Katılımcıları",
-        path: "/dashboard/event-members",
-        icon: UserGroupIcon,
-        roles: ["schooladmin", "officer"],
-      },
-    ],
+    title: "Etkinlikler",
+    path: "/dashboard/events",
+    icon: CalendarDaysIcon,
+    roles: ["schooladmin", "officer"],
   },
 
   {

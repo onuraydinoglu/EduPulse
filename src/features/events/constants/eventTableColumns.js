@@ -1,4 +1,11 @@
 import {
+    BanknotesIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    GiftIcon,
+} from "@heroicons/react/24/outline";
+
+import {
     getEventDateText,
     getEventLocation,
     getEventName,
@@ -31,7 +38,8 @@ export const eventPdfColumns = [
     },
     {
         header: "Sorumlu Öğretmenler",
-        accessor: (event) => getEventResponsibleTeacherNames(event).join(", ") || "-",
+        accessor: (event) =>
+            getEventResponsibleTeacherNames(event).join(", ") || "-",
     },
     {
         header: "Durum",
@@ -57,21 +65,29 @@ export const getEventStats = (events = []) => {
             title: "Toplam Etkinlik",
             value: total,
             description: "Sistemde kayıtlı etkinlik",
+            icon: CalendarDaysIcon,
+            color: "primary",
         },
         {
             title: "Aktif Etkinlik",
             value: active,
             description: "Kullanıma açık etkinlik",
+            icon: CheckCircleIcon,
+            color: "success",
         },
         {
             title: "Ücretli Etkinlik",
             value: paid,
             description: "Katılım ücreti bulunan etkinlik",
+            icon: BanknotesIcon,
+            color: "warning",
         },
         {
             title: "Ücretsiz Etkinlik",
             value: free,
             description: "Ücretsiz katılım etkinliği",
+            icon: GiftIcon,
+            color: "info",
         },
     ];
 };

@@ -49,14 +49,14 @@ function AppRouter() {
           <Route path="lessons" element={<LessonsPage />} />
           <Route path="teacher-lessons" element={<TeacherLessonsPage />} />
 
-          <Route path="exams" element={<ExamsPage />} />
+          { /* <Route path="exams" element={<ExamsPage />} /> */}
           <Route path="trial-exams" element={<TrialExamsPage />} />
 
           <Route path="clubs" element={<ClubsPage />} />
           <Route path="clubs/:clubId/members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
-          <Route path="/dashboard/events/:eventId/members" element={<EventMembersPage />} />
+          <Route path="events/:eventId/members" element={<EventMembersPage />} />
 
           <Route path="principal-reports" element={<PrincipalReportsPage />} />
           <Route path="teacher-reports" element={<TeacherReportsPage />} />

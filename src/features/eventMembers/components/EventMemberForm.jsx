@@ -1,77 +1,49 @@
+import {
+  getStudentFullName,
+  getStudentId,
+  getStudentNumber,
+} from "../utils/eventMemberFormatters";
+
 function EventMemberForm({
   formData,
   setFormData,
-  events = [],
   students = [],
   errors = {},
 }) {
-  const eventOptions = events.map((event) => ({
-    value: event.id || event.Id,
-    label: event.name || event.Name || event.title || event.Title || "-",
-  }));
-
   const studentOptions = students.map((student) => {
-    const id = student.id || student.Id;
-
-    const fullName =
-      student.fullName ||
-      student.FullName ||
-      `${student.firstName || student.FirstName || ""} ${student.lastName || student.LastName || ""
-        }`.trim();
-
-    const number = student.studentNumber || student.StudentNumber || "";
+    const id = getStudentId(student);
+    const fullName = getStudentFullName(student);
+    const number = getStudentNumber(student);
 
     return {
       value: id,
-      label: number ? `${fullName} - ${number}` : fullName || "-",
+      label: number ? `${fullName} - ${number}` : fullName,
     };
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {errors.general && (
+        <div className="alert alert-error rounded-2xl text-sm">
+          {errors.general}
+        </div>
+      )}
+
       <div>
-        <label className="label">
-          <span className="label-text font-medium">Etkinlik</span>
+        <label className="mb-2 block text-sm font-medium text-base-content">
+          Öğrenci
         </label>
 
         <select
-          className="select select-bordered w-full"
-          value={formData.eventId}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              eventId: e.target.value,
-            }))
-          }
-        >
-          <option value="">Etkinlik seçiniz</option>
-
-          {eventOptions.map((event) => (
-            <option key={event.value} value={event.value}>
-              {event.label}
-            </option>
-          ))}
-        </select>
-
-        {errors.eventId && (
-          <p className="mt-1 text-sm text-error">{errors.eventId}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="label">
-          <span className="label-text font-medium">Öğrenci</span>
-        </label>
-
-        <select
-          className="select select-bordered w-full"
           value={formData.studentId}
-          onChange={(e) =>
+          onChange={(event) =>
             setFormData((prev) => ({
               ...prev,
-              studentId: e.target.value,
+              studentId: event.target.value,
             }))
           }
+          className={`select select-bordered w-full rounded-xl ${errors.studentId ? "select-error" : ""
+            }`}
         >
           <option value="">Öğrenci seçiniz</option>
 
@@ -87,45 +59,52 @@ function EventMemberForm({
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="flex items-center gap-3 rounded-xl border border-base-300 bg-base-100 p-4">
+      <div className="rounded-2xl border border-base-300 bg-base-200/40 p-4">
+        <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
-            className="checkbox checkbox-primary"
             checked={formData.isPaid}
-            onChange={(e) =>
+            onChange={(event) =>
               setFormData((prev) => ({
                 ...prev,
-                isPaid: e.target.checked,
+                isPaid: event.target.checked,
+                paidAmount: event.target.checked ? prev.paidAmount : 0,
               }))
             }
+            className="checkbox checkbox-primary"
           />
-          <span className="text-sm font-medium">Ödeme yapıldı</span>
+
+          <span className="text-sm font-medium text-base-content">
+            Ödeme yapıldı
+          </span>
         </label>
 
-        <div>
-          <label className="label">
-            <span className="label-text font-medium">Ödenen Tutar</span>
-          </label>
+        {formData.isPaid && (
+          <div className="mt-4">
+            <label className="mb-2 block text-sm font-medium text-base-content">
+              Ödenen Tutar
+            </label>
 
-          <input
-            type="number"
-            min="0"
-            className="input input-bordered w-full"
-            value={formData.paidAmount}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                paidAmount: e.target.value,
-              }))
-            }
-            placeholder="0"
-          />
+            <input
+              type="number"
+              min="0"
+              value={formData.paidAmount}
+              onChange={(event) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  paidAmount: event.target.value,
+                }))
+              }
+              placeholder="0"
+              className={`input input-bordered w-full rounded-xl ${errors.paidAmount ? "input-error" : ""
+                }`}
+            />
 
-          {errors.paidAmount && (
-            <p className="mt-1 text-sm text-error">{errors.paidAmount}</p>
-          )}
-        </div>
+            {errors.paidAmount && (
+              <p className="mt-1 text-sm text-error">{errors.paidAmount}</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
