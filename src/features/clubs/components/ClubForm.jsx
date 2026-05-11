@@ -1,7 +1,16 @@
 import FormInput from "../../../components/ui/FormInput";
 import FormSelect from "../../../components/ui/FormSelect";
 
-function ClubForm({ formData, setFormData, teachers = [] }) {
+import { clubStatusOptions } from "../constants/clubConstants";
+import { getTeacherSelectOptions } from "../utils/clubFormatters";
+
+function ClubForm({
+  formData,
+  setFormData,
+  teachers = [],
+  errors = {},
+  isEditing = false,
+}) {
   const updateField = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -9,42 +18,47 @@ function ClubForm({ formData, setFormData, teachers = [] }) {
     }));
   };
 
-  const teacherOptions = teachers.map((teacher) => ({
-    label:
-      teacher.fullName ||
-      teacher.userFullName ||
-      teacher.teacherFullName ||
-      teacher.name ||
-      `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() ||
-      "İsimsiz Öğretmen",
-    value: teacher.id,
-  }));
+  const teacherOptions = [
+    {
+      label: "Sorumlu öğretmen seçiniz",
+      value: "",
+    },
+    ...getTeacherSelectOptions(teachers),
+  ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="space-y-4">
+      {errors.general && (
+        <div className="rounded-2xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+          {errors.general}
+        </div>
+      )}
+
       <FormInput
         label="Kulüp Adı"
         placeholder="Örn: Robotik Kulübü"
         value={formData.name}
+        error={errors.name}
         onChange={(value) => updateField("name", value)}
       />
 
       <FormSelect
         label="Sorumlu Öğretmen"
         value={formData.advisorTeacherId}
-        onChange={(value) => updateField("advisorTeacherId", value)}
         options={teacherOptions}
+        error={errors.advisorTeacherId}
+        onChange={(value) => updateField("advisorTeacherId", value)}
       />
 
-      <FormSelect
-        label="Durum"
-        value={String(formData.isActive)}
-        onChange={(value) => updateField("isActive", value === "true")}
-        options={[
-          { label: "Aktif", value: "true" },
-          { label: "Pasif", value: "false" },
-        ]}
-      />
+      {isEditing && (
+        <FormSelect
+          label="Durum"
+          value={String(formData.isActive)}
+          options={clubStatusOptions}
+          error={errors.isActive}
+          onChange={(value) => updateField("isActive", value)}
+        />
+      )}
     </div>
   );
 }

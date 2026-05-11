@@ -1,84 +1,87 @@
 import { Link } from "react-router-dom";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightOnRectangleIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
 import TableActions from "../../../components/ui/TableActions";
 
-function ClubTableRow({ club, teachers = [], onEdit, onDelete }) {
-  const clubId = club.id || club.Id;
+import {
+  getClubAdvisorTeacherName,
+  getClubId,
+  getClubIsActive,
+  getClubMemberCount,
+  getClubName,
+} from "../utils/clubFormatters";
 
-  const clubName = club.name || club.Name || "-";
-
-  const advisorTeacherId = club.advisorTeacherId || club.AdvisorTeacherId;
-
-  const advisorTeacherFromList = teachers.find(
-    (teacher) => (teacher.id || teacher.Id) === advisorTeacherId,
-  );
-
-  const advisorTeacherName =
-    club.advisorTeacherFullName ||
-    club.AdvisorTeacherFullName ||
-    club.teacherFullName ||
-    club.TeacherFullName ||
-    advisorTeacherFromList?.fullName ||
-    advisorTeacherFromList?.FullName ||
-    `${advisorTeacherFromList?.firstName || advisorTeacherFromList?.FirstName || ""} ${advisorTeacherFromList?.lastName || advisorTeacherFromList?.LastName || ""
-      }`.trim() ||
-    "-";
-
-  const memberCount =
-    club.memberCount ??
-    club.MemberCount ??
-    club.clubMemberCount ??
-    club.ClubMemberCount ??
-    0;
-
-  const isActive = club.isActive ?? club.IsActive ?? true;
+function ClubTableRow({
+  club,
+  teachers = [],
+  canManage = true,
+  onEdit,
+  onDelete,
+}) {
+  const clubId = getClubId(club);
+  const isActive = getClubIsActive(club);
 
   return (
-    <tr>
+    <tr className="transition hover:bg-base-200/60">
       <td>
-        <div>
-          <p className="font-semibold text-base-content">{clubName}</p>
-          <p className="mt-1 text-xs text-base-content/50">
-            Kulüp ID: {clubId}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <UserGroupIcon className="h-6 w-6" />
+          </div>
+
+          <div>
+            <p className="font-semibold text-base-content">
+              {getClubName(club)}
+            </p>
+
+            <p className="text-xs text-base-content/50">
+              Kulüp kaydı
+            </p>
+          </div>
         </div>
       </td>
 
       <td>
-        <span className="text-sm text-base-content/70">
-          {advisorTeacherName}
+        <span className="font-medium text-base-content/80">
+          {getClubAdvisorTeacherName(club, teachers)}
         </span>
       </td>
 
       <td>
-        <span className="font-medium text-base-content">{memberCount}</span>
+        <span className="badge badge-outline rounded-xl">
+          {getClubMemberCount(club)} Üye
+        </span>
       </td>
 
       <td>
         <span
-          className={`badge ${isActive ? "badge-success" : "badge-error"
-            } badge-sm text-white`}
+          className={`badge rounded-xl ${isActive ? "badge-success" : "badge-error"
+            }`}
         >
           {isActive ? "Aktif" : "Pasif"}
         </span>
       </td>
 
       <td>
-        <Link
-          to={`/dashboard/clubs/${clubId}`}
-          className="btn btn-sm border-base-300 bg-base-100 text-base-content hover:border-primary hover:bg-primary hover:text-primary-content"
-        >
-          <ArrowRightOnRectangleIcon className="h-4 w-4" />
-          Kulübe Git
-        </Link>
-      </td>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to={`/dashboard/club-members?clubId=${clubId}`}
+            className="btn btn-sm rounded-xl border border-primary/20 bg-primary/10 text-primary hover:bg-primary hover:text-primary-content"
+          >
+            <ArrowRightOnRectangleIcon className="h-4 w-4" />
+            Kulübe Git
+          </Link>
 
-      <td className="text-right">
-        <TableActions
-          onEdit={() => onEdit(club)}
-          onDelete={() => onDelete(clubId)}
-        />
+          {canManage && (
+            <TableActions
+              onEdit={() => onEdit(club)}
+              onDelete={() => onDelete(clubId)}
+            />
+          )}
+        </div>
       </td>
     </tr>
   );

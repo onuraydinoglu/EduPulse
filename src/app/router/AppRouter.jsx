@@ -22,7 +22,6 @@ import TeacherReportsPage from "../../features/reports/pages/TeacherReportsPage"
 import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLessonsPage";
 import EventsPage from "../../features/events/pages/EventsPage";
 import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
-import ClubWorkspacePage from "../../features/clubMembers/pages/ClubMembersPage";
 
 
 function AppRouter() {
@@ -54,7 +53,6 @@ function AppRouter() {
           <Route path="trial-exams" element={<TrialExamsPage />} />
 
           <Route path="clubs" element={<ClubsPage />} />
-          <Route path="clubs/:clubId" element={<ClubWorkspacePage />} />
           <Route path="club-members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
