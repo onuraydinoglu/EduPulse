@@ -11,6 +11,11 @@ export const clubService = {
     return getData(response);
   },
 
+  getById: async (id) => {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.CLUBS}/${id}`);
+    return getData(response);
+  },
+
   create: async (data) => {
     const response = await axiosInstance.post(API_ENDPOINTS.CLUBS, data);
     return getData(response);

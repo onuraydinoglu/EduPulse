@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
-  MagnifyingGlassIcon,
+  ArrowLeftIcon,
+  UserGroupIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 
@@ -9,35 +11,31 @@ import { API_ENDPOINTS } from "../../../api/endpoints";
 import Button from "../../../components/ui/Button";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import Modal from "../../../components/ui/Modal";
+import Pagination from "../../../components/ui/Pagination";
+import SearchInput from "../../../components/ui/SearchInput";
+import TableActions from "../../../components/ui/TableActions";
 import Toast from "../../../components/ui/Toast";
-import CreateButton from "../../../components/ui/CreateButton";
+import { usePagination } from "../../../hooks/usePagination";
 
-import ClubMemberForm from "../components/ClubMemberForm";
-import ClubMemberTable from "../components/ClubMemberTable";
-import { clubMemberService } from "../services/clubMemberService";
+import { clubMemberService } from "../../clubMembers/services/clubMemberService";
+import { clubService } from "../../clubs/services/clubService";
 
-const emptyForm = {
-  clubId: "",
+const emptyMemberForm = {
   studentId: "",
 };
 
-function ClubMembersPage() {
-  const [clubs, setClubs] = useState([]);
+function ClubWorkspacePage() {
+  const { clubId } = useParams();
+  const navigate = useNavigate();
+
+  const [club, setClub] = useState(null);
+  const [members, setMembers] = useState([]);
   const [students, setStudents] = useState([]);
-
-  const [selectedClub, setSelectedClub] = useState(null);
-  const [selectedClubMembers, setSelectedClubMembers] = useState([]);
-
-  const [formData, setFormData] = useState(emptyForm);
-  const [errors, setErrors] = useState({});
-  const [deletingId, setDeletingId] = useState(null);
-
+  const [formData, setFormData] = useState(emptyMemberForm);
+  const [deletingMemberId, setDeletingMemberId] = useState(null);
   const [search, setSearch] = useState("");
-  const [selectedClubId, setSelectedClubId] = useState("");
-
   const [loading, setLoading] = useState(true);
-  const [memberLoading, setMemberLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [savingMember, setSavingMember] = useState(false);
 
   const [toast, setToast] = useState({
     message: "",
@@ -52,29 +50,66 @@ function ClubMembersPage() {
     }, 2500);
   };
 
-  const getResultData = (response) => {
+  const getData = (response) => {
     return response.data?.data ?? response.data?.Data ?? response.data;
   };
 
-  const loadClubsAndStudents = async () => {
+  const getId = (item) => item?.id || item?.Id;
+
+  const getClubName = (item) => item?.name || item?.Name || "Kulüp";
+
+  const getAdvisorName = (item) =>
+    item?.advisorTeacherFullName ||
+    item?.AdvisorTeacherFullName ||
+    item?.teacherFullName ||
+    item?.TeacherFullName ||
+    "-";
+
+  const getStudentId = (student) =>
+    student?.studentId || student?.StudentId || getId(student);
+
+  const getStudentFullName = (item) =>
+    item?.studentFullName ||
+    item?.StudentFullName ||
+    item?.fullName ||
+    item?.FullName ||
+    `${item?.firstName || item?.FirstName || ""} ${item?.lastName || item?.LastName || ""
+      }`.trim() ||
+    "Öğrenci";
+
+  const getStudentNumber = (item) =>
+    item?.studentNumber || item?.StudentNumber || "-";
+
+  const getClassroomName = (item) =>
+    item?.classroomName ||
+    item?.ClassroomName ||
+    item?.className ||
+    item?.ClassName ||
+    "-";
+
+  const fetchClub = async () => {
+    const data = await clubService.getById(clubId);
+    setClub(data || null);
+  };
+
+  const fetchMembers = async () => {
+    const data = await clubMemberService.getByClubId(clubId);
+    setMembers(Array.isArray(data) ? data : []);
+  };
+
+  const fetchStudents = async () => {
+    const response = await axiosInstance.get(API_ENDPOINTS.STUDENTS);
+    const data = getData(response);
+    setStudents(Array.isArray(data) ? data : []);
+  };
+
+  const loadPage = async () => {
     try {
       setLoading(true);
-
-      const [clubResponse, studentResponse] = await Promise.all([
-        axiosInstance.get(API_ENDPOINTS.CLUBS),
-        axiosInstance.get(API_ENDPOINTS.STUDENTS),
-      ]);
-
-      const clubData = getResultData(clubResponse);
-      const studentData = getResultData(studentResponse);
-
-      setClubs(Array.isArray(clubData) ? clubData : []);
-      setStudents(Array.isArray(studentData) ? studentData : []);
+      await Promise.all([fetchClub(), fetchMembers(), fetchStudents()]);
     } catch (error) {
-      setClubs([]);
-      setStudents([]);
       showToast(
-        error.message || "Kulüpler ve öğrenciler yüklenirken hata oluştu.",
+        error.message || "Kulüp çalışma alanı yüklenirken hata oluştu.",
         "error",
       );
     } finally {
@@ -82,320 +117,378 @@ function ClubMembersPage() {
     }
   };
 
-  const loadSelectedClubMembers = async (clubId) => {
-    if (!clubId) return;
-
-    try {
-      setMemberLoading(true);
-
-      const data = await clubMemberService.getByClubId(clubId);
-      setSelectedClubMembers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      setSelectedClubMembers([]);
-      showToast(
-        error.message || "Kulüp üyeleri yüklenirken hata oluştu.",
-        "error",
-      );
-    } finally {
-      setMemberLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadClubsAndStudents();
-  }, []);
+    loadPage();
+  }, [clubId]);
 
-  const filteredClubs = useMemo(() => {
+  const memberStudentIds = useMemo(() => {
+    return members
+      .map((member) => member.studentId || member.StudentId)
+      .filter(Boolean);
+  }, [members]);
+
+  const selectableStudents = useMemo(() => {
+    return students.filter((student) => {
+      const studentId = getStudentId(student);
+      const isActive = student.isActive ?? student.IsActive ?? true;
+
+      return isActive && !memberStudentIds.includes(studentId);
+    });
+  }, [students, memberStudentIds]);
+
+  const filteredMembers = useMemo(() => {
     const normalizedSearch = search.toLowerCase().trim();
 
-    return clubs.filter((club) => {
-      const clubId = club.id || club.Id;
+    return members.filter((member) => {
+      const fullName = getStudentFullName(member).toLowerCase();
+      const number = String(getStudentNumber(member)).toLowerCase();
+      const classroom = getClassroomName(member).toLowerCase();
 
-      const memberCount = club.memberCount ?? club.MemberCount ?? 0;
-
-      if (memberCount <= 0) return false;
-
-      const clubName = (club.name || club.Name || "").toLowerCase();
-
-      const teacherName = (
-        club.advisorTeacherFullName ||
-        club.AdvisorTeacherFullName ||
-        club.teacherFullName ||
-        club.TeacherFullName ||
-        ""
-      ).toLowerCase();
-
-      const matchesClubFilter = !selectedClubId || clubId === selectedClubId;
-
-      const matchesSearch =
-        clubName.includes(normalizedSearch) ||
-        teacherName.includes(normalizedSearch);
-
-      return matchesClubFilter && matchesSearch;
+      return (
+        fullName.includes(normalizedSearch) ||
+        number.includes(normalizedSearch) ||
+        classroom.includes(normalizedSearch)
+      );
     });
-  }, [clubs, search, selectedClubId]);
+  }, [members, search]);
 
-  const validateForm = () => {
-    const newErrors = {};
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+  } = usePagination(filteredMembers, 5);
 
-    if (!formData.clubId) {
-      newErrors.clubId = "Kulüp seçiniz.";
-    }
-
-    if (!formData.studentId) {
-      newErrors.studentId = "Öğrenci seçiniz.";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleOpenCreateModal = () => {
-    setFormData(emptyForm);
-    setErrors({});
+  const handleOpenMemberModal = () => {
+    setFormData(emptyMemberForm);
     document.getElementById("club_member_modal")?.showModal();
   };
 
-  const handleCloseModal = () => {
+  const handleCloseMemberModal = () => {
+    setFormData(emptyMemberForm);
     document.getElementById("club_member_modal")?.close();
-    setFormData(emptyForm);
-    setErrors({});
   };
 
-  const handleOpenMembersModal = async (club) => {
-    const clubId = club.id || club.Id;
-
-    setSelectedClub(club);
-    setSelectedClubMembers([]);
-
-    document.getElementById("club_members_detail_modal")?.showModal();
-
-    await loadSelectedClubMembers(clubId);
-  };
-
-  const handleCloseMembersModal = () => {
-    document.getElementById("club_members_detail_modal")?.close();
-    setSelectedClub(null);
-    setSelectedClubMembers([]);
-  };
-
-  const handleOpenDeleteModal = (id) => {
-    setDeletingId(id);
-    document.getElementById("club_member_delete_modal")?.showModal();
-  };
-
-  const handleCloseDeleteModal = () => {
-    document.getElementById("club_member_delete_modal")?.close();
-    setDeletingId(null);
-  };
-
-  const refreshOpenClubMembers = async () => {
-    const clubId = selectedClub?.id || selectedClub?.Id;
-
-    if (clubId) {
-      await loadSelectedClubMembers(clubId);
+  const handleCreateMember = async () => {
+    if (!formData.studentId) {
+      showToast("Öğrenci seçiniz.", "error");
+      return;
     }
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
 
     try {
-      setSaving(true);
+      setSavingMember(true);
 
       await clubMemberService.create({
-        clubId: formData.clubId,
+        clubId,
         studentId: formData.studentId,
       });
 
-      showToast("Kulüp üyesi başarıyla eklendi.");
-      handleCloseModal();
-      await loadClubsAndStudents();
-      await refreshOpenClubMembers();
+      showToast("Öğrenci kulübe başarıyla eklendi.");
+      handleCloseMemberModal();
+      await fetchMembers();
     } catch (error) {
       showToast(
-        error.message || "Kulüp üyesi eklenirken hata oluştu.",
+        error.message || "Öğrenci kulübe eklenirken hata oluştu.",
         "error",
       );
     } finally {
-      setSaving(false);
+      setSavingMember(false);
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await clubMemberService.delete(deletingId);
+  const handleOpenDeleteMemberModal = (memberId) => {
+    setDeletingMemberId(memberId);
+    document.getElementById("club_member_delete_modal")?.showModal();
+  };
 
-      showToast("Kulüp üyesi başarıyla silindi.");
-      handleCloseDeleteModal();
-      await loadClubsAndStudents();
-      await refreshOpenClubMembers();
+  const handleCloseDeleteMemberModal = () => {
+    setDeletingMemberId(null);
+    document.getElementById("club_member_delete_modal")?.close();
+  };
+
+  const handleDeleteMember = async () => {
+    try {
+      await clubMemberService.delete(deletingMemberId);
+
+      showToast("Öğrenci kulüpten çıkarıldı.");
+      handleCloseDeleteMemberModal();
+      await fetchMembers();
     } catch (error) {
       showToast(
-        error.message || "Kulüp üyesi silinirken hata oluştu.",
+        error.message || "Öğrenci kulüpten çıkarılırken hata oluştu.",
         "error",
       );
     }
   };
 
-  const selectedClubName =
-    selectedClub?.name || selectedClub?.Name || "Kulüp";
+  if (loading) {
+    return (
+      <div className="rounded-3xl border border-base-300 bg-base-100 p-10 text-center text-sm text-base-content/60 shadow-sm">
+        Kulüp bilgileri yükleniyor...
+      </div>
+    );
+  }
+
+  if (!club) {
+    return (
+      <div className="rounded-3xl border border-base-300 bg-base-100 p-10 text-center shadow-sm">
+        <p className="text-sm font-semibold text-base-content">
+          Kulüp bulunamadı.
+        </p>
+
+        <Button
+          className="mt-4"
+          onClick={() => navigate("/dashboard/clubs")}
+        >
+          Kulüplere Dön
+        </Button>
+      </div>
+    );
+  }
+
+  const isActive = club.isActive ?? club.IsActive ?? true;
 
   return (
     <div className="space-y-6">
-      {toast.message && <Toast message={toast.message} type={toast.type} />}
+      <Toast message={toast.message} type={toast.type} />
 
-      <section className="radius-card border border-gray-200 bg-white px-6 py-4">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/clubs")}
+              className="btn btn-square btn-sm border-base-300 bg-base-100"
+              title="Kulüplere dön"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+            </button>
+
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <UserGroupIcon className="h-5 w-5" />
+                Kulüp Çalışma Alanı
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-bold text-base-content">
+                  {getClubName(club)}
+                </h1>
+
+                <span
+                  className={`badge ${isActive ? "badge-success" : "badge-error"
+                    } badge-sm text-white`}
+                >
+                  {isActive ? "Aktif" : "Pasif"}
+                </span>
+              </div>
+
+              <p className="mt-1 text-sm text-base-content/60">
+                Sorumlu Öğretmen:{" "}
+                <span className="font-medium text-base-content">
+                  {getAdvisorName(club)}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <Button onClick={handleOpenMemberModal} disabled={!isActive}>
+            <span className="inline-flex items-center gap-2">
+              <UserPlusIcon className="h-5 w-5" />
+              Öğrenci Ekle
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
+          <p className="text-sm font-medium text-base-content/60">
+            Toplam Üye
+          </p>
+          <p className="mt-3 text-3xl font-bold text-base-content">
+            {members.length}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
+          <p className="text-sm font-medium text-base-content/60">
+            Eklenebilir Öğrenci
+          </p>
+          <p className="mt-3 text-3xl font-bold text-base-content">
+            {selectableStudents.length}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
+          <p className="text-sm font-medium text-base-content/60">
+            Kulüp Durumu
+          </p>
+          <p className="mt-3 text-3xl font-bold text-base-content">
+            {isActive ? "Aktif" : "Pasif"}
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+            <h2 className="text-base font-semibold text-base-content">
               Kulüp Üyeleri
-            </h1>
+            </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Kulüplere öğrenci atama ve üye listesini yönetme ekranı
+            <p className="mt-1 text-sm text-base-content/60">
+              {filteredMembers.length} kayıt listeleniyor.
             </p>
           </div>
 
-          <CreateButton icon={UserPlusIcon} onClick={handleOpenCreateModal}>
-            Yeni Kulüp Üyesi
-          </CreateButton>
-        </div>
-      </section>
-
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="relative w-full md:w-80">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-
-          <input
-            type="text"
+          <SearchInput
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Kulüp veya öğretmen ara..."
-            className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Öğrenci, numara veya sınıf ara..."
           />
         </div>
 
-        <select
-          value={selectedClubId}
-          onChange={(e) => setSelectedClubId(e.target.value)}
-          className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 md:w-64"
-        >
-          <option value="">Tüm Kulüpler</option>
+        <div className="overflow-x-auto">
+          <table className="table">
+            <thead className="bg-base-200/70">
+              <tr>
+                <th className="text-sm">Öğrenci</th>
+                <th className="text-sm">Numara</th>
+                <th className="text-sm">Sınıf</th>
+                <th className="text-right text-sm">İşlemler</th>
+              </tr>
+            </thead>
 
-          {clubs.map((club) => (
-            <option key={club.id || club.Id} value={club.id || club.Id}>
-              {club.name || club.Name || "-"}
-            </option>
-          ))}
-        </select>
+            <tbody>
+              {paginatedItems.map((member) => {
+                const memberId = getId(member);
+
+                return (
+                  <tr key={memberId}>
+                    <td>
+                      <span className="font-semibold text-base-content">
+                        {getStudentFullName(member)}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="text-sm text-base-content/70">
+                        {getStudentNumber(member)}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="text-sm text-base-content/70">
+                        {getClassroomName(member)}
+                      </span>
+                    </td>
+
+                    <td className="text-right">
+                      <TableActions
+                        hideEdit
+                        onDelete={() => handleOpenDeleteMemberModal(memberId)}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {filteredMembers.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-10 text-center text-sm text-base-content/60"
+                  >
+                    Bu kulüpte öğrenci bulunamadı.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
-      {loading ? (
-        <div className="rounded-2xl border border-base-300 bg-base-100 p-8 text-center text-base-content/60">
-          Kulüpler yükleniyor...
-        </div>
-      ) : (
-        <ClubMemberTable
-          clubs={filteredClubs}
-          onDetail={handleOpenMembersModal}
-        />
-      )}
+      <Modal
+        id="club_member_modal"
+        title="Kulübe Öğrenci Ekle"
+        description="Bu kulübe eklenecek öğrenciyi seçin."
+        actions={
+          <>
+            <Button variant="secondary" onClick={handleCloseMemberModal}>
+              Vazgeç
+            </Button>
 
-      <Modal id="club_member_modal" title="Yeni Kulüp Üyesi">
-        <ClubMemberForm
-          formData={formData}
-          setFormData={setFormData}
-          clubs={clubs}
-          students={students}
-          errors={errors}
-        />
+            <Button onClick={handleCreateMember} disabled={savingMember}>
+              {savingMember ? "Ekleniyor..." : "Ekle"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-base-content">
+            Öğrenci
+          </label>
 
-        <div className="modal-action">
-          <Button variant="ghost" onClick={handleCloseModal}>
-            Vazgeç
-          </Button>
+          <select
+            value={formData.studentId}
+            onChange={(event) =>
+              setFormData((previous) => ({
+                ...previous,
+                studentId: event.target.value,
+              }))
+            }
+            className="select select-bordered w-full"
+          >
+            <option value="">Öğrenci seçiniz</option>
 
-          <Button onClick={handleSubmit} disabled={saving}>
-            {saving ? "Kaydediliyor..." : "Kaydet"}
-          </Button>
-        </div>
-      </Modal>
-
-      <Modal id="club_members_detail_modal" title={`${selectedClubName} Üyeleri`}>
-        {memberLoading ? (
-          <div className="rounded-2xl border border-base-300 bg-base-100 p-8 text-center text-base-content/60">
-            Üyeler yükleniyor...
-          </div>
-        ) : selectedClubMembers.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60">
-            Bu kulüpte henüz öğrenci yok.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {selectedClubMembers.map((member) => {
-              const id = member.id || member.Id;
-
-              const fullName =
-                member.studentFullName ||
-                member.StudentFullName ||
-                member.fullName ||
-                member.FullName ||
-                "-";
-
-              const number =
-                member.studentNumber ||
-                member.StudentNumber ||
-                member.number ||
-                member.Number ||
-                "-";
+            {selectableStudents.map((student) => {
+              const studentId = getStudentId(student);
 
               return (
-                <div
-                  key={id}
-                  className="flex items-center justify-between rounded-2xl border border-base-300 bg-base-100 px-4 py-3"
-                >
-                  <div>
-                    <p className="font-semibold text-base-content">
-                      {fullName}
-                    </p>
-                    <p className="text-sm text-base-content/55">
-                      Öğrenci No: {number}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm text-error"
-                    onClick={() => handleOpenDeleteModal(id)}
-                    disabled={!id}
-                  >
-                    Sil
-                  </button>
-                </div>
+                <option key={studentId} value={studentId}>
+                  {getStudentFullName(student)} - {getStudentNumber(student)}
+                </option>
               );
             })}
-          </div>
-        )}
+          </select>
 
-        <div className="modal-action">
-          <Button variant="ghost" onClick={handleCloseMembersModal}>
-            Kapat
-          </Button>
+          {selectableStudents.length === 0 && (
+            <p className="text-xs text-warning">
+              Eklenebilir aktif öğrenci bulunamadı veya tüm öğrenciler bu
+              kulübe eklenmiş.
+            </p>
+          )}
         </div>
       </Modal>
 
       <ConfirmModal
         id="club_member_delete_modal"
-        title="Kulüp Üyesini Sil"
-        description="Bu kulüp üyesini silmek istediğinize emin misiniz?"
-        confirmText="Sil"
-        onCancel={handleCloseDeleteModal}
-        onConfirm={handleDelete}
+        title="Öğrenci kulüpten çıkarılsın mı?"
+        description="Bu öğrenci sadece kulüp üyeliğinden çıkarılır. Öğrenci kaydı silinmez."
+        confirmText="Çıkar"
+        cancelText="Vazgeç"
+        onConfirm={handleDeleteMember}
+        onCancel={handleCloseDeleteMemberModal}
       />
     </div>
   );
 }
 
-export default ClubMembersPage;
+export default ClubWorkspacePage;

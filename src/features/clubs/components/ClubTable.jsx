@@ -1,8 +1,66 @@
+import FilterSelect from "../../../components/ui/FilterSelect";
+import Pagination from "../../../components/ui/Pagination";
+import SearchInput from "../../../components/ui/SearchInput";
+import { usePagination } from "../../../hooks/usePagination";
+
 import ClubTableRow from "./ClubTableRow";
 
-function ClubTable({ clubs = [], onEdit, onDelete }) {
+const clubStatusFilterOptions = [
+  { value: "all", label: "Tüm Durumlar" },
+  { value: "active", label: "Aktif" },
+  { value: "passive", label: "Pasif" },
+];
+
+function ClubTable({
+  clubs,
+  teachers = [],
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  onEdit,
+  onDelete,
+}) {
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+  } = usePagination(clubs, 5);
+
   return (
-    <div className="overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-base-content">
+            Kulüp Listesi
+          </h2>
+
+          <p className="mt-1 text-sm text-base-content/60">
+            {clubs.length} kayıt listeleniyor.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <SearchInput
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Kulüp veya öğretmen ara..."
+          />
+
+          <FilterSelect
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            options={clubStatusFilterOptions}
+          />
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
@@ -11,30 +69,48 @@ function ClubTable({ clubs = [], onEdit, onDelete }) {
               <th className="text-sm">Sorumlu Öğretmen</th>
               <th className="text-sm">Üye Sayısı</th>
               <th className="text-sm">Durum</th>
+              <th className="text-sm">Kulüp İşlemi</th>
               <th className="text-right text-sm">İşlemler</th>
             </tr>
           </thead>
 
           <tbody>
-            {clubs.map((club) => (
+            {paginatedItems.map((club) => (
               <ClubTableRow
-                key={club.id}
+                key={club.id || club.Id}
                 club={club}
+                teachers={teachers}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
             ))}
+
+            {clubs.length === 0 && (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="py-10 text-center text-sm text-base-content/60"
+                >
+                  Kulüp kaydı bulunamadı.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {clubs.length === 0 && (
-        <div className="p-8 text-center text-sm text-base-content/60">
-          Kayıt bulunamadı.
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }
 
-export default ClubTable; 
+export default ClubTable;
