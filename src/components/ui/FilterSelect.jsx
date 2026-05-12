@@ -46,7 +46,7 @@ function FilterSelect({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex h-11 w-50 items-center justify-between rounded-xl border bg-white px-4 text-left text-sm font-normal outline-none transition ${error
+        className={`flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm font-normal outline-none transition ${error
           ? "border-rose-400 text-rose-600 ring-4 ring-rose-50"
           : "border-gray-200 text-gray-700 shadow-sm hover:border-blue-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
           }`}
@@ -67,7 +67,7 @@ function FilterSelect({
 
       {open && (
         <div
-          className={`absolute right-0 z-50 w-50 overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ${dropdownDirection === "up" ? "bottom-full mb-2" : "mt-2"
+          className={`absolute right-0 z-50 w-full overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ${dropdownDirection === "up" ? "bottom-full mb-2" : "mt-2"
             }`}
         >
           {options.map((option) => {

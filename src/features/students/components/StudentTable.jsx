@@ -54,7 +54,7 @@ function StudentTable({
             value={classroomFilter}
             onChange={setClassroomFilter}
             hideLabel
-            placeholder="Sınıf filtresi"
+            className="w-full sm:w-48 shrink-0"
             options={[defaultClassroomFilterOption, ...classroomOptions]}
           />
         </div>

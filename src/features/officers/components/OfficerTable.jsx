@@ -53,7 +53,7 @@ function OfficerTable({
             value={statusFilter}
             onChange={setStatusFilter}
             hideLabel
-            placeholder="Durum filtresi"
+            className="w-full sm:w-48 shrink-0"
             options={officerStatusFilterOptions}
           />
         </div>

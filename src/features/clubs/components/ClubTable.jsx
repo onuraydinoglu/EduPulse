@@ -45,13 +45,14 @@ function ClubTable({
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={setSearch}
             placeholder="Kulüp veya öğretmen ara..."
           />
 
           <FilterSelect
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onChange={setStatusFilter}
+            className="w-full sm:w-48 shrink-0"
             options={clubStatusFilterOptions}
           />
         </div>

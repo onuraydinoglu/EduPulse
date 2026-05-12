@@ -52,6 +52,7 @@ function TeacherTable({
             value={statusFilter}
             onChange={setStatusFilter}
             hideLabel
+            className="w-full sm:w-48 shrink-0"
             options={teacherStatusFilterOptions}
           />
         </div>
