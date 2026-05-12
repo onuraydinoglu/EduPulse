@@ -61,38 +61,38 @@ function TeacherTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
-            <tr className="border-b border-base-300">
-              <th className="px-6 py-5 text-left">
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Öğretmen
                 </span>
               </th>
 
-              <th className="px-6 py-5 text-left">
+              <th>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Branş / Bölüm
                 </span>
               </th>
 
-              <th className="px-6 py-5 text-left">
+              <th>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   E-Posta
                 </span>
               </th>
 
-              <th className="px-6 py-5 text-left">
+              <th>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Telefon
                 </span>
               </th>
 
-              <th className="px-6 py-5 text-left">
+              <th>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   Durum
                 </span>
               </th>
 
-              <th className="px-6 py-5 text-right">
+              <th className="text-right">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
                   İşlemler
                 </span>

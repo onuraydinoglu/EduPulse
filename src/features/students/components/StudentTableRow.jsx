@@ -15,7 +15,7 @@ function StudentTableRow({ student, onEdit, onDelete }) {
   const studentId = getStudentId(student);
 
   return (
-    <tr className="transition hover:bg-base-200/40">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
       <td>
         <div className="font-semibold text-base-content">
           {getStudentFullName(student)}

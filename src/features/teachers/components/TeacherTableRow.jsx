@@ -27,8 +27,8 @@ function TeacherTableRow({
   const status = getTeacherStatus(teacher);
 
   return (
-    <tr className="border-b border-base-200 transition hover:bg-base-200/40">
-      <td className="px-6 py-4">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
+      <td>
         <div>
           <div className="font-semibold text-base-content">{fullName}</div>
 
@@ -40,27 +40,27 @@ function TeacherTableRow({
         </div>
       </td>
 
-      <td className="px-6 py-4">
+      <td>
         <span className="text-sm text-base-content/70">{branch}</span>
       </td>
 
-      <td className="px-6 py-4">
+      <td>
         <span className="text-sm text-base-content/70">
           {email || "-"}
         </span>
       </td>
 
-      <td className="px-6 py-4">
+      <td>
         <span className="text-sm text-base-content/70">
           {phoneNumber || "-"}
         </span>
       </td>
 
-      <td className="px-6 py-4">
+      <td>
         <StatusBadge status={status === "pasif" ? "izinli" : status} />
       </td>
 
-      <td className="px-6 py-4">
+      <td>
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"

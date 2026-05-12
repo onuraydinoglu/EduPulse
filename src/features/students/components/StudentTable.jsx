@@ -63,7 +63,7 @@ function StudentTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
-            <tr className="text-xs uppercase text-base-content/50">
+            <tr className="border-b border-base-300 [&_th]:px-6">
               <th>Öğrenci</th>
               <th>Öğrenci No</th>
               <th>Sınıf</th>
