@@ -1,7 +1,13 @@
-export const getEventId = (event) => event?.id || event?.Id || "";
+export const getEventId = (event) => {
+    return event?.id || event?.Id || "";
+};
 
 export const getEventName = (event) => {
-    return event?.name || event?.Name || event?.title || event?.Title || "-";
+    return event?.name || event?.Name || "-";
+};
+
+export const getEventDescription = (event) => {
+    return event?.description || event?.Description || "";
 };
 
 export const getEventLocation = (event) => {
@@ -12,113 +18,220 @@ export const getEventDate = (event) => {
     return event?.eventDate || event?.EventDate || "";
 };
 
-export const getEventDateText = (event) => {
-    const value = getEventDate(event);
+export const getEventStartTime = (event) => {
+    return event?.startTime || event?.StartTime || "";
+};
 
-    if (!value) return "-";
-
-    return new Date(value).toLocaleDateString("tr-TR");
+export const getEventEndTime = (event) => {
+    return event?.endTime || event?.EndTime || "";
 };
 
 export const getEventTime = (event) => {
+    return getEventStartTime(event);
+};
+
+export const getEventIsPaid = (event) => {
+    return Boolean(event?.isPaid ?? event?.IsPaid ?? false);
+};
+
+export const getEventPricePerStudent = (event) => {
+    return Number(event?.pricePerStudent ?? event?.PricePerStudent ?? 0);
+};
+
+export const getEventQuota = (event) => {
+    return event?.quota ?? event?.Quota ?? "";
+};
+
+export const getEventIsActive = (event) => {
+    return Boolean(event?.isActive ?? event?.IsActive ?? true);
+};
+
+export const getTeacherId = (teacher) => {
     return (
-        event?.startTime ||
-        event?.StartTime ||
-        event?.eventTime ||
-        event?.EventTime ||
+        teacher?.teacherId ||
+        teacher?.TeacherId ||
+        teacher?.id ||
+        teacher?.Id ||
         ""
     );
 };
 
-export const getEventTimeText = (event) => {
-    return getEventTime(event) || "-";
+export const getTeacherUserId = (teacher) => {
+    return teacher?.userId || teacher?.UserId || "";
 };
 
-export const getEventIsPaid = (event) => {
-    return event?.isPaid ?? event?.IsPaid ?? false;
+export const getTeacherFullName = (teacher) => {
+    const directName =
+        teacher?.fullName ||
+        teacher?.FullName ||
+        teacher?.teacherFullName ||
+        teacher?.TeacherFullName ||
+        teacher?.name ||
+        teacher?.Name;
+
+    if (directName) return directName;
+
+    const firstName = teacher?.firstName || teacher?.FirstName || "";
+    const lastName = teacher?.lastName || teacher?.LastName || "";
+
+    return `${firstName} ${lastName}`.trim();
 };
 
-export const getEventPricePerStudent = (event) => {
-    return event?.pricePerStudent ?? event?.PricePerStudent ?? 0;
+export const getTeacherBranchName = (teacher) => {
+    return (
+        teacher?.branchLessonName ||
+        teacher?.BranchLessonName ||
+        teacher?.lessonName ||
+        teacher?.LessonName ||
+        teacher?.department ||
+        teacher?.Department ||
+        ""
+    );
 };
 
-export const getEventPaymentText = (event) => {
-    const isPaid = getEventIsPaid(event);
-    const price = getEventPricePerStudent(event);
+export const getEventResponsibleTeacherObjects = (event) => {
+    const teachers = event?.responsibleTeachers || event?.ResponsibleTeachers;
 
-    return isPaid ? `${price} ₺` : "Ücretsiz";
-};
+    if (!Array.isArray(teachers)) return [];
 
-export const getEventIsActive = (event) => {
-    return event?.isActive ?? event?.IsActive ?? true;
-};
-
-export const getEventStatusText = (event) => {
-    return getEventIsActive(event) ? "Aktif" : "Pasif";
+    return teachers;
 };
 
 export const getEventResponsibleTeacherIds = (event) => {
-    return event?.responsibleTeacherIds || event?.ResponsibleTeacherIds || [];
+    const directIds = event?.responsibleTeacherIds || event?.ResponsibleTeacherIds;
+
+    if (Array.isArray(directIds)) {
+        return directIds.filter(Boolean).map(String);
+    }
+
+    const responsibleTeachers = getEventResponsibleTeacherObjects(event);
+
+    return responsibleTeachers
+        .map((teacher) => getTeacherId(teacher))
+        .filter(Boolean)
+        .map(String);
 };
 
 export const getEventResponsibleTeacherNames = (event, teachers = []) => {
-    const directNames =
-        event?.responsibleTeacherNames ||
-        event?.ResponsibleTeacherNames ||
-        event?.teacherNames ||
-        event?.TeacherNames;
+    const responsibleTeacherObjects = getEventResponsibleTeacherObjects(event);
 
-    if (Array.isArray(directNames) && directNames.length > 0) {
-        return directNames;
+    if (responsibleTeacherObjects.length > 0) {
+        const names = responsibleTeacherObjects
+            .map((teacher) => getTeacherFullName(teacher))
+            .filter(Boolean);
+
+        if (names.length > 0) return names;
     }
 
-    const teacherIds = getEventResponsibleTeacherIds(event);
+    const responsibleTeacherIds = getEventResponsibleTeacherIds(event);
 
-    if (!Array.isArray(teacherIds) || teacherIds.length === 0) {
-        return [];
-    }
+    if (responsibleTeacherIds.length === 0) return [];
 
-    return teacherIds
+    return responsibleTeacherIds
         .map((teacherId) => {
-            const teacher = teachers.find((item) => {
-                const id = item?.id || item?.Id;
-                return id === teacherId;
-            });
+            const matchedTeacher = teachers.find(
+                (teacher) => String(getTeacherId(teacher)) === String(teacherId)
+            );
 
-            if (!teacher) return null;
-
-            const firstName = teacher?.firstName || teacher?.FirstName || "";
-            const lastName = teacher?.lastName || teacher?.LastName || "";
-            const fullName = teacher?.fullName || teacher?.FullName;
-
-            return fullName || `${firstName} ${lastName}`.trim();
+            return getTeacherFullName(matchedTeacher);
         })
         .filter(Boolean);
 };
 
 export const getTeacherSelectOptions = (teachers = []) => {
-    return teachers.map((teacher) => {
-        const id = teacher?.id || teacher?.Id;
-        const firstName = teacher?.firstName || teacher?.FirstName || "";
-        const lastName = teacher?.lastName || teacher?.LastName || "";
-        const fullName =
-            teacher?.fullName || teacher?.FullName || `${firstName} ${lastName}`.trim();
+    if (!Array.isArray(teachers)) return [];
 
-        return {
-            label: fullName || "-",
-            value: id,
-        };
+    return teachers
+        .map((teacher) => {
+            const id = getTeacherId(teacher);
+            const label = getTeacherFullName(teacher);
+            const branchName = getTeacherBranchName(teacher);
+
+            if (!id || !label) return null;
+
+            return {
+                value: String(id),
+                label,
+                description: branchName,
+            };
+        })
+        .filter(Boolean);
+};
+
+export const normalizeResponsibleTeacherIds = (teacherIds = []) => {
+    if (!Array.isArray(teacherIds)) return [];
+
+    return [...new Set(teacherIds.filter(Boolean).map(String))];
+};
+
+export const formatEventDate = (dateValue) => {
+    if (!dateValue) return "-";
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return date.toLocaleDateString("tr-TR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
     });
+};
+
+export const getEventDateText = (event) => {
+    return formatEventDate(getEventDate(event));
+};
+
+export const formatEventTime = (startTime, endTime) => {
+    if (!startTime && !endTime) return "-";
+
+    if (startTime && endTime) {
+        return `${startTime} - ${endTime}`;
+    }
+
+    return startTime || endTime || "-";
+};
+
+export const getEventTimeText = (event) => {
+    return formatEventTime(getEventStartTime(event), getEventEndTime(event));
+};
+
+export const formatEventPrice = (isPaid, pricePerStudent) => {
+    if (!isPaid) return "Ücretsiz";
+
+    const price = Number(pricePerStudent || 0);
+
+    return `${price.toLocaleString("tr-TR")} ₺`;
+};
+
+export const getEventPriceText = (event) => {
+    return formatEventPrice(getEventIsPaid(event), getEventPricePerStudent(event));
+};
+
+export const getEventPaymentText = (event) => {
+    return formatEventPrice(getEventIsPaid(event), getEventPricePerStudent(event));
+};
+
+export const getEventStatusLabel = (event) => {
+    return getEventIsActive(event) ? "Aktif" : "Pasif";
+};
+
+export const getEventStatusText = (event) => {
+    return getEventStatusLabel(event);
+};
+
+export const getEventPaymentLabel = (event) => {
+    return getEventIsPaid(event) ? "Ücretli" : "Ücretsiz";
 };
 
 export const filterEvents = (
     events = [],
     teachers = [],
-    search = "",
+    searchTerm = "",
     statusFilter = "all",
-    paymentFilter = "all",
+    paymentFilter = "all"
 ) => {
-    const normalizedSearch = search.toLowerCase().trim();
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
     return events.filter((event) => {
         const name = getEventName(event).toLowerCase();
@@ -127,14 +240,14 @@ export const filterEvents = (
             .join(" ")
             .toLowerCase();
 
+        const matchesSearch =
+            !normalizedSearchTerm ||
+            name.includes(normalizedSearchTerm) ||
+            location.includes(normalizedSearchTerm) ||
+            teacherNames.includes(normalizedSearchTerm);
+
         const isActive = getEventIsActive(event);
         const isPaid = getEventIsPaid(event);
-
-        const matchesSearch =
-            !normalizedSearch ||
-            name.includes(normalizedSearch) ||
-            location.includes(normalizedSearch) ||
-            teacherNames.includes(normalizedSearch);
 
         const matchesStatus =
             statusFilter === "all" ||
@@ -150,23 +263,16 @@ export const filterEvents = (
     });
 };
 
-export const getErrorMessage = (error, fallbackMessage) => {
-    return (
-        error?.response?.data?.message ||
-        error?.response?.data?.Message ||
-        error?.response?.data?.error ||
-        error?.response?.data?.Error ||
-        error?.message ||
-        fallbackMessage
-    );
-};
-
 export const getBackendFieldErrors = (error) => {
+    const responseData = error?.response?.data;
+
     const errors =
-        error?.response?.data?.errors ||
-        error?.response?.data?.Errors ||
-        error?.response?.data?.data?.errors ||
-        {};
+        responseData?.errors ||
+        responseData?.Errors ||
+        responseData?.data?.errors ||
+        responseData?.data?.Errors;
+
+    if (!errors) return {};
 
     if (Array.isArray(errors)) {
         return {
@@ -174,13 +280,15 @@ export const getBackendFieldErrors = (error) => {
         };
     }
 
-    return Object.keys(errors).reduce((acc, key) => {
-        const value = errors[key];
+    if (typeof errors === "object") {
+        return Object.entries(errors).reduce((acc, [key, value]) => {
+            const normalizedKey = key.charAt(0).toLowerCase() + key.slice(1);
 
-        acc[key.charAt(0).toLowerCase() + key.slice(1)] = Array.isArray(value)
-            ? value[0]
-            : value;
+            acc[normalizedKey] = Array.isArray(value) ? value[0] : value;
 
-        return acc;
-    }, {});
+            return acc;
+        }, {});
+    }
+
+    return {};
 };

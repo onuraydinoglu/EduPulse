@@ -14,6 +14,7 @@ import {
     getEventPaymentTypeText,
     getEventPriceText,
     getEventResponsibleTeacherName,
+    getEventResponsibleTeacherNames,
     getEventTimeText,
 } from "../utils/eventMemberFormatters";
 
@@ -26,6 +27,10 @@ function EventInfoCard({ event }) {
                 </div>
 
                 <div className="min-w-0">
+                    <p className="text-sm font-medium text-base-content/60">
+                        Etkinlik Bilgileri
+                    </p>
+
                     <div className="mt-2 space-y-1 text-sm text-base-content">
                         <p>
                             <span className="font-semibold">Yer:</span>{" "}
@@ -58,6 +63,31 @@ function EventInfoCard({ event }) {
     );
 }
 
+function ResponsibleTeacherValue({ event }) {
+    const responsibleTeacherNames = getEventResponsibleTeacherNames(event);
+
+    if (!responsibleTeacherNames.length) {
+        return (
+            <span className="text-base font-semibold leading-snug">
+                {getEventResponsibleTeacherName(event)}
+            </span>
+        );
+    }
+
+    return (
+        <div className="space-y-1">
+            {responsibleTeacherNames.map((teacherName, index) => (
+                <p
+                    key={`${teacherName}-${index}`}
+                    className="break-words text-base font-semibold leading-snug"
+                >
+                    {teacherName}
+                </p>
+            ))}
+        </div>
+    );
+}
+
 function EventMemberStatsCards({ event, members = [] }) {
     return (
         <div className="grid gap-4 md:grid-cols-4">
@@ -71,7 +101,7 @@ function EventMemberStatsCards({ event, members = [] }) {
 
             <StatCard
                 title="Sorumlu"
-                value={getEventResponsibleTeacherName(event)}
+                value={<ResponsibleTeacherValue event={event} />}
                 description="Etkinlik sorumlusu"
                 icon={UserIcon}
                 color="warning"

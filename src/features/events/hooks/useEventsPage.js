@@ -7,16 +7,20 @@ import { eventPdfColumns } from "../constants/eventTableColumns";
 import {
     filterEvents,
     getBackendFieldErrors,
-    getErrorMessage,
-    getEventDate,
+    getEventDescription,
+    getEventEndTime,
     getEventId,
     getEventIsActive,
     getEventIsPaid,
     getEventLocation,
     getEventName,
     getEventPricePerStudent,
+    getEventQuota,
     getEventResponsibleTeacherIds,
-    getEventTime,
+    getEventStartTime,
+    getEventDate,
+    getTeacherId,
+    normalizeResponsibleTeacherIds,
 } from "../utils/eventFormatters";
 
 export function useEventsPage() {
@@ -52,6 +56,18 @@ export function useEventsPage() {
         }, 2500);
     };
 
+    const getErrorMessage = (error, fallbackMessage) => {
+        return (
+            error?.response?.data?.message ||
+            error?.response?.data?.Message ||
+            error?.response?.data?.error ||
+            error?.response?.data?.Error ||
+            error?.response?.data?.title ||
+            error?.message ||
+            fallbackMessage
+        );
+    };
+
     const openModal = (id) => {
         document.getElementById(id)?.showModal();
     };
@@ -70,8 +86,10 @@ export function useEventsPage() {
 
             if (result?.isSuccess === false || result?.IsSuccess === false) {
                 showToast(
-                    result.message || result.Message || "Etkinlikler yüklenirken hata oluştu.",
-                    "error",
+                    result.message ||
+                    result.Message ||
+                    "Etkinlikler yüklenirken hata oluştu.",
+                    "error"
                 );
                 return;
             }
@@ -80,7 +98,10 @@ export function useEventsPage() {
             setEvents(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error(error);
-            showToast(getErrorMessage(error, "Etkinlikler yüklenirken hata oluştu."), "error");
+            showToast(
+                getErrorMessage(error, "Etkinlikler yüklenirken hata oluştu."),
+                "error"
+            );
         }
     };
 
@@ -90,8 +111,10 @@ export function useEventsPage() {
 
             if (result?.isSuccess === false || result?.IsSuccess === false) {
                 showToast(
-                    result.message || result.Message || "Öğretmenler yüklenirken hata oluştu.",
-                    "error",
+                    result.message ||
+                    result.Message ||
+                    "Öğretmenler yüklenirken hata oluştu.",
+                    "error"
                 );
                 return;
             }
@@ -100,14 +123,20 @@ export function useEventsPage() {
 
             const activeTeachers = Array.isArray(data)
                 ? data.filter((teacher) => {
-                    return teacher.isActive !== false && teacher.IsActive !== false;
+                    const isActive = teacher?.isActive ?? teacher?.IsActive;
+                    const teacherId = getTeacherId(teacher);
+
+                    return isActive !== false && Boolean(teacherId);
                 })
                 : [];
 
             setTeachers(activeTeachers);
         } catch (error) {
             console.error(error);
-            showToast(getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."), "error");
+            showToast(
+                getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."),
+                "error"
+            );
         }
     };
 
@@ -136,12 +165,18 @@ export function useEventsPage() {
 
         setFormData({
             name: getEventName(event) === "-" ? "" : getEventName(event),
+            description:
+                getEventDescription(event) === "-" ? "" : getEventDescription(event),
             location: getEventLocation(event) === "-" ? "" : getEventLocation(event),
             eventDate: getEventDate(event) ? getEventDate(event).split("T")[0] : "",
-            startTime: getEventTime(event),
+            startTime: getEventStartTime(event),
+            endTime: getEventEndTime(event),
             isPaid: String(getEventIsPaid(event)),
             pricePerStudent: getEventPricePerStudent(event),
-            responsibleTeacherIds: getEventResponsibleTeacherIds(event),
+            quota: getEventQuota(event),
+            responsibleTeacherIds: normalizeResponsibleTeacherIds(
+                getEventResponsibleTeacherIds(event)
+            ),
             isActive: String(getEventIsActive(event)),
         });
 
@@ -168,11 +203,11 @@ export function useEventsPage() {
     const validateEventForm = () => {
         const newErrors = {};
 
-        if (!formData.name.trim()) {
+        if (!formData.name?.trim()) {
             newErrors.name = "Etkinlik adı zorunludur.";
         }
 
-        if (!formData.location.trim()) {
+        if (!formData.location?.trim()) {
             newErrors.location = "Etkinlik yeri zorunludur.";
         }
 
@@ -187,7 +222,8 @@ export function useEventsPage() {
         const isPaid = formData.isPaid === true || formData.isPaid === "true";
 
         if (isPaid && Number(formData.pricePerStudent) <= 0) {
-            newErrors.pricePerStudent = "Ücretli etkinlik için kişi başı ücret giriniz.";
+            newErrors.pricePerStudent =
+                "Ücretli etkinlik için kişi başı ücret giriniz.";
         }
 
         setErrors(newErrors);
@@ -200,12 +236,17 @@ export function useEventsPage() {
 
         return {
             name: formData.name.trim(),
+            description: formData.description?.trim() || null,
             location: formData.location.trim(),
             eventDate: formData.eventDate,
             startTime: formData.startTime,
+            endTime: formData.endTime || null,
             isPaid,
-            pricePerStudent: isPaid ? Number(formData.pricePerStudent) : 0,
-            responsibleTeacherIds: formData.responsibleTeacherIds || [],
+            pricePerStudent: isPaid ? Number(formData.pricePerStudent || 0) : 0,
+            quota: formData.quota ? Number(formData.quota) : null,
+            responsibleTeacherIds: normalizeResponsibleTeacherIds(
+                formData.responsibleTeacherIds
+            ),
             isActive: isEditing
                 ? formData.isActive === true || formData.isActive === "true"
                 : true,
@@ -264,7 +305,10 @@ export function useEventsPage() {
             const result = await eventService.delete(deletingEventId);
 
             if (result?.isSuccess === false || result?.IsSuccess === false) {
-                showToast(result.message || result.Message || "Etkinlik silinemedi.", "error");
+                showToast(
+                    result.message || result.Message || "Etkinlik silinemedi.",
+                    "error"
+                );
                 return;
             }
 
@@ -273,7 +317,10 @@ export function useEventsPage() {
             showToast("Etkinlik silindi.");
         } catch (error) {
             console.error(error);
-            showToast(getErrorMessage(error, "Etkinlik silinirken hata oluştu."), "error");
+            showToast(
+                getErrorMessage(error, "Etkinlik silinirken hata oluştu."),
+                "error"
+            );
         }
     };
 

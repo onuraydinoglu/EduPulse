@@ -79,12 +79,12 @@ export const menuItems = [
     roles: ["schooladmin", "teacher"],
   },
 
-  {
+  { /* {
     title: "Deneme Sınavları (Sınıflardan Ulaşım olacak daha sonra kalkacak)",
     path: "/dashboard/trial-exams",
     icon: DocumentChartBarIcon,
     roles: ["schooladmin", "teacher"],
-  },
+  }, */ },
 
 
   {

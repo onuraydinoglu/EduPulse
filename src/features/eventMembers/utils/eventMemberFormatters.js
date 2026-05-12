@@ -28,25 +28,28 @@ export const getEventLocation = (event) => {
 };
 
 export const getEventDateText = (event) => {
-    const value =
-        event?.eventDate ||
-        event?.EventDate ||
-        event?.date ||
-        event?.Date;
+    const value = event?.eventDate || event?.EventDate || event?.date || event?.Date;
 
     if (!value) return "-";
 
-    return new Date(value).toLocaleDateString("tr-TR");
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return date.toLocaleDateString("tr-TR");
 };
 
 export const getEventTimeText = (event) => {
-    return (
-        event?.startTime ||
-        event?.StartTime ||
-        event?.eventTime ||
-        event?.EventTime ||
-        "-"
-    );
+    const startTime =
+        event?.startTime || event?.StartTime || event?.eventTime || event?.EventTime || "";
+
+    const endTime = event?.endTime || event?.EndTime || "";
+
+    if (startTime && endTime) {
+        return `${startTime} - ${endTime}`;
+    }
+
+    return startTime || "-";
 };
 
 export const getEventIsPaid = (event) => {
@@ -74,8 +77,68 @@ export const getEventIsActive = (event) => {
     return event?.isActive ?? event?.IsActive ?? true;
 };
 
-export const getEventResponsibleTeacherName = (event) => {
+export const getTeacherId = (teacher) => {
     return (
+        teacher?.teacherId ||
+        teacher?.TeacherId ||
+        teacher?.id ||
+        teacher?.Id ||
+        ""
+    );
+};
+
+export const getTeacherFullName = (teacher) => {
+    const directName =
+        teacher?.fullName ||
+        teacher?.FullName ||
+        teacher?.teacherFullName ||
+        teacher?.TeacherFullName ||
+        teacher?.name ||
+        teacher?.Name;
+
+    if (directName) return directName;
+
+    const firstName = teacher?.firstName || teacher?.FirstName || "";
+    const lastName = teacher?.lastName || teacher?.LastName || "";
+
+    return `${firstName} ${lastName}`.trim();
+};
+
+export const getEventResponsibleTeacherObjects = (event) => {
+    const teachers =
+        event?.responsibleTeachers ||
+        event?.ResponsibleTeachers ||
+        event?.eventResponsibleTeachers ||
+        event?.EventResponsibleTeachers ||
+        [];
+
+    if (!Array.isArray(teachers)) return [];
+
+    return teachers;
+};
+
+export const getEventResponsibleTeacherNames = (event) => {
+    const teacherObjects = getEventResponsibleTeacherObjects(event);
+
+    const namesFromObjects = teacherObjects
+        .map((teacher) => getTeacherFullName(teacher))
+        .filter(Boolean);
+
+    if (namesFromObjects.length > 0) {
+        return namesFromObjects;
+    }
+
+    const directNames =
+        event?.responsibleTeacherNames ||
+        event?.ResponsibleTeacherNames ||
+        event?.teacherNames ||
+        event?.TeacherNames;
+
+    if (Array.isArray(directNames)) {
+        return directNames.filter(Boolean);
+    }
+
+    const singleName =
         event?.responsibleTeacherName ||
         event?.ResponsibleTeacherName ||
         event?.responsibleTeacherFullName ||
@@ -85,15 +148,29 @@ export const getEventResponsibleTeacherName = (event) => {
         event?.teacherFullName ||
         event?.TeacherFullName ||
         event?.teacherName ||
-        event?.TeacherName ||
-        "-"
-    );
+        event?.TeacherName;
+
+    return singleName ? [singleName] : [];
+};
+
+export const getEventResponsibleTeacherName = (event) => {
+    const names = getEventResponsibleTeacherNames(event);
+
+    if (names.length === 0) return "-";
+
+    return names.join(", ");
+};
+
+export const getEventResponsibleTeacherCount = (event) => {
+    return getEventResponsibleTeacherNames(event).length;
 };
 
 export const getEventInfoText = (event) => {
     return `Yer: ${getEventLocation(event)} • Tarih: ${getEventDateText(
-        event,
-    )} • Saat: ${getEventTimeText(event)} • Ücret: ${getEventPriceText(event)}`;
+        event
+    )} • Saat: ${getEventTimeText(event)} • Ücret: ${getEventPriceText(
+        event
+    )} • Sorumlu Hocalar: ${getEventResponsibleTeacherName(event)}`;
 };
 
 /* EVENT MEMBER FORMATTERS */
@@ -187,12 +264,13 @@ export const getStudentClassroomName = (student) => {
 export const getSelectableStudents = (students = [], members = []) => {
     const memberStudentIds = members
         .map((member) => getEventMemberStudentId(member))
-        .filter(Boolean);
+        .filter(Boolean)
+        .map(String);
 
     return students.filter((student) => {
         const studentId = getStudentId(student);
 
-        return studentId && !memberStudentIds.includes(studentId);
+        return studentId && !memberStudentIds.includes(String(studentId));
     });
 };
 
