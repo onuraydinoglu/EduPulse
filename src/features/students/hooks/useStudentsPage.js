@@ -185,9 +185,9 @@ export function useStudentsPage() {
     try {
       const result = isEditing
         ? await studentService.update({
-            id: editingStudentId,
-            ...preparedStudent,
-          })
+          id: editingStudentId,
+          ...preparedStudent,
+        })
         : await studentService.create(preparedStudent);
 
       if (!result.isSuccess) {

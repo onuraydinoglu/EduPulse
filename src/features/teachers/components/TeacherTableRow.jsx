@@ -57,7 +57,7 @@ function TeacherTableRow({
       </td>
 
       <td className="px-6 py-4">
-        <StatusBadge status={status} />
+        <StatusBadge status={status === "pasif" ? "izinli" : status} />
       </td>
 
       <td className="px-6 py-4">

@@ -7,12 +7,14 @@ function StatusBadge({ status = "" }) {
     aktif: "badge-success",
     pasif: "badge-error",
     izinde: "badge-warning",
+    izinli: "badge-warning",
   };
 
   const labels = {
     aktif: "Aktif",
     pasif: "Pasif",
     izinde: "İzinde",
+    izinli: "İzinli",
   };
 
   return (

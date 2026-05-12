@@ -4,10 +4,7 @@ import SearchInput from "../../../components/ui/SearchInput";
 
 import { usePagination } from "../../../hooks/usePagination";
 
-import {
-  defaultClassroomFilterOption,
-  studentStatusFilterOptions,
-} from "../constants/studentFilters";
+import { defaultClassroomFilterOption } from "../constants/studentFilters";
 
 import StudentTableRow from "./StudentTableRow";
 
@@ -15,12 +12,9 @@ function StudentTable({
   students,
   search,
   setSearch,
-  statusFilter,
-  setStatusFilter,
   classroomFilter,
   setClassroomFilter,
   classroomOptions = [],
-  showStatusFilter = true,
   onEdit,
   onDelete,
 }) {
@@ -49,14 +43,11 @@ function StudentTable({
           </p>
         </div>
 
-        <div
-          className={`grid w-full grid-cols-1 gap-3 ${showStatusFilter ? "md:grid-cols-3" : "md:grid-cols-2"
-            } xl:w-auto`}
-        >
+        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:w-auto">
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Öğrenci, numara, e-posta veya telefon ara..."
+            placeholder="Öğrenci ara..."
           />
 
           <FilterSelect
@@ -66,16 +57,6 @@ function StudentTable({
             placeholder="Sınıf filtresi"
             options={[defaultClassroomFilterOption, ...classroomOptions]}
           />
-
-          {showStatusFilter && (
-            <FilterSelect
-              value={statusFilter}
-              onChange={setStatusFilter}
-              hideLabel
-              placeholder="Durum filtresi"
-              options={studentStatusFilterOptions}
-            />
-          )}
         </div>
       </div>
 
