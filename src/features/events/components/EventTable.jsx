@@ -40,7 +40,7 @@ function EventTable({
                     </p>
                 </div>
 
-                <div className="grid w-full gap-3 md:grid-cols-3 lg:w-[760px]">
+                <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
                     <SearchInput
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}

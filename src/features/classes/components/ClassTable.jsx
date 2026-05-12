@@ -40,7 +40,7 @@ function ClassTable({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <SearchInput
             value={search}
             onChange={(event) => setSearch(event.target.value)}

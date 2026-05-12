@@ -46,14 +46,12 @@ function TeacherTable({
             value={search}
             onChange={setSearch}
             placeholder="Öğretmen, branş, telefon veya email ara..."
-            className="h-11 w-full sm:w-80"
           />
 
           <FilterSelect
             value={statusFilter}
             onChange={setStatusFilter}
             hideLabel
-            className="w-full sm:w-44"
             options={teacherStatusFilterOptions}
           />
         </div>

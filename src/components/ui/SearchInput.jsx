@@ -18,6 +18,7 @@ function SearchInput({
         className="
           h-11
           w-full
+          sm:w-80
           rounded-xl
           border
           border-gray-200

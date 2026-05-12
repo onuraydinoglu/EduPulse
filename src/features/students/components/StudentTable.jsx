@@ -43,7 +43,7 @@ function StudentTable({
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:w-auto">
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <SearchInput
             value={search}
             onChange={setSearch}
