@@ -30,8 +30,8 @@ function TeacherTable({
   } = usePagination(teachers, 5);
 
   return (
-    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-lg font-bold text-base-content">
             Öğretmen Listesi
@@ -60,7 +60,7 @@ function TeacherTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-100">
+          <thead className="bg-base-200/70">
             <tr className="border-b border-base-300">
               <th className="px-6 py-5 text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
@@ -133,17 +133,18 @@ function TeacherTable({
           </tbody>
         </table>
       </div>
-
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        startItem={startItem}
-        endItem={endItem}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-        onPageChange={setCurrentPage}
-      />
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 }

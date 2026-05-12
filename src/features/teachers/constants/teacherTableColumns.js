@@ -51,7 +51,7 @@ export const getTeacherStats = (teachers = [], temporaryPasswords = {}) => {
         {
             title: "Geçici Şifre",
             value: Object.keys(temporaryPasswords || {}).length,
-            description: "Bu oturumda oluşturulan geçici şifreler",
+            description: "Bu oturumda oluşturulan",
             icon: KeyIcon,
             color: passiveCount > 0 ? "warning" : "primary",
         },

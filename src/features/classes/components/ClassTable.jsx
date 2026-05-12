@@ -43,14 +43,13 @@ function ClassTable({
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <SearchInput
             value={search}
-            onChange={setSearch}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Sınıf veya öğretmen ara..."
           />
 
           <FilterSelect
             value={gradeFilter}
             onChange={setGradeFilter}
-            hideLabel
             className="w-full sm:w-48 shrink-0"
             options={classGradeFilterOptions}
           />
