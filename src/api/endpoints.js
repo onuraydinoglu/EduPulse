@@ -26,6 +26,8 @@ export const API_ENDPOINTS = {
 
   PERSONAL_NOTES: "/PersonalNotes",
 
+  TRIAL_EXAMS: "/TrialExams",
+
   MESSAGES: {
     BASE: "/Messages",
     USERS: "/Messages/users",

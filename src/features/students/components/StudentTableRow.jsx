@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { EyeIcon } from "@heroicons/react/24/outline";
+
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
@@ -53,7 +56,16 @@ function StudentTableRow({ student, onEdit, onDelete }) {
       </td>
 
       <td>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <Link
+            to={`/dashboard/profiles/student/${studentId}`}
+            className="btn btn-ghost btn-sm rounded-xl text-primary"
+            title="Öğrenci profili"
+          >
+            <EyeIcon className="h-4 w-4" />
+            Profil
+          </Link>
+
           <TableActions
             onEdit={() => onEdit(student)}
             onDelete={() => onDelete(studentId)}
