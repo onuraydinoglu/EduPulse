@@ -11,6 +11,7 @@ import {
 
 import EmptyProfileState from "./EmptyProfileState";
 import ProfileInfoCard from "./ProfileInfoCard";
+import ProfileInfoPanel from "./ProfileInfoPanel";
 import ProfileSection from "./ProfileSection";
 import StudentProfileStatsCards from "./StudentProfileStatsCards";
 import {
@@ -44,37 +45,35 @@ function StudentProfileDetails({ profile, details }) {
                 description="Öğrencinin sistemde kayıtlı temel bilgileri"
                 icon={UserCircleIcon}
             >
-                <div className="grid gap-4 md:grid-cols-2">
-                    <ProfileInfoCard
-                        icon={UserCircleIcon}
-                        label="Ad Soyad"
-                        value={getFullName(profile)}
-                    />
-
-                    <ProfileInfoCard
-                        icon={HashtagIcon}
-                        label="Öğrenci Numarası"
-                        value={studentNumber}
-                    />
-
-                    <ProfileInfoCard
-                        icon={AcademicCapIcon}
-                        label="Sınıf"
-                        value={classroomName}
-                    />
-
-                    <ProfileInfoCard
-                        icon={EnvelopeIcon}
-                        label="E-posta"
-                        value={getEmail(profile)}
-                    />
-
-                    <ProfileInfoCard
-                        icon={PhoneIcon}
-                        label="Telefon"
-                        value={getPhoneNumber(profile)}
-                    />
-                </div>
+                <ProfileInfoPanel
+                    items={[
+                        {
+                            icon: UserCircleIcon,
+                            label: "Ad Soyad",
+                            value: getFullName(profile),
+                        },
+                        {
+                            icon: HashtagIcon,
+                            label: "Öğrenci Numarası",
+                            value: studentNumber,
+                        },
+                        {
+                            icon: AcademicCapIcon,
+                            label: "Sınıf",
+                            value: classroomName,
+                        },
+                        {
+                            icon: EnvelopeIcon,
+                            label: "E-posta",
+                            value: getEmail(profile),
+                        },
+                        {
+                            icon: PhoneIcon,
+                            label: "Telefon",
+                            value: getPhoneNumber(profile),
+                        },
+                    ]}
+                />
             </ProfileSection>
 
             <ProfileSection

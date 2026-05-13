@@ -23,7 +23,6 @@ function OfficerProfileStatsCards({ profile }) {
         {
             title: "Ad Soyad",
             value: fullName,
-            description: "Kayıtlı memur adı",
             icon: UserCircleIcon,
             variant: "blue",
             valueClassName: "text-xl",
@@ -31,14 +30,12 @@ function OfficerProfileStatsCards({ profile }) {
         {
             title: "Rol",
             value: roleName,
-            description: "Sistem rol bilgisi",
             icon: ShieldCheckIcon,
             variant: "emerald",
         },
         {
             title: "E-posta",
             value: email,
-            description: "Kayıtlı e-posta",
             icon: EnvelopeIcon,
             variant: "amber",
             valueClassName: "text-base",
@@ -46,7 +43,6 @@ function OfficerProfileStatsCards({ profile }) {
         {
             title: "Telefon",
             value: phoneNumber,
-            description: "İletişim numarası",
             icon: PhoneIcon,
             variant: "sky",
             valueClassName: "text-xl",
