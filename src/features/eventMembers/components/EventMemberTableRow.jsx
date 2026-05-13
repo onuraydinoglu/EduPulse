@@ -15,7 +15,7 @@ function EventMemberTableRow({ member, canManage = true, onDelete }) {
   const paidAmount = getEventMemberPaidAmount(member);
 
   return (
-    <tr className="transition hover:bg-base-200/50">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
       <td>
         <div className="font-semibold text-base-content">
           {getEventMemberStudentFullName(member)}
@@ -23,14 +23,14 @@ function EventMemberTableRow({ member, canManage = true, onDelete }) {
       </td>
 
       <td>
-        <span className="badge badge-ghost rounded-xl">
-          {getEventMemberStudentNumber(member)}
+        <span className="text-sm text-base-content/70">
+          {getEventMemberStudentNumber(member) || "-"}
         </span>
       </td>
 
       <td>
         <span className="text-sm text-base-content/70">
-          {getEventMemberClassroomName(member)}
+          {getEventMemberClassroomName(member) || "-"}
         </span>
       </td>
 

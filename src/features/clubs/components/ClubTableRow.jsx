@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 import TableActions from "../../../components/ui/TableActions";
-
 import {
   getClubAdvisorTeacherName,
   getClubId,
@@ -20,7 +19,7 @@ function ClubTableRow({
   const clubId = getClubId(club);
 
   return (
-    <tr className="transition hover:bg-base-200/50">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
       <td>
         <div className="font-semibold text-base-content">
           {getClubName(club)}
@@ -34,7 +33,7 @@ function ClubTableRow({
       </td>
 
       <td>
-        <span className="badge badge-ghost rounded-xl">
+        <span className="text-sm text-base-content/70">
           {getClubMemberCount(club)} üye
         </span>
       </td>

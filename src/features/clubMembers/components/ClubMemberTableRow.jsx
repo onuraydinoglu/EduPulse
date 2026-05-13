@@ -11,7 +11,7 @@ function ClubMemberTableRow({ member, canManage = true, onDelete }) {
   const memberId = getMemberId(member);
 
   return (
-    <tr className="transition hover:bg-base-200/50">
+    <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
       <td>
         <div className="font-semibold text-base-content">
           {getStudentFullName(member)}
@@ -19,14 +19,14 @@ function ClubMemberTableRow({ member, canManage = true, onDelete }) {
       </td>
 
       <td>
-        <span className="badge badge-ghost rounded-xl">
-          {getStudentNumber(member)}
+        <span className="text-sm text-base-content/70">
+          {getStudentNumber(member) || "-"}
         </span>
       </td>
 
       <td>
         <span className="text-sm text-base-content/70">
-          {getClassroomName(member)}
+          {getClassroomName(member) || "-"}
         </span>
       </td>
 

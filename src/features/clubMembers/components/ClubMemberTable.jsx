@@ -1,7 +1,6 @@
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import ClubMemberTableRow from "./ClubMemberTableRow";
 
 function ClubMemberTable({
@@ -22,6 +21,9 @@ function ClubMemberTable({
     startItem,
     endItem,
   } = usePagination(members, 5);
+
+  const tableHeadTextClass =
+    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
 
   return (
     <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
@@ -48,12 +50,24 @@ function ClubMemberTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Öğrenci</th>
-              <th className="text-sm">Öğrenci No</th>
-              <th className="text-sm">Sınıf</th>
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className={tableHeadTextClass}>Öğrenci</span>
+              </th>
 
-              {canManage && <th className="text-right text-sm">İşlemler</th>}
+              <th>
+                <span className={tableHeadTextClass}>Öğrenci No</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Sınıf</span>
+              </th>
+
+              {canManage && (
+                <th className="text-right">
+                  <span className={tableHeadTextClass}>İşlemler</span>
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -71,7 +85,7 @@ function ClubMemberTable({
               <tr>
                 <td
                   colSpan={canManage ? 4 : 3}
-                  className="py-10 text-center text-sm text-base-content/60"
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Bu kulüpte öğrenci bulunamadı.
                 </td>

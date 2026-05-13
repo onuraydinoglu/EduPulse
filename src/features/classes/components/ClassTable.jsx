@@ -28,14 +28,18 @@ function ClassTable({
     endItem,
   } = usePagination(classes, 5);
 
+  const tableHeadTextClass =
+    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
+
   return (
-    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-base-content">
+          <h2 className="text-lg font-bold text-base-content">
             Sınıf Listesi
           </h2>
-          <p className="mt-1 text-sm text-base-content/60">
+
+          <p className="text-sm text-base-content/60">
             {classes.length} kayıt listeleniyor.
           </p>
         </div>
@@ -43,14 +47,15 @@ function ClassTable({
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={setSearch}
             placeholder="Sınıf veya öğretmen ara..."
           />
 
           <FilterSelect
             value={gradeFilter}
             onChange={setGradeFilter}
-            className="w-full sm:w-48 shrink-0"
+            hideLabel
+            className="w-full shrink-0 sm:w-48"
             options={classGradeFilterOptions}
           />
         </div>
@@ -59,12 +64,28 @@ function ClassTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Sınıf</th>
-              <th className="text-sm">Sınıf Öğretmeni</th>
-              <th className="text-sm">Öğrenci Sayısı</th>
-              <th className="text-sm">Sınıf İşlemi</th>
-              {canManage && <th className="text-right text-sm">İşlemler</th>}
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className={tableHeadTextClass}>Sınıf</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Sınıf Öğretmeni</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Öğrenci Sayısı</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Sınıf İşlemi</span>
+              </th>
+
+              {canManage && (
+                <th className="text-right">
+                  <span className={tableHeadTextClass}>İşlemler</span>
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -84,7 +105,7 @@ function ClassTable({
               <tr>
                 <td
                   colSpan={canManage ? 5 : 4}
-                  className="py-10 text-center text-sm text-base-content/60"
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Sınıf kaydı bulunamadı.
                 </td>
@@ -94,7 +115,7 @@ function ClassTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

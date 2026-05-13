@@ -2,9 +2,7 @@ import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import { officerStatusFilterOptions } from "../constants/officerFilters";
-
 import OfficerTableRow from "./OfficerTableRow";
 
 function OfficerTable({
@@ -61,14 +59,43 @@ function OfficerTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead>
-            <tr className="text-xs uppercase text-base-content/50">
-              <th>Memur</th>
-              <th>E-Posta</th>
-              <th>Telefon</th>
-              <th>Geçici Şifre</th>
-              <th>Durum</th>
-              <th className="text-right">İşlemler</th>
+          <thead className="bg-base-200/70">
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Memur
+                </span>
+              </th>
+
+              <th>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  E-Posta
+                </span>
+              </th>
+
+              <th>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Telefon
+                </span>
+              </th>
+
+              <th>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Geçici Şifre
+                </span>
+              </th>
+
+              <th>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  Durum
+                </span>
+              </th>
+
+              <th className="text-right">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                  İşlemler
+                </span>
+              </th>
             </tr>
           </thead>
 
@@ -86,8 +113,8 @@ function OfficerTable({
             {officers.length === 0 && (
               <tr>
                 <td
-                  colSpan="6"
-                  className="py-10 text-center text-base-content/50"
+                  colSpan={6}
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Memur kaydı bulunamadı.
                 </td>
@@ -97,7 +124,7 @@ function OfficerTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

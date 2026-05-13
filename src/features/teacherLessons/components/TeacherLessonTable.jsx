@@ -1,10 +1,8 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
-
 import { usePagination } from "../../../hooks/usePagination";
 import { teacherLessonStatusFilterOptions } from "../constants/teacherLessonFilters";
-
 import TeacherLessonTableRow from "./TeacherLessonTableRow";
 
 function TeacherLessonTable({
@@ -35,6 +33,9 @@ function TeacherLessonTable({
     endItem,
   } = usePagination(safeTeacherLessons, 5);
 
+  const tableHeadTextClass =
+    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
+
   return (
     <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
       <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
@@ -59,7 +60,7 @@ function TeacherLessonTable({
             value={statusFilter}
             onChange={setStatusFilter}
             hideLabel
-            className="w-full sm:w-48 shrink-0"
+            className="w-full shrink-0 sm:w-48"
             options={teacherLessonStatusFilterOptions}
           />
         </div>
@@ -67,13 +68,27 @@ function TeacherLessonTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead>
-            <tr className="text-xs uppercase text-base-content/50">
-              <th>Öğretmen</th>
-              <th>Ders</th>
-              <th>Sınıf</th>
-              <th>Durum</th>
-              <th className="text-right">İşlemler</th>
+          <thead className="bg-base-200/70">
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className={tableHeadTextClass}>Öğretmen</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Ders</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Sınıf</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Durum</span>
+              </th>
+
+              <th className="text-right">
+                <span className={tableHeadTextClass}>İşlemler</span>
+              </th>
             </tr>
           </thead>
 
@@ -81,7 +96,7 @@ function TeacherLessonTable({
             {paginatedItems.map((teacherLesson) => (
               <TeacherLessonTableRow
                 key={teacherLesson.id || teacherLesson.Id}
-                teacherLesson={teacherLesson}
+                item={teacherLesson}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
@@ -90,8 +105,8 @@ function TeacherLessonTable({
             {safeTeacherLessons.length === 0 && (
               <tr>
                 <td
-                  colSpan="5"
-                  className="py-10 text-center text-base-content/50"
+                  colSpan={5}
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Öğretmen ders ataması bulunamadı.
                 </td>
@@ -101,7 +116,7 @@ function TeacherLessonTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

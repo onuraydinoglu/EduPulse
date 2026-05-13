@@ -2,7 +2,6 @@ import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import { clubStatusFilterOptions } from "../constants/clubFilters";
 import ClubTableRow from "./ClubTableRow";
 
@@ -29,15 +28,18 @@ function ClubTable({
     endItem,
   } = usePagination(clubs, 5);
 
+  const tableHeadTextClass =
+    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
+
   return (
-    <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-base-300 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-base-300/60 p-5 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-base-content">
+          <h2 className="text-lg font-bold text-base-content">
             Kulüp Listesi
           </h2>
 
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="text-sm text-base-content/60">
             {clubs.length} kayıt listeleniyor.
           </p>
         </div>
@@ -52,7 +54,8 @@ function ClubTable({
           <FilterSelect
             value={statusFilter}
             onChange={setStatusFilter}
-            className="w-full sm:w-48 shrink-0"
+            hideLabel
+            className="w-full shrink-0 sm:w-48"
             options={clubStatusFilterOptions}
           />
         </div>
@@ -61,13 +64,28 @@ function ClubTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Kulüp</th>
-              <th className="text-sm">Sorumlu Öğretmen</th>
-              <th className="text-sm">Üye Sayısı</th>
-              <th className="text-sm">Kulüp İşlemi</th>
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className={tableHeadTextClass}>Kulüp</span>
+              </th>
 
-              {canManage && <th className="text-right text-sm">İşlemler</th>}
+              <th>
+                <span className={tableHeadTextClass}>Sorumlu Öğretmen</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Üye Sayısı</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Kulüp İşlemi</span>
+              </th>
+
+              {canManage && (
+                <th className="text-right">
+                  <span className={tableHeadTextClass}>İşlemler</span>
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -87,7 +105,7 @@ function ClubTable({
               <tr>
                 <td
                   colSpan={canManage ? 5 : 4}
-                  className="py-10 text-center text-sm text-base-content/60"
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Kulüp kaydı bulunamadı.
                 </td>
@@ -97,7 +115,7 @@ function ClubTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -106,7 +124,7 @@ function ClubTable({
           endItem={endItem}
           pageSize={pageSize}
           setPageSize={setPageSize}
-          setCurrentPage={setCurrentPage}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>

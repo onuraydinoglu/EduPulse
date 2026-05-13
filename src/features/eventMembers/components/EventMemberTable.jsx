@@ -1,7 +1,6 @@
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
 import { usePagination } from "../../../hooks/usePagination";
-
 import EventMemberTableRow from "./EventMemberTableRow";
 
 function EventMemberTable({
@@ -22,6 +21,9 @@ function EventMemberTable({
     startItem,
     endItem,
   } = usePagination(members, 5);
+
+  const tableHeadTextClass =
+    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
 
   return (
     <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
@@ -48,14 +50,32 @@ function EventMemberTable({
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-base-200/70">
-            <tr>
-              <th className="text-sm">Öğrenci</th>
-              <th className="text-sm">Öğrenci No</th>
-              <th className="text-sm">Sınıf</th>
-              <th className="text-sm">Ödeme Durumu</th>
-              <th className="text-sm">Ödenen Tutar</th>
+            <tr className="border-b border-base-300 [&_th]:px-6">
+              <th>
+                <span className={tableHeadTextClass}>Öğrenci</span>
+              </th>
 
-              {canManage && <th className="text-right text-sm">İşlemler</th>}
+              <th>
+                <span className={tableHeadTextClass}>Öğrenci No</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Sınıf</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Ödeme Durumu</span>
+              </th>
+
+              <th>
+                <span className={tableHeadTextClass}>Ödenen Tutar</span>
+              </th>
+
+              {canManage && (
+                <th className="text-right">
+                  <span className={tableHeadTextClass}>İşlemler</span>
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -73,7 +93,7 @@ function EventMemberTable({
               <tr>
                 <td
                   colSpan={canManage ? 6 : 5}
-                  className="py-10 text-center text-sm text-base-content/60"
+                  className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Bu etkinlikte öğrenci bulunamadı.
                 </td>
@@ -83,7 +103,7 @@ function EventMemberTable({
         </table>
       </div>
 
-      <div className="border-t border-base-300/60 p-4">
+      <div className="p-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
