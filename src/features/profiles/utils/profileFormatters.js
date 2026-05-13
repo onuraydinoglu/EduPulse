@@ -1,3 +1,9 @@
+import {
+    PROFILE_BACK_PATHS,
+    PROFILE_STATUS,
+    PROFILE_TYPE_LABELS,
+} from "../constants/profileConstants";
+
 export const getValue = (obj, keys = [], fallback = "-") => {
     for (const key of keys) {
         const value = obj?.[key];
@@ -46,7 +52,14 @@ export const getFullName = (item) => {
 
     return getValue(
         item,
-        ["fullName", "FullName", "studentFullName", "StudentFullName", "teacherFullName", "TeacherFullName"],
+        [
+            "fullName",
+            "FullName",
+            "studentFullName",
+            "StudentFullName",
+            "teacherFullName",
+            "TeacherFullName",
+        ],
         generatedFullName || "-"
     );
 };
@@ -66,7 +79,7 @@ export const getStatus = (item) => {
         const normalizedStatus = String(status).toLocaleLowerCase("tr-TR");
 
         if (normalizedStatus === "aktif" || normalizedStatus === "active") {
-            return "aktif";
+            return PROFILE_STATUS.ACTIVE;
         }
 
         if (
@@ -75,35 +88,23 @@ export const getStatus = (item) => {
             normalizedStatus === "izinde" ||
             normalizedStatus === "leave"
         ) {
-            return "pasif";
+            return PROFILE_STATUS.PASSIVE;
         }
     }
 
     if (item?.isActive === false || item?.IsActive === false) {
-        return "pasif";
+        return PROFILE_STATUS.PASSIVE;
     }
 
-    return "aktif";
+    return PROFILE_STATUS.ACTIVE;
 };
 
 export const getProfileTypeLabel = (profileType) => {
-    const labels = {
-        student: "Öğrenci",
-        teacher: "Öğretmen",
-        officer: "Memur",
-    };
-
-    return labels[profileType] || "Profil";
+    return PROFILE_TYPE_LABELS[profileType] || "Profil";
 };
 
 export const getBackPathByProfileType = (profileType) => {
-    const paths = {
-        student: "/dashboard/students",
-        teacher: "/dashboard/teachers",
-        officer: "/dashboard/officers",
-    };
-
-    return paths[profileType] || "/dashboard";
+    return PROFILE_BACK_PATHS[profileType] || "/dashboard";
 };
 
 export const isSameId = (value1, value2) => {
@@ -117,7 +118,11 @@ export const isRelatedToStudent = (item, studentId) => {
 };
 
 export const isRelatedToTeacher = (item, teacherId) => {
-    const relatedTeacherId = getValue(item, ["teacherId", "TeacherId", "advisorTeacherId", "AdvisorTeacherId"], "");
+    const relatedTeacherId = getValue(
+        item,
+        ["teacherId", "TeacherId", "advisorTeacherId", "AdvisorTeacherId"],
+        ""
+    );
 
     return isSameId(relatedTeacherId, teacherId);
 };

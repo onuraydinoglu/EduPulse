@@ -10,6 +10,7 @@ import {
 import EmptyProfileState from "./EmptyProfileState";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ProfileSection from "./ProfileSection";
+import TeacherProfileStatsCards from "./TeacherProfileStatsCards";
 import {
     getEmail,
     getFullName,
@@ -31,12 +32,7 @@ function TeacherProfileDetails({ profile, details }) {
 
     return (
         <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <ProfileInfoCard icon={BookOpenIcon} label="Branş" value={branch} />
-                <ProfileInfoCard icon={AcademicCapIcon} label="Ders Ataması" value={teacherLessons.length} />
-                <ProfileInfoCard icon={UserGroupIcon} label="Danışman Sınıf" value={advisorClassrooms.length} />
-                <ProfileInfoCard icon={UserGroupIcon} label="Sorumlu Kulüp" value={clubs.length} />
-            </div>
+            <TeacherProfileStatsCards profile={profile} details={details} />
 
             <ProfileSection
                 title="Kişisel Bilgiler"
@@ -44,10 +40,29 @@ function TeacherProfileDetails({ profile, details }) {
                 icon={UserCircleIcon}
             >
                 <div className="grid gap-4 md:grid-cols-2">
-                    <ProfileInfoCard icon={UserCircleIcon} label="Ad Soyad" value={getFullName(profile)} />
-                    <ProfileInfoCard icon={BookOpenIcon} label="Branş" value={branch} />
-                    <ProfileInfoCard icon={EnvelopeIcon} label="E-posta" value={getEmail(profile)} />
-                    <ProfileInfoCard icon={PhoneIcon} label="Telefon" value={getPhoneNumber(profile)} />
+                    <ProfileInfoCard
+                        icon={UserCircleIcon}
+                        label="Ad Soyad"
+                        value={getFullName(profile)}
+                    />
+
+                    <ProfileInfoCard
+                        icon={BookOpenIcon}
+                        label="Branş"
+                        value={branch}
+                    />
+
+                    <ProfileInfoCard
+                        icon={EnvelopeIcon}
+                        label="E-posta"
+                        value={getEmail(profile)}
+                    />
+
+                    <ProfileInfoCard
+                        icon={PhoneIcon}
+                        label="Telefon"
+                        value={getPhoneNumber(profile)}
+                    />
                 </div>
             </ProfileSection>
 
@@ -75,15 +90,24 @@ function TeacherProfileDetails({ profile, details }) {
                                         <td className="font-semibold">
                                             {getValue(item, ["lessonName", "LessonName"], "-")}
                                         </td>
+
                                         <td>
                                             {getValue(
                                                 item,
-                                                ["classroomName", "ClassroomName", "className", "ClassName"],
+                                                [
+                                                    "classroomName",
+                                                    "ClassroomName",
+                                                    "className",
+                                                    "ClassName",
+                                                ],
                                                 "-"
                                             )}
                                         </td>
+
                                         <td>
-                                            {item?.isActive === false || item?.IsActive === false ? "Pasif" : "Aktif"}
+                                            {item?.isActive === false || item?.IsActive === false
+                                                ? "Pasif"
+                                                : "Aktif"}
                                         </td>
                                     </tr>
                                 ))}
@@ -110,7 +134,14 @@ function TeacherProfileDetails({ profile, details }) {
                                 <p className="text-sm font-bold text-base-content">
                                     {getValue(
                                         classroom,
-                                        ["classroomName", "ClassroomName", "className", "ClassName", "name", "Name"],
+                                        [
+                                            "classroomName",
+                                            "ClassroomName",
+                                            "className",
+                                            "ClassName",
+                                            "name",
+                                            "Name",
+                                        ],
                                         `${getValue(classroom, ["grade", "Grade"], "")}/${getValue(
                                             classroom,
                                             ["section", "Section"],
@@ -134,8 +165,17 @@ function TeacherProfileDetails({ profile, details }) {
                 icon={UserGroupIcon}
             >
                 <div className="grid gap-4 md:grid-cols-2">
-                    <ProfileInfoCard icon={UserGroupIcon} label="Kulüp Sorumluluğu" value={clubs.length} />
-                    <ProfileInfoCard icon={UserGroupIcon} label="Etkinlik Sorumluluğu" value={events.length} />
+                    <ProfileInfoCard
+                        icon={UserGroupIcon}
+                        label="Kulüp Sorumluluğu"
+                        value={clubs.length}
+                    />
+
+                    <ProfileInfoCard
+                        icon={UserGroupIcon}
+                        label="Etkinlik Sorumluluğu"
+                        value={events.length}
+                    />
                 </div>
             </ProfileSection>
         </div>

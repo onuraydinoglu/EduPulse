@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import Toast from "../../../components/ui/Toast";
 import ProfileHeader from "../components/ProfileHeader";
 import StudentProfileDetails from "../components/StudentProfileDetails";
 import TeacherProfileDetails from "../components/TeacherProfileDetails";
 import OfficerProfileDetails from "../components/OfficerProfileDetails";
-import { profileService } from "../services/profileService";
+import { useProfilePage } from "../hooks/useProfilePage";
 import {
     getBackPathByProfileType,
     getProfileTypeLabel,
@@ -15,43 +13,7 @@ import {
 function ProfilePage() {
     const { profileType, id } = useParams();
 
-    const [profile, setProfile] = useState(null);
-    const [details, setDetails] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [toast, setToast] = useState({
-        message: "",
-        type: "success",
-    });
-
-    const showToast = (message, type = "success") => {
-        setToast({ message, type });
-
-        setTimeout(() => {
-            setToast({ message: "", type: "success" });
-        }, 2500);
-    };
-
-    useEffect(() => {
-        const getProfile = async () => {
-            try {
-                setLoading(true);
-
-                const result = await profileService.getProfile(profileType, id);
-
-                setProfile(result.profile);
-                setDetails(result.details || {});
-            } catch (error) {
-                console.error(error);
-                showToast("Profil bilgileri yüklenirken hata oluştu.", "error");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (profileType && id) {
-            getProfile();
-        }
-    }, [profileType, id]);
+    const { profile, details, loading, toast } = useProfilePage(profileType, id);
 
     const renderDetails = () => {
         if (profileType === "student") {
@@ -72,14 +34,22 @@ function ProfilePage() {
     if (loading) {
         return (
             <div className="space-y-6">
-                <div className="h-40 animate-pulse rounded-3xl bg-base-200" />
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="h-28 animate-pulse rounded-3xl bg-base-200" />
-                    <div className="h-28 animate-pulse rounded-3xl bg-base-200" />
-                    <div className="h-28 animate-pulse rounded-3xl bg-base-200" />
-                    <div className="h-28 animate-pulse rounded-3xl bg-base-200" />
+                {toast.message && <Toast message={toast.message} type={toast.type} />}
+
+                <div className="rounded-3xl border border-base-300 bg-base-100/80 p-8 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <span className="loading loading-spinner loading-md text-primary" />
+
+                        <div>
+                            <h2 className="text-lg font-semibold text-base-content">
+                                Profil yükleniyor
+                            </h2>
+                            <p className="text-sm text-base-content/60">
+                                Kullanıcı bilgileri ve ilişkili kayıtlar hazırlanıyor.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div className="h-80 animate-pulse rounded-3xl bg-base-200" />
             </div>
         );
     }
@@ -89,20 +59,23 @@ function ProfilePage() {
         const profileTypeLabel = getProfileTypeLabel(profileType);
 
         return (
-            <div className="rounded-3xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
+            <div className="space-y-6">
                 {toast.message && <Toast message={toast.message} type={toast.type} />}
 
-                <h2 className="text-xl font-bold text-base-content">
-                    {profileTypeLabel} profili bulunamadı
-                </h2>
+                <div className="rounded-3xl border border-base-300 bg-base-100/80 p-8 text-center shadow-sm">
+                    <h2 className="text-xl font-bold text-base-content">
+                        {profileTypeLabel} profili bulunamadı
+                    </h2>
 
-                <p className="mt-2 text-sm text-base-content/60">
-                    Kayıt silinmiş olabilir veya bu profili görüntüleme yetkiniz olmayabilir.
-                </p>
+                    <p className="mt-2 text-sm text-base-content/60">
+                        Kayıt silinmiş olabilir veya bu profili görüntüleme yetkiniz
+                        olmayabilir.
+                    </p>
 
-                <Link to={backPath} className="btn btn-primary mt-6 rounded-xl">
-                    Listeye dön
-                </Link>
+                    <Link to={backPath} className="btn btn-primary btn-sm mt-6 rounded-xl">
+                        Listeye dön
+                    </Link>
+                </div>
             </div>
         );
     }
