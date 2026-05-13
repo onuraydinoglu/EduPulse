@@ -1,4 +1,5 @@
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
+import { BookOpenIcon, EyeIcon } from "@heroicons/react/24/outline";
 
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
@@ -60,24 +61,31 @@ function TeacherTableRow({
         <StatusBadge status={status === "pasif" ? "izinli" : status} />
       </td>
 
-      <td>
-        <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onAssignLesson(teacher)}
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-content"
-            title="Ders ata"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-            Ders Ata
-          </button>
+      <div className="flex items-center justify-end gap-2">
+        <Link
+          to={`/dashboard/profiles/teacher/${teacherId}`}
+          className="btn btn-ghost btn-sm rounded-xl text-primary"
+          title="Öğretmen profili"
+        >
+          <EyeIcon className="h-4 w-4" />
+          Profil
+        </Link>
 
-          <TableActions
-            onEdit={() => onEdit(teacher)}
-            onDelete={() => onDelete(teacherId)}
-          />
-        </div>
-      </td>
+        <button
+          type="button"
+          onClick={() => onAssignLesson(teacher)}
+          className="inline-flex h-9 items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-content"
+          title="Ders ata"
+        >
+          <BookOpenIcon className="h-4 w-4" />
+          Ders Ata
+        </button>
+
+        <TableActions
+          onEdit={() => onEdit(teacher)}
+          onDelete={() => onDelete(teacherId)}
+        />
+      </div>
     </tr>
   );
 }
