@@ -1,19 +1,32 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
+
 import Toast from "../../../components/ui/Toast";
+
 import ProfileHeader from "../components/ProfileHeader";
+
 import StudentProfileDetails from "../components/StudentProfileDetails";
+
 import TeacherProfileDetails from "../components/TeacherProfileDetails";
+
 import OfficerProfileDetails from "../components/OfficerProfileDetails";
 import { useProfilePage } from "../hooks/useProfilePage";
+
 import {
     getBackPathByProfileType,
+
     getProfileTypeLabel,
 } from "../utils/profileFormatters";
 
 function ProfilePage() {
     const { profileType, id } = useParams();
 
+    const location = useLocation();
+
     const { profile, details, loading, toast } = useProfilePage(profileType, id);
+
+    const fallbackBackPath = getBackPathByProfileType(profileType);
+
+    const backPath = location.state?.backPath || fallbackBackPath;
 
     const renderDetails = () => {
         if (profileType === "student") {
@@ -44,6 +57,7 @@ function ProfilePage() {
                             <h2 className="text-lg font-semibold text-base-content">
                                 Profil yükleniyor
                             </h2>
+
                             <p className="text-sm text-base-content/60">
                                 Kullanıcı bilgileri ve ilişkili kayıtlar hazırlanıyor.
                             </p>
@@ -55,7 +69,6 @@ function ProfilePage() {
     }
 
     if (!profile) {
-        const backPath = getBackPathByProfileType(profileType);
         const profileTypeLabel = getProfileTypeLabel(profileType);
 
         return (
@@ -84,7 +97,11 @@ function ProfilePage() {
         <div className="space-y-6">
             {toast.message && <Toast message={toast.message} type={toast.type} />}
 
-            <ProfileHeader profileType={profileType} profile={profile} />
+            <ProfileHeader
+                profileType={profileType}
+                profile={profile}
+                backPath={backPath}
+            />
 
             {renderDetails()}
         </div>

@@ -1,8 +1,12 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
+
 import Pagination from "../../../components/ui/Pagination";
+
 import SearchInput from "../../../components/ui/SearchInput";
+
 import { usePagination } from "../../../hooks/usePagination";
 import { defaultClassroomFilterOption } from "../constants/studentFilters";
+
 import StudentTableRow from "./StudentTableRow";
 
 function StudentTable({
@@ -12,6 +16,7 @@ function StudentTable({
   classroomFilter,
   setClassroomFilter,
   classroomOptions = [],
+  backPath = "/dashboard/students",
   onEdit,
   onDelete,
 }) {
@@ -26,9 +31,6 @@ function StudentTable({
     startItem,
     endItem,
   } = usePagination(students, 5);
-
-  const tableHeadTextClass =
-    "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
 
   return (
     <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
@@ -62,35 +64,21 @@ function StudentTable({
 
       <div className="overflow-x-auto">
         <table className="table">
-          <thead className="bg-base-200/70">
+          <thead>
             <tr className="border-b border-base-300 [&_th]:px-6">
-              <th>
-                <span className={tableHeadTextClass}>Öğrenci</span>
-              </th>
+              <th>Öğrenci</th>
 
-              <th>
-                <span className={tableHeadTextClass}>Öğrenci No</span>
-              </th>
+              <th>Öğrenci No</th>
 
-              <th>
-                <span className={tableHeadTextClass}>Sınıf</span>
-              </th>
+              <th>Sınıf</th>
 
-              <th>
-                <span className={tableHeadTextClass}>E-Posta</span>
-              </th>
+              <th>E-Posta</th>
 
-              <th>
-                <span className={tableHeadTextClass}>Telefon</span>
-              </th>
+              <th>Telefon</th>
 
-              <th>
-                <span className={tableHeadTextClass}>Durum</span>
-              </th>
+              <th>Durum</th>
 
-              <th className="text-right">
-                <span className={tableHeadTextClass}>İşlemler</span>
-              </th>
+              <th className="text-right">İşlemler</th>
             </tr>
           </thead>
 
@@ -99,6 +87,7 @@ function StudentTable({
               <StudentTableRow
                 key={student.id || student.Id}
                 student={student}
+                backPath={backPath}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
@@ -107,10 +96,10 @@ function StudentTable({
             {students.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
-                  className="px-6 py-10 text-center text-sm text-base-content/60"
+                  colSpan="7"
+                  className="py-10 text-center text-base-content/50"
                 >
-                  Öğrenci kaydı bulunamadı.
+                  Kayıt bulunamadı.
                 </td>
               </tr>
             )}

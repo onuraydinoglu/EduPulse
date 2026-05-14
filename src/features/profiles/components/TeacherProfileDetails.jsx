@@ -8,10 +8,10 @@ import {
     UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
+import StatCard from "../../../components/ui/StatCard";
 import EmptyProfileState from "./EmptyProfileState";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ProfileSection from "./ProfileSection";
-import ProfileStatsCard from "./ProfileStatsCard";
 import TeacherProfileStatsCards from "./TeacherProfileStatsCards";
 
 import {
@@ -94,12 +94,7 @@ function TeacherProfileDetails({ profile, details }) {
                                         <td>
                                             {getValue(
                                                 item,
-                                                [
-                                                    "classroomName",
-                                                    "ClassroomName",
-                                                    "className",
-                                                    "ClassName",
-                                                ],
+                                                ["classroomName", "ClassroomName", "className", "ClassName"],
                                                 "-"
                                             )}
                                         </td>
@@ -134,7 +129,7 @@ function TeacherProfileDetails({ profile, details }) {
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {advisorClassrooms.map((classroom, index) => (
-                            <ProfileStatsCard
+                            <StatCard
                                 key={getValue(classroom, ["id", "Id"], index)}
                                 icon={AcademicCapIcon}
                                 title="Sınıf Danışmanlığı"
@@ -155,7 +150,7 @@ function TeacherProfileDetails({ profile, details }) {
                                     )}`
                                 )}
                                 description="Danışman olduğu sınıf"
-                                variant="blue"
+                                color="primary"
                                 valueClassName="text-base"
                             />
                         ))}
@@ -184,7 +179,7 @@ function TeacherProfileDetails({ profile, details }) {
                             );
 
                             return (
-                                <ProfileStatsCard
+                                <StatCard
                                     key={getValue(club, ["id", "Id"], index)}
                                     icon={UserGroupIcon}
                                     title="Kulüp Sorumluluğu"
@@ -194,7 +189,7 @@ function TeacherProfileDetails({ profile, details }) {
                                         "Kulüp adı bulunamadı"
                                     )}
                                     description={`Üye Sayısı: ${memberCount}`}
-                                    variant={isActive ? "emerald" : "rose"}
+                                    color={isActive ? "success" : "error"}
                                     valueClassName="text-base"
                                 />
                             );
@@ -222,7 +217,7 @@ function TeacherProfileDetails({ profile, details }) {
                             );
 
                             return (
-                                <ProfileStatsCard
+                                <StatCard
                                     key={getValue(event, ["id", "Id"], index)}
                                     icon={CalendarDaysIcon}
                                     title="Etkinlik Sorumluluğu"
@@ -233,7 +228,7 @@ function TeacherProfileDetails({ profile, details }) {
                                     )}
                                     description={`Tarih: ${eventDate || "-"} • Durum: ${isActive ? "Aktif" : "Pasif"
                                         }`}
-                                    variant={isActive ? "sky" : "rose"}
+                                    color={isActive ? "info" : "error"}
                                     valueClassName="text-base"
                                 />
                             );

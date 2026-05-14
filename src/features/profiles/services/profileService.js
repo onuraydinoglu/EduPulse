@@ -23,30 +23,29 @@ const getOfficerById = async (id) => {
     const officers = toArray(result);
 
     return (
-        officers.find((officer) =>
-            isSameId(officer?.id || officer?.Id, id)
-        ) || null
+        officers.find((officer) => isSameId(officer?.id, id)) ||
+        null
     );
 };
 
 const getId = (item) => {
-    return item?.id || item?.Id || "";
+    return item?.id || "";
 };
 
 const getStudentClassroomId = (student) => {
-    return student?.classroomId || student?.ClassroomId || "";
+    return student?.classroomId || "";
 };
 
 const getClassroomTeacherId = (classroom) => {
-    return classroom?.teacherId || classroom?.TeacherId || "";
+    return classroom?.teacherId || "";
 };
 
 const getClassroomTeacherFullName = (classroom) => {
-    return classroom?.teacherFullName || classroom?.TeacherFullName || "";
+    return classroom?.teacherFullName || "";
 };
 
 const getTeacherFullName = (teacher) => {
-    return teacher?.fullName || teacher?.FullName || "-";
+    return teacher?.fullName || "-";
 };
 
 const findStudentClassroom = (student, classrooms = []) => {
@@ -57,9 +56,8 @@ const findStudentClassroom = (student, classrooms = []) => {
     }
 
     return (
-        classrooms.find((classroom) =>
-            isSameId(getId(classroom), classroomId)
-        ) || null
+        classrooms.find((classroom) => isSameId(getId(classroom), classroomId)) ||
+        null
     );
 };
 
@@ -71,13 +69,15 @@ const findTeacherByClassroom = (classroom, teachers = []) => {
     }
 
     return (
-        teachers.find((teacher) =>
-            isSameId(getId(teacher), teacherId)
-        ) || null
+        teachers.find((teacher) => isSameId(getId(teacher), teacherId)) || null
     );
 };
 
-const enrichStudentWithClassroomTeacher = (student, classrooms = [], teachers = []) => {
+const enrichStudentWithClassroomTeacher = (
+    student,
+    classrooms = [],
+    teachers = []
+) => {
     if (!student) {
         return null;
     }
@@ -100,6 +100,33 @@ const enrichStudentWithClassroomTeacher = (student, classrooms = [], teachers = 
     };
 };
 
+const getEventId = (eventMember) => {
+    return eventMember?.eventId || "";
+};
+
+const enrichEventMembersWithEvents = (eventMembers = [], events = []) => {
+    return eventMembers.map((eventMember) => {
+        const event = events.find((item) =>
+            isSameId(item?.id, getEventId(eventMember))
+        );
+
+        if (!event) {
+            return eventMember;
+        }
+
+        return {
+            ...eventMember,
+            eventName: event.name,
+            location: event.location,
+            eventDate: event.eventDate,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            isPaid: event.isPaid,
+            pricePerStudent: event.pricePerStudent,
+        };
+    });
+};
+
 const getStudentProfile = async (id) => {
     const [
         studentResult,
@@ -107,6 +134,7 @@ const getStudentProfile = async (id) => {
         trialExamsResult,
         clubMembersResult,
         eventMembersResult,
+        eventsResult,
         classroomsResult,
         teachersResult,
     ] = await Promise.all([
@@ -115,6 +143,7 @@ const getStudentProfile = async (id) => {
         safeGet(API_ENDPOINTS.TRIAL_EXAMS, []),
         safeGet(API_ENDPOINTS.CLUB_MEMBERS, []),
         safeGet(API_ENDPOINTS.EVENT_MEMBERS, []),
+        safeGet(API_ENDPOINTS.EVENTS, []),
         safeGet(API_ENDPOINTS.CLASSROOMS, []),
         safeGet(API_ENDPOINTS.TEACHERS, []),
     ]);
@@ -141,8 +170,13 @@ const getStudentProfile = async (id) => {
         isRelatedToStudent(item, id)
     );
 
-    const eventMembers = toArray(eventMembersResult).filter((item) =>
+    const filteredEventMembers = toArray(eventMembersResult).filter((item) =>
         isRelatedToStudent(item, id)
+    );
+
+    const eventMembers = enrichEventMembersWithEvents(
+        filteredEventMembers,
+        toArray(eventsResult)
     );
 
     return {

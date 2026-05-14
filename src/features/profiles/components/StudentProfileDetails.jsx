@@ -10,10 +10,10 @@ import {
     UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
+import StatCard from "../../../components/ui/StatCard";
 import EmptyProfileState from "./EmptyProfileState";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ProfileSection from "./ProfileSection";
-import ProfileStatsCard from "./ProfileStatsCard";
 import StudentProfileStatsCards from "./StudentProfileStatsCards";
 
 import {
@@ -42,131 +42,44 @@ function StudentProfileDetails({ profile, details }) {
         "-"
     );
 
-    const getEventName = (eventMember) =>
-        getValue(
-            eventMember,
-            [
-                "eventName",
-                "EventName",
-                "name",
-                "Name",
-                "title",
-                "Title",
-            ],
-            "Etkinlik adı bulunamadı"
-        );
+    const getEventName = (eventMember) => {
+        return eventMember?.eventName || "Etkinlik adı bulunamadı";
+    };
 
-    const getEventLocation = (eventMember) =>
-        getValue(
-            eventMember,
-            [
-                "location",
-                "Location",
-                "eventLocation",
-                "EventLocation",
-                "place",
-                "Place",
-                "venue",
-                "Venue",
-                "address",
-                "Address",
-            ],
-            "-"
-        );
+    const getEventLocation = (eventMember) => {
+        return eventMember?.location || "-";
+    };
 
     const getEventDate = (eventMember) => {
-        const rawDate = getValue(
-            eventMember,
-            [
-                "eventDate",
-                "EventDate",
-                "date",
-                "Date",
-                "startDate",
-                "StartDate",
-                "startTime",
-                "StartTime",
-                "eventStartDate",
-                "EventStartDate",
-            ],
-            ""
-        );
-
-        return formatDate(rawDate) || "-";
+        return formatDate(eventMember?.eventDate) || "-";
     };
 
     const getEventTime = (eventMember) => {
-        const rawTime = getValue(
-            eventMember,
-            [
-                "eventTime",
-                "EventTime",
-                "time",
-                "Time",
-                "startHour",
-                "StartHour",
-                "hour",
-                "Hour",
-            ],
-            ""
-        );
+        const startTime = eventMember?.startTime || "";
+        const endTime = eventMember?.endTime || "";
 
-        if (rawTime) return String(rawTime).slice(0, 5);
+        if (startTime && endTime) {
+            return `${String(startTime).slice(0, 5)} - ${String(endTime).slice(
+                0,
+                5
+            )}`;
+        }
 
-        const rawDateTime = getValue(
-            eventMember,
-            [
-                "eventDate",
-                "EventDate",
-                "date",
-                "Date",
-                "startDate",
-                "StartDate",
-                "startTime",
-                "StartTime",
-                "eventStartDate",
-                "EventStartDate",
-            ],
-            ""
-        );
+        if (startTime) {
+            return String(startTime).slice(0, 5);
+        }
 
-        if (!rawDateTime || !String(rawDateTime).includes("T")) return "-";
-
-        return String(rawDateTime).split("T")[1]?.slice(0, 5) || "-";
+        return "-";
     };
 
     const getEventFee = (eventMember) => {
-        const isPaid = getValue(
-            eventMember,
-            ["isPaid", "IsPaid", "paid", "Paid"],
-            null
-        );
+        if (!eventMember?.isPaid) {
+            return "Ücretsiz";
+        }
 
-        const price = getValue(
-            eventMember,
-            [
-                "price",
-                "Price",
-                "fee",
-                "Fee",
-                "amount",
-                "Amount",
-                "eventPrice",
-                "EventPrice",
-                "participationFee",
-                "ParticipationFee",
-            ],
-            null
-        );
+        const price = eventMember?.pricePerStudent;
 
-        if (isPaid === false || isPaid === "false") return "Ücretsiz";
-
-        if (
-            price === null ||
-            price === undefined ||
-            price === "" ||
-            Number(price) === 0
-        ) {
+        if (!price || Number(price) === 0) {
             return "Ücretsiz";
         }
 
@@ -242,19 +155,56 @@ function StudentProfileDetails({ profile, details }) {
                                 {grades.map((grade, index) => (
                                     <tr key={getValue(grade, ["id", "Id"], index)}>
                                         <td className="font-semibold">
-                                            {getValue(grade, ["lessonName", "LessonName"], "-")}
+                                            {getValue(
+                                                grade,
+                                                ["lessonName", "LessonName"],
+                                                "-"
+                                            )}
                                         </td>
 
-                                        <td>{getValue(grade, ["exam1", "Exam1"], "-")}</td>
-                                        <td>{getValue(grade, ["exam2", "Exam2"], "-")}</td>
-                                        <td>{getValue(grade, ["project", "Project"], "-")}</td>
-                                        <td>{getValue(grade, ["activity1", "Activity1"], "-")}</td>
-                                        <td>{getValue(grade, ["activity2", "Activity2"], "-")}</td>
-                                        <td>{getValue(grade, ["activity3", "Activity3"], "-")}</td>
+                                        <td>
+                                            {getValue(grade, ["exam1", "Exam1"], "-")}
+                                        </td>
+
+                                        <td>
+                                            {getValue(grade, ["exam2", "Exam2"], "-")}
+                                        </td>
+
+                                        <td>
+                                            {getValue(grade, ["project", "Project"], "-")}
+                                        </td>
+
+                                        <td>
+                                            {getValue(
+                                                grade,
+                                                ["activity1", "Activity1"],
+                                                "-"
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            {getValue(
+                                                grade,
+                                                ["activity2", "Activity2"],
+                                                "-"
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            {getValue(
+                                                grade,
+                                                ["activity3", "Activity3"],
+                                                "-"
+                                            )}
+                                        </td>
 
                                         <td>
                                             <span className="badge badge-primary rounded-xl px-3 py-3 font-bold">
-                                                {getValue(grade, ["average", "Average"], "-")}
+                                                {getValue(
+                                                    grade,
+                                                    ["average", "Average"],
+                                                    "-"
+                                                )}
                                             </span>
                                         </td>
                                     </tr>
@@ -305,13 +255,18 @@ function StudentProfileDetails({ profile, details }) {
                                                     ["examDate", "ExamDate", "date", "Date"],
                                                     ""
                                                 )
-                                            )}
+                                            ) || "-"}
                                         </td>
 
                                         <td>
                                             {getValue(
                                                 exam,
-                                                ["correctCount", "CorrectCount", "correct", "Correct"],
+                                                [
+                                                    "correctCount",
+                                                    "CorrectCount",
+                                                    "correct",
+                                                    "Correct",
+                                                ],
                                                 "-"
                                             )}
                                         </td>
@@ -369,7 +324,7 @@ function StudentProfileDetails({ profile, details }) {
                             );
 
                             return (
-                                <ProfileStatsCard
+                                <StatCard
                                     key={getValue(clubMember, ["id", "Id"], index)}
                                     icon={UserGroupIcon}
                                     title="Kulüp Üyeliği"
@@ -378,7 +333,7 @@ function StudentProfileDetails({ profile, details }) {
                                         ["clubName", "ClubName", "name", "Name"],
                                         "Kulüp adı bulunamadı"
                                     )}
-                                    variant={isActive ? "emerald" : "rose"}
+                                    color={isActive ? "success" : "error"}
                                     valueClassName="text-base"
                                 />
                             );
@@ -397,49 +352,22 @@ function StudentProfileDetails({ profile, details }) {
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                         {eventMembers.map((eventMember, index) => {
-                            const isActive = !(
-                                eventMember?.isActive === false ||
-                                eventMember?.IsActive === false
-                            );
+                            const isActive = eventMember?.isActive !== false;
 
                             return (
-                                <ProfileStatsCard
-                                    key={getValue(eventMember, ["id", "Id"], index)}
+                                <StatCard
+                                    key={eventMember?.id || index}
                                     icon={CalendarDaysIcon}
                                     title="Etkinlik Adı"
                                     value={getEventName(eventMember)}
-                                    description={
-                                        <div className="mt-2 space-y-1 text-sm leading-relaxed text-base-content/70">
-                                            <p>
-                                                <span className="font-semibold text-base-content">
-                                                    Yer:
-                                                </span>{" "}
-                                                {getEventLocation(eventMember)}
-                                            </p>
-
-                                            <p>
-                                                <span className="font-semibold text-base-content">
-                                                    Tarih:
-                                                </span>{" "}
-                                                {getEventDate(eventMember)}
-                                            </p>
-
-                                            <p>
-                                                <span className="font-semibold text-base-content">
-                                                    Saat:
-                                                </span>{" "}
-                                                {getEventTime(eventMember)}
-                                            </p>
-
-                                            <p>
-                                                <span className="font-semibold text-base-content">
-                                                    Ücret:
-                                                </span>{" "}
-                                                {getEventFee(eventMember)}
-                                            </p>
-                                        </div>
-                                    }
-                                    variant={isActive ? "sky" : "rose"}
+                                    description={`Yer: ${getEventLocation(
+                                        eventMember
+                                    )} • Tarih: ${getEventDate(
+                                        eventMember
+                                    )} • Saat: ${getEventTime(
+                                        eventMember
+                                    )} • Ücret: ${getEventFee(eventMember)}`}
+                                    color={isActive ? "info" : "error"}
                                     valueClassName="text-base"
                                 />
                             );

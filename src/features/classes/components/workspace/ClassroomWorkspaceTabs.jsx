@@ -3,7 +3,6 @@ import StudentTable from "../../../students/components/StudentTable";
 
 function ClassroomWorkspaceTabs({
   activeTab,
-  setActiveTab,
   students,
   grades,
   classroom,
@@ -11,14 +10,20 @@ function ClassroomWorkspaceTabs({
   onDeleteStudent,
 }) {
   const [studentSearch, setStudentSearch] = useState("");
+
   const [studentClassroomFilter, setStudentClassroomFilter] = useState("all");
 
   const classroomId = classroom?.id || classroom?.Id;
+
+  const profileBackPath = classroomId
+    ? `/dashboard/classes/${classroomId}`
+    : "/dashboard/classes";
 
   const classroomOptions = classroom
     ? [
       {
         value: classroomId,
+
         label:
           classroom.name ||
           classroom.className ||
@@ -40,6 +45,7 @@ function ClassroomWorkspaceTabs({
           setClassroomFilter={setStudentClassroomFilter}
           classroomOptions={classroomOptions}
           showStatusFilter={false}
+          backPath={profileBackPath}
           onEdit={onEditStudent}
           onDelete={onDeleteStudent}
         />

@@ -1,28 +1,44 @@
 import { Link } from "react-router-dom";
+
 import {
     ArrowLeftIcon,
+
     EnvelopeIcon,
+
     PhoneIcon,
+
     UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
 import StatusBadge from "../../../components/ui/StatusBadge";
+
 import {
     getBackPathByProfileType,
+
     getEmail,
+
     getFullName,
+
     getPhoneNumber,
+
     getProfileTypeLabel,
+
     getStatus,
 } from "../utils/profileFormatters";
 
-function ProfileHeader({ profileType, profile }) {
+function ProfileHeader({ profileType, profile, backPath }) {
     const fullName = getFullName(profile);
     const email = getEmail(profile);
+
     const phoneNumber = getPhoneNumber(profile);
+
     const status = getStatus(profile);
+
     const profileTypeLabel = getProfileTypeLabel(profileType);
-    const backPath = getBackPathByProfileType(profileType);
+
+    const defaultBackPath = getBackPathByProfileType(profileType);
+
+    const resolvedBackPath = backPath || defaultBackPath;
 
     return (
         <div className="rounded-3xl border border-base-300/60 bg-base-100/90 p-6 shadow-sm">
@@ -52,19 +68,22 @@ function ProfileHeader({ profileType, profile }) {
                         <div className="mt-4 flex flex-wrap gap-3 text-sm text-base-content/70">
                             <span className="inline-flex items-center gap-2 rounded-xl bg-base-200 px-3 py-2">
                                 <EnvelopeIcon className="h-4 w-4" />
+
                                 {email}
                             </span>
 
                             <span className="inline-flex items-center gap-2 rounded-xl bg-base-200 px-3 py-2">
                                 <PhoneIcon className="h-4 w-4" />
+
                                 {phoneNumber}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <Link to={backPath} className="btn btn-ghost rounded-xl">
+                <Link to={resolvedBackPath} className="btn btn-ghost rounded-xl">
                     <ArrowLeftIcon className="h-5 w-5" />
+
                     Listeye Dön
                 </Link>
             </div>

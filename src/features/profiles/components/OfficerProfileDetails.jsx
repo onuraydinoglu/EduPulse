@@ -9,6 +9,7 @@ import {
 import OfficerProfileStatsCards from "./OfficerProfileStatsCards";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ProfileSection from "./ProfileSection";
+
 import {
     getEmail,
     getFullName,
@@ -26,7 +27,7 @@ function OfficerProfileDetails({ profile }) {
             <ProfileSection
                 title="Kişisel Bilgiler"
                 description="Memurun sistemde kayıtlı temel bilgileri"
-                icon={IdentificationIcon}
+                icon={UserCircleIcon}
             >
                 <div className="grid gap-4 md:grid-cols-2">
                     <ProfileInfoCard
@@ -37,7 +38,7 @@ function OfficerProfileDetails({ profile }) {
 
                     <ProfileInfoCard
                         icon={ShieldCheckIcon}
-                        label="Rol"
+                        label="Yetki Rolü"
                         value={roleName}
                     />
 
@@ -52,18 +53,12 @@ function OfficerProfileDetails({ profile }) {
                         label="Telefon"
                         value={getPhoneNumber(profile)}
                     />
-                </div>
-            </ProfileSection>
 
-            <ProfileSection
-                title="Görev Bilgileri"
-                description="Memur profili için işlem geçmişi, evrak ve etkinlik sorumluluğu gibi alanlar burada genişletilebilir."
-                icon={ShieldCheckIcon}
-            >
-                <div className="rounded-2xl border border-dashed border-base-300 bg-base-200/30 p-8 text-center">
-                    <p className="text-sm font-semibold text-base-content/55">
-                        Şu an memur için temel profil bilgileri gösteriliyor.
-                    </p>
+                    <ProfileInfoCard
+                        icon={IdentificationIcon}
+                        label="Kullanıcı Tipi"
+                        value="Okul Memuru"
+                    />
                 </div>
             </ProfileSection>
         </div>
