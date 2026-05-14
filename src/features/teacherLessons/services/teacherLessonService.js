@@ -1,18 +1,21 @@
 import axiosInstance from "../../../api/axiosInstance";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 
-const unwrap = (response) => response.data?.data ?? response.data?.Data ?? response.data;
+const unwrap = (response) =>
+  response.data?.data ?? response.data?.Data ?? response.data;
 
 export const teacherLessonService = {
   getAll: async () => {
     const response = await axiosInstance.get(API_ENDPOINTS.TEACHER_LESSONS);
+
     return unwrap(response);
   },
 
   getById: async (id) => {
     const response = await axiosInstance.get(
-      `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`,
+      `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`
     );
+
     return unwrap(response);
   },
 
@@ -27,6 +30,7 @@ export const teacherLessonService = {
       teacherId: data.teacherId,
       lessonId: data.lessonId,
       classroomIds,
+      isActive: data.isActive ?? true,
     });
 
     return response.data;
@@ -46,8 +50,9 @@ export const teacherLessonService = {
 
   delete: async (id) => {
     const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`,
+      `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`
     );
+
     return response.data;
   },
 };

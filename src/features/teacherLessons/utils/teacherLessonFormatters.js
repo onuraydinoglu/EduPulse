@@ -19,13 +19,8 @@ export const getTeacherLessonTeacherName = (item) =>
 export const getTeacherLessonLessonName = (item) =>
     item?.lessonName || item?.LessonName || "-";
 
-export const getTeacherLessonClassroomName = (item) => {
-    if (Array.isArray(item?.classroomNames) && item.classroomNames.length > 0) {
-        return item.classroomNames.join(", ");
-    }
-
-    return item?.classroomName || item?.ClassroomName || "-";
-};
+export const getTeacherLessonClassroomName = (item) =>
+    item?.classroomName || item?.ClassroomName || "-";
 
 export const getTeacherLessonIsActive = (item) =>
     item?.isActive !== false && item?.IsActive !== false;
@@ -88,7 +83,6 @@ export const mapTeachersToOptions = (teachers = []) => [
     ...teachers.map((teacher) => {
         const firstName = teacher.firstName || teacher.FirstName || "";
         const lastName = teacher.lastName || teacher.LastName || "";
-
         const fullName =
             teacher.fullName ||
             teacher.FullName ||
@@ -109,12 +103,7 @@ export const mapLessonsToOptions = (lessons = []) => [
     },
     ...lessons.map((lesson) => ({
         value: lesson.id || lesson.Id,
-        label:
-            lesson.name ||
-            lesson.Name ||
-            lesson.lessonName ||
-            lesson.LessonName ||
-            "-",
+        label: lesson.name || lesson.Name || lesson.lessonName || lesson.LessonName || "-",
     })),
 ];
 
@@ -126,7 +115,6 @@ export const mapClassroomsToOptions = (classrooms = []) => [
     ...classrooms.map((classroom) => {
         const grade = classroom.grade || classroom.Grade || "";
         const section = classroom.section || classroom.Section || "";
-
         const classroomName =
             classroom.name ||
             classroom.Name ||
@@ -142,12 +130,168 @@ export const mapClassroomsToOptions = (classrooms = []) => [
     }),
 ];
 
+const getTeacherLessonGroupKey = (item) => {
+    const teacherId = getTeacherLessonTeacherId(item);
+    const lessonId = getTeacherLessonLessonId(item);
+
+    return `${teacherId}-${lessonId}`;
+};
+
+const getComparableDate = (item) => {
+    const value =
+        item?.createdDate ||
+        item?.CreatedDate ||
+        item?.updatedDate ||
+        item?.UpdatedDate ||
+        "";
+
+    const time = new Date(value).getTime();
+
+    return Number.isNaN(time) ? 0 : time;
+};
+
+const getClassroomSortValue = (classroomName = "") => {
+    const text = String(classroomName).trim();
+
+    const match = text.match(/(\d+)\s*[-/.]?\s*([A-Za-zÇĞİÖŞÜçğıöşü])?/);
+
+    if (!match) {
+        return {
+            grade: Number.MAX_SAFE_INTEGER,
+            section: text,
+        };
+    }
+
+    return {
+        grade: Number(match[1]),
+        section: match[2] || "",
+    };
+};
+
+const sortClassroomNames = (classroomNames = []) => {
+    return [...classroomNames].sort((a, b) => {
+        const valueA = getClassroomSortValue(a);
+        const valueB = getClassroomSortValue(b);
+
+        if (valueA.grade !== valueB.grade) {
+            return valueA.grade - valueB.grade;
+        }
+
+        return valueA.section.localeCompare(valueB.section, "tr");
+    });
+};
+
+export const getTeacherLessonClassroomIds = (item) => {
+    if (Array.isArray(item?.classroomIds)) return item.classroomIds;
+    if (Array.isArray(item?.ClassroomIds)) return item.ClassroomIds;
+
+    if (Array.isArray(item?.items)) {
+        return item.items.map(getTeacherLessonClassroomId).filter(Boolean);
+    }
+
+    const classroomId = getTeacherLessonClassroomId(item);
+
+    return classroomId ? [classroomId] : [];
+};
+
+export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
+    if (!Array.isArray(teacherLessons)) return [];
+
+    const groupedMap = new Map();
+
+    teacherLessons.forEach((item, index) => {
+        const groupKey = getTeacherLessonGroupKey(item);
+
+        if (!groupedMap.has(groupKey)) {
+            groupedMap.set(groupKey, {
+                ...item,
+                id: getTeacherLessonId(item),
+                Id: getTeacherLessonId(item),
+                teacherId: getTeacherLessonTeacherId(item),
+                TeacherId: getTeacherLessonTeacherId(item),
+                lessonId: getTeacherLessonLessonId(item),
+                LessonId: getTeacherLessonLessonId(item),
+                teacherFullName: getTeacherLessonTeacherName(item),
+                TeacherFullName: getTeacherLessonTeacherName(item),
+                lessonName: getTeacherLessonLessonName(item),
+                LessonName: getTeacherLessonLessonName(item),
+                classroomNames: [],
+                classroomIds: [],
+                ClassroomIds: [],
+                items: [],
+                isActive: false,
+                IsActive: false,
+                _firstIndex: index,
+                _sortDate: getComparableDate(item),
+            });
+        }
+
+        const group = groupedMap.get(groupKey);
+
+        const classroomName = getTeacherLessonClassroomName(item);
+        const classroomId = getTeacherLessonClassroomId(item);
+
+        group.items.push(item);
+
+        if (classroomName && classroomName !== "-") {
+            group.classroomNames.push(classroomName);
+        }
+
+        if (classroomId) {
+            group.classroomIds.push(classroomId);
+            group.ClassroomIds.push(classroomId);
+        }
+
+        if (getTeacherLessonIsActive(item)) {
+            group.isActive = true;
+            group.IsActive = true;
+        }
+
+        const itemDate = getComparableDate(item);
+
+        if (itemDate > group._sortDate) {
+            group._sortDate = itemDate;
+        }
+    });
+
+    return Array.from(groupedMap.values())
+        .map((group) => {
+            const uniqueClassroomNames = sortClassroomNames([
+                ...new Set(group.classroomNames),
+            ]);
+
+            const uniqueClassroomIds = [...new Set(group.classroomIds)];
+
+            const classroomNameText = uniqueClassroomNames.join(", ") || "-";
+            const firstClassroomId = uniqueClassroomIds[0] || "";
+
+            return {
+                ...group,
+                classroomId: firstClassroomId,
+                ClassroomId: firstClassroomId,
+                classroomIds: uniqueClassroomIds,
+                ClassroomIds: uniqueClassroomIds,
+                classroomName: classroomNameText,
+                ClassroomName: classroomNameText,
+                classroomNames: uniqueClassroomNames,
+            };
+        })
+        .sort((a, b) => {
+            if (b._sortDate !== a._sortDate) {
+                return b._sortDate - a._sortDate;
+            }
+
+            return a._firstIndex - b._firstIndex;
+        })
+        .map(({ _firstIndex, _sortDate, ...item }) => item);
+};
+
 export const filterTeacherLessons = (
     teacherLessons = [],
     search = "",
     statusFilter = "all"
 ) => {
-    const normalizedSearch = search.toLocaleLowerCase("tr-TR").trim();
+    const normalizedSearch = search.toLowerCase().trim();
 
     return teacherLessons.filter((item) => {
         const isActive = getTeacherLessonIsActive(item);
@@ -163,78 +307,13 @@ export const filterTeacherLessons = (
             getTeacherLessonClassroomName(item),
         ]
             .join(" ")
-            .toLocaleLowerCase("tr-TR");
+            .toLowerCase();
 
         return matchesStatus && searchableText.includes(normalizedSearch);
     });
 };
 
-const getTeacherLessonGroupKey = (item) => {
-    const teacherId = getTeacherLessonTeacherId(item);
-    const lessonId = getTeacherLessonLessonId(item);
-    const isActive = getTeacherLessonIsActive(item);
-
-    return `${teacherId}-${lessonId}-${isActive}`;
-};
-
-const sortClassroomNames = (classroomNames = []) => {
-    return [...classroomNames].sort((a, b) => {
-        const [gradeA, sectionA = ""] = String(a).split("-");
-        const [gradeB, sectionB = ""] = String(b).split("-");
-
-        const numericGradeA = Number(gradeA);
-        const numericGradeB = Number(gradeB);
-
-        if (!Number.isNaN(numericGradeA) && !Number.isNaN(numericGradeB)) {
-            if (numericGradeA !== numericGradeB) {
-                return numericGradeA - numericGradeB;
-            }
-        }
-
-        return sectionA.localeCompare(sectionB, "tr-TR");
-    });
-};
-
-export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
-    if (!Array.isArray(teacherLessons)) return [];
-
-    const groupedMap = new Map();
-
-    teacherLessons.forEach((item) => {
-        const groupKey = getTeacherLessonGroupKey(item);
-
-        if (!groupedMap.has(groupKey)) {
-            groupedMap.set(groupKey, {
-                ...item,
-                classroomNames: [],
-            });
-        }
-
-        const group = groupedMap.get(groupKey);
-        const classroomName = getTeacherLessonClassroomName(item);
-
-        if (classroomName && classroomName !== "-") {
-            group.classroomNames.push(classroomName);
-        }
-    });
-
-    return Array.from(groupedMap.values()).map((group) => {
-        const uniqueClassroomNames = sortClassroomNames([
-            ...new Set(group.classroomNames),
-        ]);
-
-        const classroomNameText = uniqueClassroomNames.join(", ") || "-";
-
-        return {
-            ...group,
-            classroomName: classroomNameText,
-            ClassroomName: classroomNameText,
-            classroomNames: uniqueClassroomNames,
-        };
-    });
-};
-
-export const validateTeacherLessonForm = (formData, isEditing = false) => {
+export const validateTeacherLessonForm = (formData) => {
     const errors = {};
 
     if (!formData.teacherId) {
@@ -245,11 +324,7 @@ export const validateTeacherLessonForm = (formData, isEditing = false) => {
         errors.lessonId = "Ders seçimi zorunludur.";
     }
 
-    if (isEditing) {
-        if (!formData.classroomId) {
-            errors.classroomId = "Sınıf seçimi zorunludur.";
-        }
-    } else if (
+    if (
         !Array.isArray(formData.classroomIds) ||
         formData.classroomIds.length === 0
     ) {
