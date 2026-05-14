@@ -58,7 +58,7 @@ function StudentTableRow({ student, backPath, onEdit, onDelete }) {
 
       <td className="text-right">
         <TableActions
-          onDetail={handleOpenProfile}
+          onProfile={handleOpenProfile}
           onEdit={() => onEdit(student)}
           onDelete={() => onDelete(studentId)}
         />

@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { BookOpenIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
@@ -20,12 +20,20 @@ function TeacherTableRow({
   onDelete,
   onAssignLesson,
 }) {
+  const navigate = useNavigate();
+
   const teacherId = getTeacherId(teacher);
   const fullName = getTeacherFullName(teacher);
   const branch = getTeacherBranch(teacher);
   const email = getTeacherEmail(teacher);
   const phoneNumber = getTeacherPhoneNumber(teacher);
   const status = getTeacherStatus(teacher);
+
+  const handleOpenProfile = () => {
+    if (!teacherId) return;
+
+    navigate(`/dashboard/profiles/teacher/${teacherId}`);
+  };
 
   return (
     <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
@@ -63,15 +71,6 @@ function TeacherTableRow({
 
       <td>
         <div className="flex items-center justify-end gap-2">
-          <Link
-            to={`/dashboard/profiles/teacher/${teacherId}`}
-            className="btn btn-ghost btn-sm rounded-xl text-primary"
-            title="Öğretmen profili"
-          >
-            <EyeIcon className="h-4 w-4" />
-            Profil
-          </Link>
-
           <button
             type="button"
             onClick={() => onAssignLesson(teacher)}
@@ -83,6 +82,7 @@ function TeacherTableRow({
           </button>
 
           <TableActions
+            onProfile={handleOpenProfile}
             onEdit={() => onEdit(teacher)}
             onDelete={() => onDelete(teacherId)}
           />

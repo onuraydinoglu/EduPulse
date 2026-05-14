@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
 
@@ -11,11 +13,19 @@ import {
 } from "../utils/officerFormatters";
 
 function OfficerTableRow({ officer, temporaryPasswords = {}, onEdit, onDelete }) {
+  const navigate = useNavigate();
+
   const officerId = getOfficerId(officer);
   const temporaryPassword = getOfficerTemporaryPassword(
     officer,
     temporaryPasswords,
   );
+
+  const handleOpenProfile = () => {
+    if (!officerId) return;
+
+    navigate(`/dashboard/profiles/officer/${officerId}`);
+  };
 
   return (
     <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
@@ -52,21 +62,11 @@ function OfficerTableRow({ officer, temporaryPasswords = {}, onEdit, onDelete })
       </td>
 
       <td>
-        <div className="flex items-center justify-end gap-2">
-          <Link
-            to={`/dashboard/profiles/officer/${officerId}`}
-            className="btn btn-ghost btn-sm rounded-xl text-primary"
-            title="Memur profili"
-          >
-            <EyeIcon className="h-4 w-4" />
-            Profil
-          </Link>
-
-          <TableActions
-            onEdit={() => onEdit(officer)}
-            onDelete={() => onDelete(officerId)}
-          />
-        </div>
+        <TableActions
+          onProfile={handleOpenProfile}
+          onEdit={() => onEdit(officer)}
+          onDelete={() => onDelete(officerId)}
+        />
       </td>
     </tr>
   );

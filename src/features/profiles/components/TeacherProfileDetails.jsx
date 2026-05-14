@@ -120,45 +120,6 @@ function TeacherProfileDetails({ profile, details }) {
             </ProfileSection>
 
             <ProfileSection
-                title="Danışman Olduğu Sınıflar"
-                description="Öğretmenin sınıf danışmanlığı kayıtları"
-                icon={AcademicCapIcon}
-            >
-                {advisorClassrooms.length === 0 ? (
-                    <EmptyProfileState text="Bu öğretmene atanmış danışman sınıf bulunamadı." />
-                ) : (
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {advisorClassrooms.map((classroom, index) => (
-                            <StatCard
-                                key={getValue(classroom, ["id", "Id"], index)}
-                                icon={AcademicCapIcon}
-                                title="Sınıf Danışmanlığı"
-                                value={getValue(
-                                    classroom,
-                                    [
-                                        "classroomName",
-                                        "ClassroomName",
-                                        "className",
-                                        "ClassName",
-                                        "name",
-                                        "Name",
-                                    ],
-                                    `${getValue(classroom, ["grade", "Grade"], "")}/${getValue(
-                                        classroom,
-                                        ["section", "Section"],
-                                        ""
-                                    )}`
-                                )}
-                                description="Danışman olduğu sınıf"
-                                color="primary"
-                                valueClassName="text-base"
-                            />
-                        ))}
-                    </div>
-                )}
-            </ProfileSection>
-
-            <ProfileSection
                 title="Kulüp Bilgileri"
                 description="Öğretmenin sorumlu olduğu kulüp bilgileri"
                 icon={UserGroupIcon}

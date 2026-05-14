@@ -48,14 +48,14 @@ export const TEACHER_PROFILE_STATS = [
         valueClassName: "text-xl",
     },
     {
-        key: "teacherLessons",
-        title: "Ders Ataması",
+        key: "advisorClassrooms",
+        title: "Danışman Sınıf",
         icon: AcademicCapIcon,
         color: "success",
     },
     {
-        key: "advisorClassrooms",
-        title: "Danışman Sınıf",
+        key: "teacherLessons",
+        title: "Toplam Girdiği Ders",
         icon: ClipboardDocumentCheckIcon,
         color: "warning",
     },

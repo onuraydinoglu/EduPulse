@@ -2,6 +2,31 @@ import StatsCard from "../../../components/ui/StatCard";
 import { TEACHER_PROFILE_STATS } from "../constants/profileStats.constants";
 import { getValue } from "../utils/profileFormatters";
 
+const getAdvisorClassroomLabel = (classroom) => {
+    const classroomName = getValue(
+        classroom,
+        ["classroomName", "ClassroomName", "className", "ClassName", "name", "Name"],
+        ""
+    );
+
+    if (classroomName) {
+        return classroomName;
+    }
+
+    const grade = getValue(classroom, ["grade", "Grade"], "");
+    const section = getValue(classroom, ["section", "Section"], "");
+
+    if (grade && section) {
+        return `${grade}/${String(section).toLocaleUpperCase("tr-TR")}`;
+    }
+
+    if (grade) {
+        return `${grade}. Sınıf`;
+    }
+
+    return "-";
+};
+
 function TeacherProfileStatsCards({ profile, details }) {
     const teacherLessons = details?.teacherLessons || [];
     const advisorClassrooms = details?.advisorClassrooms || [];
@@ -13,10 +38,15 @@ function TeacherProfileStatsCards({ profile, details }) {
         "Branş atanmadı"
     );
 
+    const advisorClassroomLabel =
+        advisorClassrooms.length > 0
+            ? advisorClassrooms.map(getAdvisorClassroomLabel).join(", ")
+            : "-";
+
     const statValues = {
         branch,
         teacherLessons: teacherLessons.length || "-",
-        advisorClassrooms: advisorClassrooms.length || "-",
+        advisorClassrooms: advisorClassroomLabel,
         clubs: clubs.length || "-",
     };
 
