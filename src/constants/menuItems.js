@@ -28,7 +28,7 @@ export const menuItems = [
   {
     title: "Kullanıcılar",
     icon: UserGroupIcon,
-    roles: ["schooladmin"],
+    roles: ["schooladmin", "officer"],
     children: [
       {
         title: "Öğretmenler",
@@ -54,7 +54,7 @@ export const menuItems = [
   {
     title: "Akademik Yönetim",
     icon: RectangleStackIcon,
-    roles: ["schooladmin", "officer", "teacher"],
+    roles: ["schooladmin", "officer"],
     children: [
       {
         title: "Dersler",
@@ -76,7 +76,7 @@ export const menuItems = [
     title: "Sınıflar",
     path: "/dashboard/classes",
     icon: RectangleGroupIcon,
-    roles: ["schooladmin", "teacher"],
+    roles: ["schooladmin", "officer", "teacher"],
   },
 
   { /* {
@@ -91,7 +91,7 @@ export const menuItems = [
     title: "Kulüpler",
     path: "/dashboard/clubs",
     icon: Squares2X2Icon,
-    roles: ["schooladmin"],
+    roles: ["schooladmin", "officer"],
   },
   {
     title: "Etkinlikler",

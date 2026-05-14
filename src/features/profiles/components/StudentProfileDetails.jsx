@@ -9,6 +9,7 @@ import {
     UserCircleIcon,
     UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 import StatCard from "../../../components/ui/StatCard";
 import EmptyProfileState from "./EmptyProfileState";
@@ -41,6 +42,10 @@ function StudentProfileDetails({ profile, details }) {
         ["classroomName", "ClassroomName", "className", "ClassName"],
         "-"
     );
+
+    const getEventId = (eventMember) => {
+        return eventMember?.eventId || "";
+    };
 
     const getEventName = (eventMember) => {
         return eventMember?.eventName || "Etkinlik adı bulunamadı";
@@ -162,49 +167,16 @@ function StudentProfileDetails({ profile, details }) {
                                             )}
                                         </td>
 
-                                        <td>
-                                            {getValue(grade, ["exam1", "Exam1"], "-")}
-                                        </td>
-
-                                        <td>
-                                            {getValue(grade, ["exam2", "Exam2"], "-")}
-                                        </td>
-
-                                        <td>
-                                            {getValue(grade, ["project", "Project"], "-")}
-                                        </td>
-
-                                        <td>
-                                            {getValue(
-                                                grade,
-                                                ["activity1", "Activity1"],
-                                                "-"
-                                            )}
-                                        </td>
-
-                                        <td>
-                                            {getValue(
-                                                grade,
-                                                ["activity2", "Activity2"],
-                                                "-"
-                                            )}
-                                        </td>
-
-                                        <td>
-                                            {getValue(
-                                                grade,
-                                                ["activity3", "Activity3"],
-                                                "-"
-                                            )}
-                                        </td>
+                                        <td>{getValue(grade, ["exam1", "Exam1"], "-")}</td>
+                                        <td>{getValue(grade, ["exam2", "Exam2"], "-")}</td>
+                                        <td>{getValue(grade, ["project", "Project"], "-")}</td>
+                                        <td>{getValue(grade, ["activity1", "Activity1"], "-")}</td>
+                                        <td>{getValue(grade, ["activity2", "Activity2"], "-")}</td>
+                                        <td>{getValue(grade, ["activity3", "Activity3"], "-")}</td>
 
                                         <td>
                                             <span className="badge badge-primary rounded-xl px-3 py-3 font-bold">
-                                                {getValue(
-                                                    grade,
-                                                    ["average", "Average"],
-                                                    "-"
-                                                )}
+                                                {getValue(grade, ["average", "Average"], "-")}
                                             </span>
                                         </td>
                                     </tr>
@@ -261,12 +233,7 @@ function StudentProfileDetails({ profile, details }) {
                                         <td>
                                             {getValue(
                                                 exam,
-                                                [
-                                                    "correctCount",
-                                                    "CorrectCount",
-                                                    "correct",
-                                                    "Correct",
-                                                ],
+                                                ["correctCount", "CorrectCount", "correct", "Correct"],
                                                 "-"
                                             )}
                                         </td>
@@ -352,11 +319,11 @@ function StudentProfileDetails({ profile, details }) {
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                         {eventMembers.map((eventMember, index) => {
+                            const eventId = getEventId(eventMember);
                             const isActive = eventMember?.isActive !== false;
 
-                            return (
+                            const card = (
                                 <StatCard
-                                    key={eventMember?.id || index}
                                     icon={CalendarDaysIcon}
                                     title="Etkinlik Adı"
                                     value={getEventName(eventMember)}
@@ -370,6 +337,24 @@ function StudentProfileDetails({ profile, details }) {
                                     color={isActive ? "info" : "error"}
                                     valueClassName="text-base"
                                 />
+                            );
+
+                            if (!eventId) {
+                                return (
+                                    <div key={eventMember?.id || index}>
+                                        {card}
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <Link
+                                    key={eventMember?.id || eventId || index}
+                                    to={`/dashboard/events/${eventId}/members`}
+                                    className="block rounded-2xl transition hover:-translate-y-0.5 hover:shadow-md"
+                                >
+                                    {card}
+                                </Link>
                             );
                         })}
                     </div>
