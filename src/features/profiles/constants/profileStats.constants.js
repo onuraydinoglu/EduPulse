@@ -25,7 +25,7 @@ export const STUDENT_PROFILE_STATS = [
         color: "success",
     },
     {
-        key: "classroomTeacher",
+        key: "FullName",
         title: "Sınıf Öğretmeni",
         icon: UserCircleIcon,
         color: "warning",
