@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 
@@ -24,7 +24,11 @@ const TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID =
 
 function ProfilePage() {
     const { profileType, id } = useParams();
+
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const backPath = location.state?.backPath || getBackPathByProfileType(profileType);
 
     const {
         profile,
@@ -52,7 +56,6 @@ function ProfilePage() {
     });
 
     const handleBack = () => {
-        const backPath = getBackPathByProfileType(profileType);
         navigate(backPath);
     };
 
@@ -114,7 +117,7 @@ function ProfilePage() {
     }
 
     if (!profile) {
-        const backPath = getBackPathByProfileType(profileType);
+
         const profileTypeLabel = getProfileTypeLabel(profileType);
 
         return (
