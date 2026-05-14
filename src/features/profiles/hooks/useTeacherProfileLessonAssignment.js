@@ -63,7 +63,16 @@ export function useTeacherProfileLessonAssignment({
     }, [profileType]);
 
     const handleOpenAssignLessonModal = (modalId) => {
-        setAssignFormData(emptyTeacherLessonAssignForm);
+        const branchLessonId =
+            teacher?.branchLessonId ||
+            teacher?.BranchLessonId ||
+            "";
+
+        setAssignFormData({
+            ...emptyTeacherLessonAssignForm,
+            lessonId: branchLessonId,
+        });
+
         setAssignErrors({});
         openModal(modalId);
     };

@@ -262,8 +262,16 @@ export function useTeachersPage() {
   };
 
   const handleOpenAssignLessonModal = (teacher, modalId) => {
+    const branchLessonId =
+      teacher?.branchLessonId ||
+      teacher?.BranchLessonId ||
+      "";
+
     setSelectedTeacher(teacher);
-    setAssignFormData(emptyTeacherLessonAssignForm);
+    setAssignFormData({
+      ...emptyTeacherLessonAssignForm,
+      lessonId: branchLessonId,
+    });
     setAssignErrors({});
     openModal(modalId);
   };
