@@ -1,11 +1,5 @@
-import {
-    AcademicCapIcon,
-    BookOpenIcon,
-    ClipboardDocumentCheckIcon,
-    UserGroupIcon,
-} from "@heroicons/react/24/outline";
-
-import ProfileStatsCard from "./ProfileStatsCard";
+import StatsCard from "../../../components/ui/StatCard";
+import { TEACHER_PROFILE_STATS } from "../constants/profileStats.constants";
 import { getValue } from "../utils/profileFormatters";
 
 function TeacherProfileStatsCards({ profile, details }) {
@@ -19,38 +13,22 @@ function TeacherProfileStatsCards({ profile, details }) {
         "Branş atanmadı"
     );
 
-    const stats = [
-        {
-            title: "Branş",
-            value: branch,
-            icon: BookOpenIcon,
-            variant: "blue",
-            valueClassName: "text-xl",
-        },
-        {
-            title: "Ders Ataması",
-            value: teacherLessons.length || "-",
-            icon: AcademicCapIcon,
-            variant: "emerald",
-        },
-        {
-            title: "Danışman Sınıf",
-            value: advisorClassrooms.length || "-",
-            icon: ClipboardDocumentCheckIcon,
-            variant: "amber",
-        },
-        {
-            title: "Sorumlu Kulüp",
-            value: clubs.length || "-",
-            icon: UserGroupIcon,
-            variant: "sky",
-        },
-    ];
+    const statValues = {
+        branch,
+        teacherLessons: teacherLessons.length || "-",
+        advisorClassrooms: advisorClassrooms.length || "-",
+        clubs: clubs.length || "-",
+    };
+
+    const stats = TEACHER_PROFILE_STATS.map((item) => ({
+        ...item,
+        value: statValues[item.key],
+    }));
 
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
             {stats.map((item) => (
-                <ProfileStatsCard key={item.title} {...item} />
+                <StatsCard key={item.title} {...item} />
             ))}
         </div>
     );

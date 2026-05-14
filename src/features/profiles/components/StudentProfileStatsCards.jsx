@@ -1,11 +1,5 @@
-import {
-    AcademicCapIcon,
-    ChartBarIcon,
-    ClipboardDocumentCheckIcon,
-    HashtagIcon,
-} from "@heroicons/react/24/outline";
-
-import ProfileStatsCard from "./ProfileStatsCard";
+import StatsCard from "../../../components/ui/StatCard";
+import { STUDENT_PROFILE_STATS } from "../constants/profileStats.constants";
 import { getValue } from "../utils/profileFormatters";
 
 function StudentProfileStatsCards({ profile, details }) {
@@ -23,6 +17,19 @@ function StudentProfileStatsCards({ profile, details }) {
         "-"
     );
 
+    const classroomTeacher = getValue(
+        profile,
+        [
+            "classroomTeacherName",
+            "ClassroomTeacherName",
+            "advisorTeacherName",
+            "AdvisorTeacherName",
+            "teacherName",
+            "TeacherName",
+        ],
+        "-"
+    );
+
     const validAverages = grades
         .map((grade) => Number(getValue(grade, ["average", "Average"], "")))
         .filter((value) => !Number.isNaN(value));
@@ -35,37 +42,22 @@ function StudentProfileStatsCards({ profile, details }) {
             ).toFixed(2)
             : "-";
 
-    const stats = [
-        {
-            title: "Öğrenci No",
-            value: studentNumber,
-            icon: HashtagIcon,
-            variant: "blue",
-        },
-        {
-            title: "Sınıf",
-            value: classroomName,
-            icon: AcademicCapIcon,
-            variant: "emerald",
-        },
-        {
-            title: "Ders Sayısı",
-            value: grades.length || "-",
-            icon: ClipboardDocumentCheckIcon,
-            variant: "amber",
-        },
-        {
-            title: "Genel Ortalama",
-            value: generalAverage,
-            icon: ChartBarIcon,
-            variant: "sky",
-        },
-    ];
+    const statValues = {
+        studentNumber,
+        classroomName,
+        classroomTeacher,
+        generalAverage,
+    };
+
+    const stats = STUDENT_PROFILE_STATS.map((item) => ({
+        ...item,
+        value: statValues[item.key],
+    }));
 
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
             {stats.map((item) => (
-                <ProfileStatsCard key={item.title} {...item} />
+                <StatsCard key={item.title} {...item} />
             ))}
         </div>
     );
