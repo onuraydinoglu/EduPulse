@@ -1,9 +1,10 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
-import { usePagination } from "../../../hooks/usePagination";
 
+import { usePagination } from "../../../hooks/usePagination";
 import { teacherStatusFilterOptions } from "../constants/teacherFilters";
+
 import TeacherTableRow from "./TeacherTableRow";
 
 function TeacherTable({
@@ -15,7 +16,6 @@ function TeacherTable({
   setStatusFilter,
   onEdit,
   onDelete,
-  onAssignLesson,
 }) {
   const {
     currentPage,
@@ -36,6 +36,7 @@ function TeacherTable({
           <h2 className="text-lg font-bold text-base-content">
             Öğretmen Listesi
           </h2>
+
           <p className="text-sm text-base-content/60">
             {teachers.length} kayıt listeleniyor.
           </p>
@@ -115,7 +116,6 @@ function TeacherTable({
                   }
                   onEdit={onEdit}
                   onDelete={onDelete}
-                  onAssignLesson={onAssignLesson}
                 />
               );
             })}
@@ -133,6 +133,7 @@ function TeacherTable({
           </tbody>
         </table>
       </div>
+
       <div className="p-4">
         <Pagination
           currentPage={currentPage}

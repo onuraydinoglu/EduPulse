@@ -2,14 +2,12 @@ import Toast from "../../../components/ui/Toast";
 
 import TeacherDeleteModal from "../components/TeacherDeleteModal";
 import TeacherFormModal from "../components/TeacherFormModal";
-import TeacherLessonAssignModal from "../components/TeacherLessonAssignModal";
 import TeacherStatsCards from "../components/TeacherStatsCards";
 import TeacherTable from "../components/TeacherTable";
 import TeachersPageHeader from "../components/TeachersPageHeader";
 
 import {
   TEACHER_DELETE_MODAL_ID,
-  TEACHER_LESSON_ASSIGN_MODAL_ID,
   TEACHER_MODAL_ID,
 } from "../constants/teacherConstants";
 
@@ -21,15 +19,10 @@ function TeachersPage() {
     teachers,
     filteredTeachers,
     lessons,
-    classrooms,
     formData,
     setFormData,
-    assignFormData,
-    setAssignFormData,
     errors,
-    assignErrors,
     isEditing,
-    selectedTeacher,
     temporaryPasswords,
     toast,
     search,
@@ -43,9 +36,6 @@ function TeachersPage() {
     handleCloseDeleteModal,
     handleDelete,
     handleSubmit,
-    handleOpenAssignLessonModal,
-    handleCloseAssignLessonModal,
-    handleAssignLessonSubmit,
     handleExportTeachersPdf,
   } = useTeachersPage();
 
@@ -73,12 +63,6 @@ function TeachersPage() {
         onDelete={(id) =>
           handleOpenDeleteModal(id, TEACHER_DELETE_MODAL_ID)
         }
-        onAssignLesson={(teacher) =>
-          handleOpenAssignLessonModal(
-            teacher,
-            TEACHER_LESSON_ASSIGN_MODAL_ID
-          )
-        }
       />
 
       <TeacherFormModal
@@ -90,22 +74,6 @@ function TeachersPage() {
         errors={errors}
         onClose={() => handleCloseTeacherModal(TEACHER_MODAL_ID)}
         onSubmit={() => handleSubmit(TEACHER_MODAL_ID)}
-      />
-
-      <TeacherLessonAssignModal
-        modalId={TEACHER_LESSON_ASSIGN_MODAL_ID}
-        teacher={selectedTeacher}
-        formData={assignFormData}
-        setFormData={setAssignFormData}
-        lessons={lessons}
-        classrooms={classrooms}
-        errors={assignErrors}
-        onClose={() =>
-          handleCloseAssignLessonModal(TEACHER_LESSON_ASSIGN_MODAL_ID)
-        }
-        onSubmit={() =>
-          handleAssignLessonSubmit(TEACHER_LESSON_ASSIGN_MODAL_ID)
-        }
       />
 
       <TeacherDeleteModal

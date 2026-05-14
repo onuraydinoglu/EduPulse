@@ -177,8 +177,8 @@ function TeacherLessonAssignModal({
                                         <label
                                             key={classroomId}
                                             className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition ${checked
-                                                    ? "border-primary bg-primary/10 text-primary"
-                                                    : "border-base-300 bg-base-100 text-base-content hover:bg-base-200/60"
+                                                ? "border-primary bg-primary/10 text-primary"
+                                                : "border-base-300 bg-base-100 text-base-content hover:bg-base-200/60"
                                                 }`}
                                         >
                                             <input

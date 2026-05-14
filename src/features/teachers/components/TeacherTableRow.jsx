@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
@@ -13,13 +12,7 @@ import {
   getTeacherStatus,
 } from "../utils/teacherFormatters";
 
-function TeacherTableRow({
-  teacher,
-  temporaryPassword,
-  onEdit,
-  onDelete,
-  onAssignLesson,
-}) {
+function TeacherTableRow({ teacher, temporaryPassword, onEdit, onDelete }) {
   const navigate = useNavigate();
 
   const teacherId = getTeacherId(teacher);
@@ -54,9 +47,7 @@ function TeacherTableRow({
       </td>
 
       <td>
-        <span className="text-sm text-base-content/70">
-          {email || "-"}
-        </span>
+        <span className="text-sm text-base-content/70">{email || "-"}</span>
       </td>
 
       <td>
@@ -71,16 +62,6 @@ function TeacherTableRow({
 
       <td>
         <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onAssignLesson(teacher)}
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-content"
-            title="Ders ata"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-            Ders Ata
-          </button>
-
           <TableActions
             onProfile={handleOpenProfile}
             onEdit={() => onEdit(teacher)}

@@ -1,32 +1,54 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+
+import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 import Toast from "../../../components/ui/Toast";
 
-import ProfileHeader from "../components/ProfileHeader";
-
-import StudentProfileDetails from "../components/StudentProfileDetails";
-
-import TeacherProfileDetails from "../components/TeacherProfileDetails";
+import TeacherLessonAssignModal from "../../teachers/components/TeacherLessonAssignModal";
 
 import OfficerProfileDetails from "../components/OfficerProfileDetails";
+import ProfileHeader from "../components/ProfileHeader";
+import StudentProfileDetails from "../components/StudentProfileDetails";
+import TeacherProfileDetails from "../components/TeacherProfileDetails";
+
 import { useProfilePage } from "../hooks/useProfilePage";
+import { useTeacherProfileLessonAssignment } from "../hooks/useTeacherProfileLessonAssignment";
 
 import {
     getBackPathByProfileType,
-
     getProfileTypeLabel,
 } from "../utils/profileFormatters";
+
+const TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID =
+    "teacher_profile_lesson_assign_modal";
 
 function ProfilePage() {
     const { profileType, id } = useParams();
 
-    const location = useLocation();
+    const {
+        profile,
+        details,
+        loading,
+        toast,
+        showToast,
+        reloadProfile,
+    } = useProfilePage(profileType, id);
 
-    const { profile, details, loading, toast } = useProfilePage(profileType, id);
-
-    const fallbackBackPath = getBackPathByProfileType(profileType);
-
-    const backPath = location.state?.backPath || fallbackBackPath;
+    const {
+        lessons,
+        classrooms,
+        assignFormData,
+        setAssignFormData,
+        assignErrors,
+        handleOpenAssignLessonModal,
+        handleCloseAssignLessonModal,
+        handleAssignLessonSubmit,
+    } = useTeacherProfileLessonAssignment({
+        profileType,
+        teacher: profile,
+        reloadProfile,
+        showToast,
+    });
 
     const renderDetails = () => {
         if (profileType === "student") {
@@ -42,6 +64,23 @@ function ProfilePage() {
         }
 
         return null;
+    };
+
+    const renderHeaderAction = () => {
+        if (profileType !== "teacher") return null;
+
+        return (
+            <button
+                type="button"
+                onClick={() =>
+                    handleOpenAssignLessonModal(TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID)
+                }
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-4 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-content"
+            >
+                <BookOpenIcon className="h-4 w-4" />
+                Ders Ata
+            </button>
+        );
     };
 
     if (loading) {
@@ -69,6 +108,7 @@ function ProfilePage() {
     }
 
     if (!profile) {
+        const backPath = getBackPathByProfileType(profileType);
         const profileTypeLabel = getProfileTypeLabel(profileType);
 
         return (
@@ -100,10 +140,30 @@ function ProfilePage() {
             <ProfileHeader
                 profileType={profileType}
                 profile={profile}
-                backPath={backPath}
+                action={renderHeaderAction()}
             />
 
             {renderDetails()}
+
+            {profileType === "teacher" && (
+                <TeacherLessonAssignModal
+                    modalId={TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID}
+                    teacher={profile}
+                    formData={assignFormData}
+                    setFormData={setAssignFormData}
+                    lessons={lessons}
+                    classrooms={classrooms}
+                    errors={assignErrors}
+                    onClose={() =>
+                        handleCloseAssignLessonModal(
+                            TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID
+                        )
+                    }
+                    onSubmit={() =>
+                        handleAssignLessonSubmit(TEACHER_PROFILE_LESSON_ASSIGN_MODAL_ID)
+                    }
+                />
+            )}
         </div>
     );
 }

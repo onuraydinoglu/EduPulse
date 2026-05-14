@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { profileService } from "../services/profileService";
+
 import { PROFILE_MESSAGES } from "../constants/profileConstants";
+import { profileService } from "../services/profileService";
 
 export function useProfilePage(profileType, id) {
     const [profile, setProfile] = useState(null);
     const [details, setDetails] = useState({});
     const [loading, setLoading] = useState(true);
+
     const [toast, setToast] = useState({
         message: "",
         type: "success",
@@ -34,7 +36,9 @@ export function useProfilePage(profileType, id) {
             setDetails(result?.details || {});
         } catch (error) {
             console.error(error);
+
             showToast(PROFILE_MESSAGES.LOAD_ERROR, "error");
+
             setProfile(null);
             setDetails({});
         } finally {
@@ -51,6 +55,7 @@ export function useProfilePage(profileType, id) {
         details,
         loading,
         toast,
+        showToast,
         reloadProfile: loadProfile,
     };
 }
