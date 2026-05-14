@@ -82,10 +82,6 @@ function TeacherLessonTable({
                 <span className={tableHeadTextClass}>Sınıf</span>
               </th>
 
-              <th>
-                <span className={tableHeadTextClass}>Durum</span>
-              </th>
-
               <th className="text-right">
                 <span className={tableHeadTextClass}>İşlemler</span>
               </th>

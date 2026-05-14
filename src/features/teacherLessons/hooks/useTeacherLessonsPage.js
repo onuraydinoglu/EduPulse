@@ -4,8 +4,8 @@ import { classService } from "../../classes/services/classService";
 import { lessonService } from "../../lessons/services/lessonService";
 import { teacherService } from "../../teachers/services/teacherService";
 import { teacherLessonService } from "../services/teacherLessonService";
-import { exportToPdf } from "../../../utils/exportToPdf";
 
+import { exportToPdf } from "../../../utils/exportToPdf";
 import { emptyTeacherLessonForm } from "../constants/teacherLessonConstants";
 import { teacherLessonPdfColumns } from "../constants/teacherLessonTableColumns";
 
@@ -13,6 +13,7 @@ import {
     filterTeacherLessons,
     getBackendFieldErrors,
     getErrorMessage,
+    getGroupedTeacherLessonItems,
     getListData,
     getTeacherLessonClassroomId,
     getTeacherLessonId,
@@ -28,10 +29,8 @@ export function useTeacherLessonsPage() {
     const [teachers, setTeachers] = useState([]);
     const [lessons, setLessons] = useState([]);
     const [classrooms, setClassrooms] = useState([]);
-
     const [formData, setFormData] = useState(emptyTeacherLessonForm);
     const [errors, setErrors] = useState({});
-
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
 
@@ -75,7 +74,10 @@ export function useTeacherLessonsPage() {
             console.error(error);
 
             showToast(
-                getErrorMessage(error, "Öğretmen ders atamaları yüklenirken hata oluştu."),
+                getErrorMessage(
+                    error,
+                    "Öğretmen ders atamaları yüklenirken hata oluştu."
+                ),
                 "error"
             );
         }
@@ -110,12 +112,17 @@ export function useTeacherLessonsPage() {
         return filterTeacherLessons(teacherLessons, search, statusFilter);
     }, [teacherLessons, search, statusFilter]);
 
+    const groupedFilteredTeacherLessons = useMemo(() => {
+        return getGroupedTeacherLessonItems(filteredTeacherLessons);
+    }, [filteredTeacherLessons]);
+
     const handleOpenCreateModal = async (modalId) => {
         await getSelectData();
 
         setEditingId(null);
         setFormData(emptyTeacherLessonForm);
         setErrors({});
+
         openModal(modalId);
     };
 
@@ -148,6 +155,7 @@ export function useTeacherLessonsPage() {
         setEditingId(null);
         setFormData(emptyTeacherLessonForm);
         setErrors({});
+
         closeModal(modalId);
     };
 
@@ -163,6 +171,7 @@ export function useTeacherLessonsPage() {
 
     const handleSubmit = async (modalId) => {
         const validationErrors = validateTeacherLessonForm(formData, isEditing);
+
         setErrors(validationErrors);
 
         if (hasTeacherLessonValidationError(validationErrors)) {
@@ -193,11 +202,14 @@ export function useTeacherLessonsPage() {
                 await getTeacherLessons();
                 handleCloseTeacherLessonModal(modalId);
                 showToast("Öğretmen ders ataması başarıyla güncellendi.");
+
                 return;
             }
 
             const payloads = formData.classroomIds.map((classroomId) =>
-                prepareSinglePayload({ classroomId })
+                prepareSinglePayload({
+                    classroomId,
+                })
             );
 
             const results = await Promise.all(
@@ -278,14 +290,14 @@ export function useTeacherLessonsPage() {
             title: "Öğretmen Ders Atamaları",
             fileName: "ogretmen-ders-atamalari.pdf",
             columns: teacherLessonPdfColumns,
-            rows: filteredTeacherLessons,
+            rows: groupedFilteredTeacherLessons,
             emptyMessage: "Dışa aktarılacak öğretmen ders ataması bulunamadı.",
         });
     };
 
     return {
         teacherLessons,
-        filteredTeacherLessons,
+        filteredTeacherLessons: groupedFilteredTeacherLessons,
         teachers,
         lessons,
         classrooms,

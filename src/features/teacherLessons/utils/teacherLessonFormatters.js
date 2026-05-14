@@ -19,8 +19,13 @@ export const getTeacherLessonTeacherName = (item) =>
 export const getTeacherLessonLessonName = (item) =>
     item?.lessonName || item?.LessonName || "-";
 
-export const getTeacherLessonClassroomName = (item) =>
-    item?.classroomName || item?.ClassroomName || "-";
+export const getTeacherLessonClassroomName = (item) => {
+    if (Array.isArray(item?.classroomNames) && item.classroomNames.length > 0) {
+        return item.classroomNames.join(", ");
+    }
+
+    return item?.classroomName || item?.ClassroomName || "-";
+};
 
 export const getTeacherLessonIsActive = (item) =>
     item?.isActive !== false && item?.IsActive !== false;
@@ -33,10 +38,8 @@ export const getTeacherLessonStatusLabel = (item) =>
 
 export const getListData = (result) => {
     if (Array.isArray(result)) return result;
-
     if (Array.isArray(result?.data)) return result.data;
     if (Array.isArray(result?.Data)) return result.Data;
-
     if (Array.isArray(result?.data?.data)) return result.data.data;
     if (Array.isArray(result?.Data?.Data)) return result.Data.Data;
 
@@ -144,7 +147,7 @@ export const filterTeacherLessons = (
     search = "",
     statusFilter = "all"
 ) => {
-    const normalizedSearch = search.toLowerCase().trim();
+    const normalizedSearch = search.toLocaleLowerCase("tr-TR").trim();
 
     return teacherLessons.filter((item) => {
         const isActive = getTeacherLessonIsActive(item);
@@ -160,9 +163,74 @@ export const filterTeacherLessons = (
             getTeacherLessonClassroomName(item),
         ]
             .join(" ")
-            .toLowerCase();
+            .toLocaleLowerCase("tr-TR");
 
         return matchesStatus && searchableText.includes(normalizedSearch);
+    });
+};
+
+const getTeacherLessonGroupKey = (item) => {
+    const teacherId = getTeacherLessonTeacherId(item);
+    const lessonId = getTeacherLessonLessonId(item);
+    const isActive = getTeacherLessonIsActive(item);
+
+    return `${teacherId}-${lessonId}-${isActive}`;
+};
+
+const sortClassroomNames = (classroomNames = []) => {
+    return [...classroomNames].sort((a, b) => {
+        const [gradeA, sectionA = ""] = String(a).split("-");
+        const [gradeB, sectionB = ""] = String(b).split("-");
+
+        const numericGradeA = Number(gradeA);
+        const numericGradeB = Number(gradeB);
+
+        if (!Number.isNaN(numericGradeA) && !Number.isNaN(numericGradeB)) {
+            if (numericGradeA !== numericGradeB) {
+                return numericGradeA - numericGradeB;
+            }
+        }
+
+        return sectionA.localeCompare(sectionB, "tr-TR");
+    });
+};
+
+export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
+    if (!Array.isArray(teacherLessons)) return [];
+
+    const groupedMap = new Map();
+
+    teacherLessons.forEach((item) => {
+        const groupKey = getTeacherLessonGroupKey(item);
+
+        if (!groupedMap.has(groupKey)) {
+            groupedMap.set(groupKey, {
+                ...item,
+                classroomNames: [],
+            });
+        }
+
+        const group = groupedMap.get(groupKey);
+        const classroomName = getTeacherLessonClassroomName(item);
+
+        if (classroomName && classroomName !== "-") {
+            group.classroomNames.push(classroomName);
+        }
+    });
+
+    return Array.from(groupedMap.values()).map((group) => {
+        const uniqueClassroomNames = sortClassroomNames([
+            ...new Set(group.classroomNames),
+        ]);
+
+        const classroomNameText = uniqueClassroomNames.join(", ") || "-";
+
+        return {
+            ...group,
+            classroomName: classroomNameText,
+            ClassroomName: classroomNameText,
+            classroomNames: uniqueClassroomNames,
+        };
     });
 };
 
