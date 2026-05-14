@@ -60,7 +60,7 @@ export const menuItems = [
         title: "Dersler",
         path: "/dashboard/lessons",
         icon: BookOpenIcon,
-        roles: ["schooladmin", "officer", "teacher"],
+        roles: ["schooladmin", "officer"],
       },
       {
         title: "Ders Atamaları",
@@ -91,13 +91,13 @@ export const menuItems = [
     title: "Kulüpler",
     path: "/dashboard/clubs",
     icon: Squares2X2Icon,
-    roles: ["schooladmin", "officer"],
+    roles: ["schooladmin", "officer", "teacher"],
   },
   {
     title: "Etkinlikler",
     path: "/dashboard/events",
     icon: CalendarDaysIcon,
-    roles: ["schooladmin", "officer"],
+    roles: ["schooladmin", "officer", "teacher"],
   },
 
   {
