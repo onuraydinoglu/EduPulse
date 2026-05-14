@@ -38,9 +38,9 @@ function ProfileStatsCard({
 
     return (
         <div
-            className="rounded-3xl border border-base-300 bg-base-100 px-5 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-3xl border border-base-300 bg-base-100 px-5 py-4 shadow-sm"
             style={{
-                borderLeftWidth: "6px",
+                borderLeftWidth: "5px",
                 borderLeftStyle: "solid",
                 borderLeftColor: color.accent,
             }}

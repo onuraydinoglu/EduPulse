@@ -1,50 +1,65 @@
-function StatCard({ title, value, icon: Icon, description, color = "primary", }) {
-  const colorClasses = {
-    primary: {
-      icon: "bg-blue-50 text-blue-600",
-      accent: "bg-blue-500",
-    },
-    success: {
-      icon: "bg-emerald-50 text-emerald-600",
-      accent: "bg-emerald-500",
-    },
-    warning: {
-      icon: "bg-amber-50 text-amber-600",
-      accent: "bg-amber-500",
-    },
-    error: {
-      icon: "bg-red-50 text-red-600",
-      accent: "bg-red-500",
-    },
-    info: {
-      icon: "bg-sky-50 text-sky-600",
-      accent: "bg-sky-500",
-    },
-  };
+const variantMap = {
+  primary: {
+    accent: "#3b82f6",
+    iconBg: "#eff6ff",
+    iconText: "#2563eb",
+  },
+  success: {
+    accent: "#10b981",
+    iconBg: "#ecfdf5",
+    iconText: "#059669",
+  },
+  warning: {
+    accent: "#f59e0b",
+    iconBg: "#fffbeb",
+    iconText: "#d97706",
+  },
+  error: {
+    accent: "#f43f5e",
+    iconBg: "#fff1f2",
+    iconText: "#e11d48",
+  },
+  info: {
+    accent: "#0ea5e9",
+    iconBg: "#f0f9ff",
+    iconText: "#0284c7",
+  },
+};
 
-  const currentColor =
-    colorClasses[color] || colorClasses.primary;
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  description,
+  color = "primary",
+  valueClassName = "text-2xl",
+}) {
+  const currentColor = variantMap[color] || variantMap.primary;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-gray-300 hover:shadow-sm">
-
-      {/* SOL RENK BAR */}
-      <div
-        className={`absolute left-0 top-0 h-full w-1 ${currentColor.accent}`}
-      />
-
+    <div
+      className="rounded-3xl border border-base-300 bg-base-100 px-5 py-4 shadow-sm transition-all duration-200 hover:border-base-300/80 hover:shadow-md"
+      style={{
+        borderLeftWidth: "5px",
+        borderLeftStyle: "solid",
+        borderLeftColor: currentColor.accent,
+      }}
+    >
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-gray-500">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-base-content/60">
             {title}
           </p>
 
-          <h3 className="xl:mt-1 2xl:mt-3 text-3xl font-semibold tracking-tight text-gray-950">
-            {value}
+          <h3
+            className={`mt-3 truncate font-bold leading-none tracking-tight text-base-content ${valueClassName}`}
+            title={String(value ?? "-")}
+          >
+            {value ?? "-"}
           </h3>
 
           {description && (
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-3 line-clamp-1 text-xs font-medium text-base-content/50">
               {description}
             </p>
           )}
@@ -52,9 +67,17 @@ function StatCard({ title, value, icon: Icon, description, color = "primary", })
 
         {Icon && (
           <div
-            className={`flex h-11 w-11 items-center justify-center rounded-xl ${currentColor.icon}`}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+            style={{
+              backgroundColor: currentColor.iconBg,
+            }}
           >
-            <Icon className="h-5 w-5" />
+            <Icon
+              className="h-6 w-6"
+              style={{
+                color: currentColor.iconText,
+              }}
+            />
           </div>
         )}
       </div>

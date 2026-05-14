@@ -1,6 +1,7 @@
 import {
     AcademicCapIcon,
     BookOpenIcon,
+    CalendarDaysIcon,
     EnvelopeIcon,
     PhoneIcon,
     UserCircleIcon,
@@ -10,8 +11,11 @@ import {
 import EmptyProfileState from "./EmptyProfileState";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ProfileSection from "./ProfileSection";
+import ProfileStatsCard from "./ProfileStatsCard";
 import TeacherProfileStatsCards from "./TeacherProfileStatsCards";
+
 import {
+    formatDate,
     getEmail,
     getFullName,
     getPhoneNumber,
@@ -46,11 +50,7 @@ function TeacherProfileDetails({ profile, details }) {
                         value={getFullName(profile)}
                     />
 
-                    <ProfileInfoCard
-                        icon={BookOpenIcon}
-                        label="Branş"
-                        value={branch}
-                    />
+                    <ProfileInfoCard icon={BookOpenIcon} label="Branş" value={branch} />
 
                     <ProfileInfoCard
                         icon={EnvelopeIcon}
@@ -105,9 +105,16 @@ function TeacherProfileDetails({ profile, details }) {
                                         </td>
 
                                         <td>
-                                            {item?.isActive === false || item?.IsActive === false
-                                                ? "Pasif"
-                                                : "Aktif"}
+                                            <span
+                                                className={`badge rounded-xl px-3 py-3 text-xs font-semibold ${item?.isActive === false || item?.IsActive === false
+                                                    ? "badge-error"
+                                                    : "badge-success"
+                                                    }`}
+                                            >
+                                                {item?.isActive === false || item?.IsActive === false
+                                                    ? "Pasif"
+                                                    : "Aktif"}
+                                            </span>
                                         </td>
                                     </tr>
                                 ))}
@@ -127,56 +134,112 @@ function TeacherProfileDetails({ profile, details }) {
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {advisorClassrooms.map((classroom, index) => (
-                            <div
+                            <ProfileStatsCard
                                 key={getValue(classroom, ["id", "Id"], index)}
-                                className="rounded-2xl border border-base-300/60 bg-base-100 p-4 shadow-sm"
-                            >
-                                <p className="text-sm font-bold text-base-content">
-                                    {getValue(
+                                icon={AcademicCapIcon}
+                                title="Sınıf Danışmanlığı"
+                                value={getValue(
+                                    classroom,
+                                    [
+                                        "classroomName",
+                                        "ClassroomName",
+                                        "className",
+                                        "ClassName",
+                                        "name",
+                                        "Name",
+                                    ],
+                                    `${getValue(classroom, ["grade", "Grade"], "")}/${getValue(
                                         classroom,
-                                        [
-                                            "classroomName",
-                                            "ClassroomName",
-                                            "className",
-                                            "ClassName",
-                                            "name",
-                                            "Name",
-                                        ],
-                                        `${getValue(classroom, ["grade", "Grade"], "")}/${getValue(
-                                            classroom,
-                                            ["section", "Section"],
-                                            ""
-                                        )}`
-                                    )}
-                                </p>
-
-                                <p className="mt-1 text-xs text-base-content/50">
-                                    Sınıf danışmanlığı
-                                </p>
-                            </div>
+                                        ["section", "Section"],
+                                        ""
+                                    )}`
+                                )}
+                                description="Danışman olduğu sınıf"
+                                variant="blue"
+                                valueClassName="text-base"
+                            />
                         ))}
                     </div>
                 )}
             </ProfileSection>
 
             <ProfileSection
-                title="Kulüp ve Etkinlik Sorumlulukları"
-                description="Öğretmenin sorumlu olduğu kulüp ve etkinlik kayıtları"
+                title="Kulüp Bilgileri"
+                description="Öğretmenin sorumlu olduğu kulüp bilgileri"
                 icon={UserGroupIcon}
             >
-                <div className="grid gap-4 md:grid-cols-2">
-                    <ProfileInfoCard
-                        icon={UserGroupIcon}
-                        label="Kulüp Sorumluluğu"
-                        value={clubs.length}
-                    />
+                {clubs.length === 0 ? (
+                    <EmptyProfileState text="Bu öğretmene ait kulüp sorumluluğu bulunamadı." />
+                ) : (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                        {clubs.map((club, index) => {
+                            const isActive = !(
+                                club?.isActive === false || club?.IsActive === false
+                            );
 
-                    <ProfileInfoCard
-                        icon={UserGroupIcon}
-                        label="Etkinlik Sorumluluğu"
-                        value={events.length}
-                    />
-                </div>
+                            const memberCount = getValue(
+                                club,
+                                ["memberCount", "MemberCount"],
+                                "0"
+                            );
+
+                            return (
+                                <ProfileStatsCard
+                                    key={getValue(club, ["id", "Id"], index)}
+                                    icon={UserGroupIcon}
+                                    title="Kulüp Sorumluluğu"
+                                    value={getValue(
+                                        club,
+                                        ["clubName", "ClubName", "name", "Name"],
+                                        "Kulüp adı bulunamadı"
+                                    )}
+                                    description={`Üye Sayısı: ${memberCount}`}
+                                    variant={isActive ? "emerald" : "rose"}
+                                    valueClassName="text-base"
+                                />
+                            );
+                        })}
+                    </div>
+                )}
+            </ProfileSection>
+
+            <ProfileSection
+                title="Etkinlik Bilgileri"
+                description="Öğretmenin sorumlu olduğu etkinlik bilgileri"
+                icon={CalendarDaysIcon}
+            >
+                {events.length === 0 ? (
+                    <EmptyProfileState text="Bu öğretmene ait etkinlik sorumluluğu bulunamadı." />
+                ) : (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                        {events.map((event, index) => {
+                            const isActive = !(
+                                event?.isActive === false || event?.IsActive === false
+                            );
+
+                            const eventDate = formatDate(
+                                getValue(event, ["eventDate", "EventDate", "date", "Date"], "")
+                            );
+
+                            return (
+                                <ProfileStatsCard
+                                    key={getValue(event, ["id", "Id"], index)}
+                                    icon={CalendarDaysIcon}
+                                    title="Etkinlik Sorumluluğu"
+                                    value={getValue(
+                                        event,
+                                        ["eventName", "EventName", "name", "Name"],
+                                        "Etkinlik adı bulunamadı"
+                                    )}
+                                    description={`Tarih: ${eventDate || "-"} • Durum: ${isActive ? "Aktif" : "Pasif"
+                                        }`}
+                                    variant={isActive ? "sky" : "rose"}
+                                    valueClassName="text-base"
+                                />
+                            );
+                        })}
+                    </div>
+                )}
             </ProfileSection>
         </div>
     );
