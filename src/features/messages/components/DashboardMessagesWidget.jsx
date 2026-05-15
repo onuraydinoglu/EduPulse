@@ -195,10 +195,6 @@ function DashboardMessagesWidget() {
       <section className="rounded-3xl border border-base-300 bg-base-100/90 p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
-              <EnvelopeIcon className="h-5 w-5" />
-            </div>
-
             <div>
               <h2 className="text-lg font-bold text-base-content">Mesajlar</h2>
               <p className="text-sm text-base-content/60">

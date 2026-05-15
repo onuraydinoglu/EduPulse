@@ -34,6 +34,39 @@ function TeacherProfileDetails({ profile, details }) {
         "Branş atanmadı"
     );
 
+    const groupedTeacherLessons = teacherLessons.reduce((groups, item, index) => {
+        const lessonId = getValue(item, ["lessonId", "LessonId"], "");
+        const lessonName = getValue(item, ["lessonName", "LessonName"], "-");
+        const classroomName = getValue(
+            item,
+            ["classroomName", "ClassroomName", "className", "ClassName"],
+            "-"
+        );
+
+        const groupKey = lessonId || lessonName || `lesson-${index}`;
+
+        if (!groups[groupKey]) {
+            groups[groupKey] = {
+                id: groupKey,
+                teacherFullName: getFullName(profile),
+                lessonName,
+                classrooms: [],
+            };
+        }
+
+        const hasClassroom = groups[groupKey].classrooms.some(
+            (classroom) => classroom === classroomName
+        );
+
+        if (!hasClassroom) {
+            groups[groupKey].classrooms.push(classroomName);
+        }
+
+        return groups;
+    }, {});
+
+    const teacherLessonRows = Object.values(groupedTeacherLessons);
+
     return (
         <div className="space-y-6">
             <TeacherProfileStatsCards profile={profile} details={details} />
@@ -68,47 +101,57 @@ function TeacherProfileDetails({ profile, details }) {
 
             <ProfileSection
                 title="Ders Atamaları"
-                description="Öğretmenin sınıflara göre verdiği dersler"
+                description="Öğretmenin hangi derslere ve hangi sınıflara girdiği"
                 icon={BookOpenIcon}
             >
-                {teacherLessons.length === 0 ? (
+                {teacherLessonRows.length === 0 ? (
                     <EmptyProfileState text="Bu öğretmene ait ders ataması bulunamadı." />
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">
                         <table className="table">
-                            <thead>
-                                <tr className="text-base-content/60">
-                                    <th>Ders</th>
-                                    <th>Sınıf</th>
-                                    <th>Durum</th>
+                            <thead className="bg-base-200/70">
+                                <tr className="border-b border-base-300 [&_th]:px-6">
+                                    <th>
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                                            Öğretmen
+                                        </span>
+                                    </th>
+
+                                    <th>
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                                            Ders
+                                        </span>
+                                    </th>
+
+                                    <th>
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45">
+                                            Sınıf
+                                        </span>
+                                    </th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                {teacherLessons.map((item, index) => (
-                                    <tr key={getValue(item, ["id", "Id"], index)}>
-                                        <td className="font-semibold">
-                                            {getValue(item, ["lessonName", "LessonName"], "-")}
+                                {teacherLessonRows.map((item) => (
+                                    <tr
+                                        key={item.id}
+                                        className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6"
+                                    >
+                                        <td>
+                                            <div className="font-semibold text-base-content">
+                                                {item.teacherFullName}
+                                            </div>
                                         </td>
 
                                         <td>
-                                            {getValue(
-                                                item,
-                                                ["classroomName", "ClassroomName", "className", "ClassName"],
-                                                "-"
-                                            )}
+                                            <span className="text-sm text-base-content/70">
+                                                {item.lessonName}
+                                            </span>
                                         </td>
 
                                         <td>
-                                            <span
-                                                className={`badge rounded-xl px-3 py-3 text-xs font-semibold ${item?.isActive === false || item?.IsActive === false
-                                                    ? "badge-error"
-                                                    : "badge-success"
-                                                    }`}
-                                            >
-                                                {item?.isActive === false || item?.IsActive === false
-                                                    ? "Pasif"
-                                                    : "Aktif"}
+                                            <span className="text-sm text-base-content/70">
+                                                {item.classrooms.join(", ")}
                                             </span>
                                         </td>
                                     </tr>
