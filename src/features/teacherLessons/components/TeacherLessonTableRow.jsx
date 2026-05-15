@@ -1,6 +1,4 @@
-import StatusBadge from "../../../components/ui/StatusBadge";
 import TableActions from "../../../components/ui/TableActions";
-
 import { getTeacherLessonClassroomName } from "../utils/teacherLessonFormatters";
 
 function TeacherLessonTableRow({ item, onEdit, onDelete }) {

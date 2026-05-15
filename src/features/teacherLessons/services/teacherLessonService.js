@@ -7,7 +7,6 @@ const unwrap = (response) =>
 export const teacherLessonService = {
   getAll: async () => {
     const response = await axiosInstance.get(API_ENDPOINTS.TEACHER_LESSONS);
-
     return unwrap(response);
   },
 
@@ -15,7 +14,6 @@ export const teacherLessonService = {
     const response = await axiosInstance.get(
       `${API_ENDPOINTS.TEACHER_LESSONS}/${id}`
     );
-
     return unwrap(response);
   },
 
@@ -30,7 +28,6 @@ export const teacherLessonService = {
       teacherId: data.teacherId,
       lessonId: data.lessonId,
       classroomIds,
-      isActive: data.isActive ?? true,
     });
 
     return response.data;
@@ -42,7 +39,6 @@ export const teacherLessonService = {
       teacherId: data.teacherId,
       lessonId: data.lessonId,
       classroomId: data.classroomId,
-      isActive: data.isActive,
     });
 
     return response.data;

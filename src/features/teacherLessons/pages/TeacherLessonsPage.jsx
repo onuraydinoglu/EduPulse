@@ -12,6 +12,7 @@ import {
 } from "../constants/teacherLessonConstants";
 
 import { getTeacherLessonStats } from "../constants/teacherLessonTableColumns";
+
 import { useTeacherLessonsPage } from "../hooks/useTeacherLessonsPage";
 
 function TeacherLessonsPage() {
@@ -28,8 +29,6 @@ function TeacherLessonsPage() {
     toast,
     search,
     setSearch,
-    statusFilter,
-    setStatusFilter,
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseTeacherLessonModal,
@@ -55,8 +54,6 @@ function TeacherLessonsPage() {
         teacherLessons={filteredTeacherLessons}
         search={search}
         setSearch={setSearch}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
         onEdit={(teacherLesson) =>
           handleOpenEditModal(teacherLesson, TEACHER_LESSON_MODAL_ID)
         }
@@ -80,7 +77,9 @@ function TeacherLessonsPage() {
 
       <TeacherLessonDeleteModal
         modalId={TEACHER_LESSON_DELETE_MODAL_ID}
-        onClose={() => handleCloseDeleteModal(TEACHER_LESSON_DELETE_MODAL_ID)}
+        onClose={() =>
+          handleCloseDeleteModal(TEACHER_LESSON_DELETE_MODAL_ID)
+        }
         onConfirm={() => handleDelete(TEACHER_LESSON_DELETE_MODAL_ID)}
       />
     </div>

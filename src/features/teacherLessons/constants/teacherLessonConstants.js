@@ -7,5 +7,4 @@ export const emptyTeacherLessonForm = {
     lessonId: "",
     classroomId: "",
     classroomIds: [],
-    isActive: true,
 };

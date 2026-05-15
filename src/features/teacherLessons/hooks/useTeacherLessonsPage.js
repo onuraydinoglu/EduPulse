@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { classService } from "../../classes/services/classService";
 import { lessonService } from "../../lessons/services/lessonService";
 import { teacherService } from "../../teachers/services/teacherService";
 import { teacherLessonService } from "../services/teacherLessonService";
 import { exportToPdf } from "../../../utils/exportToPdf";
+
 import { emptyTeacherLessonForm } from "../constants/teacherLessonConstants";
 import { teacherLessonPdfColumns } from "../constants/teacherLessonTableColumns";
+
 import {
     filterTeacherLessons,
     getBackendFieldErrors,
@@ -15,7 +18,6 @@ import {
     getTeacherLessonClassroomId,
     getTeacherLessonClassroomIds,
     getTeacherLessonId,
-    getTeacherLessonIsActive,
     getTeacherLessonLessonId,
     getTeacherLessonTeacherId,
     hasTeacherLessonValidationError,
@@ -32,12 +34,13 @@ export function useTeacherLessonsPage() {
     const [editingId, setEditingId] = useState(null);
     const [editingGroup, setEditingGroup] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+
     const [toast, setToast] = useState({
         message: "",
         type: "success",
     });
+
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
 
     const isEditing = editingId !== null;
 
@@ -66,7 +69,6 @@ export function useTeacherLessonsPage() {
     const getTeacherLessons = async () => {
         try {
             const result = await teacherLessonService.getAll();
-
             setTeacherLessons(getListData(result));
         } catch (error) {
             console.error(error);
@@ -111,8 +113,8 @@ export function useTeacherLessonsPage() {
     }, [teacherLessons]);
 
     const filteredTeacherLessons = useMemo(() => {
-        return filterTeacherLessons(groupedTeacherLessons, search, statusFilter);
-    }, [groupedTeacherLessons, search, statusFilter]);
+        return filterTeacherLessons(groupedTeacherLessons, search);
+    }, [groupedTeacherLessons, search]);
 
     const handleOpenCreateModal = async (modalId) => {
         await getSelectData();
@@ -121,7 +123,6 @@ export function useTeacherLessonsPage() {
         setEditingGroup(null);
         setFormData(emptyTeacherLessonForm);
         setErrors({});
-
         openModal(modalId);
     };
 
@@ -154,10 +155,12 @@ export function useTeacherLessonsPage() {
         ];
 
         setEditingId(getTeacherLessonId(teacherLesson));
+
         setEditingGroup({
             teacherId,
             lessonId,
         });
+
         setErrors({});
 
         setFormData({
@@ -166,17 +169,15 @@ export function useTeacherLessonsPage() {
             lessonId,
             classroomId: selectedClassroomIds[0] || "",
             classroomIds: selectedClassroomIds,
-            isActive: getTeacherLessonIsActive(teacherLesson),
         });
 
         openModal(modalId);
     };
 
-    const prepareSinglePayload = ({ classroomId, isActive }) => ({
+    const prepareSinglePayload = ({ classroomId }) => ({
         teacherId: formData.teacherId,
         lessonId: formData.lessonId,
         classroomId,
-        isActive: typeof isActive === "boolean" ? isActive : formData.isActive,
     });
 
     const handleCloseTeacherLessonModal = (modalId) => {
@@ -184,25 +185,21 @@ export function useTeacherLessonsPage() {
         setEditingGroup(null);
         setFormData(emptyTeacherLessonForm);
         setErrors({});
-
         closeModal(modalId);
     };
 
     const handleOpenDeleteModal = (id, modalId) => {
         setDeletingId(id);
-
         openModal(modalId);
     };
 
     const handleCloseDeleteModal = (modalId) => {
         setDeletingId(null);
-
         closeModal(modalId);
     };
 
     const handleSubmit = async (modalId) => {
         const validationErrors = validateTeacherLessonForm(formData);
-
         setErrors(validationErrors);
 
         if (hasTeacherLessonValidationError(validationErrors)) {
@@ -240,7 +237,6 @@ export function useTeacherLessonsPage() {
                             id: getTeacherLessonId(existingItem),
                             ...prepareSinglePayload({
                                 classroomId,
-                                isActive: formData.isActive,
                             }),
                         };
                     });
@@ -251,21 +247,15 @@ export function useTeacherLessonsPage() {
                         teacherId: formData.teacherId,
                         lessonId: formData.lessonId,
                         classroomIds: [classroomId],
-                        isActive: formData.isActive,
                     }));
 
-                const passivePayloads = relatedTeacherLessons
+                const deletePayloads = relatedTeacherLessons
                     .filter(
                         (item) =>
                             !selectedClassroomIds.includes(getTeacherLessonClassroomId(item))
                     )
-                    .map((item) => ({
-                        id: getTeacherLessonId(item),
-                        teacherId: formData.teacherId,
-                        lessonId: formData.lessonId,
-                        classroomId: getTeacherLessonClassroomId(item),
-                        isActive: false,
-                    }));
+                    .map((item) => getTeacherLessonId(item))
+                    .filter(Boolean);
 
                 const results = await Promise.all([
                     ...updatePayloads.map((payload) =>
@@ -274,9 +264,7 @@ export function useTeacherLessonsPage() {
                     ...createPayloads.map((payload) =>
                         teacherLessonService.create(payload)
                     ),
-                    ...passivePayloads.map((payload) =>
-                        teacherLessonService.update(payload)
-                    ),
+                    ...deletePayloads.map((id) => teacherLessonService.delete(id)),
                 ]);
 
                 const failedResult = results.find(
@@ -307,7 +295,6 @@ export function useTeacherLessonsPage() {
                 teacherId: formData.teacherId,
                 lessonId: formData.lessonId,
                 classroomIds: [classroomId],
-                isActive: true,
             }));
 
             const results = await Promise.all(
@@ -363,6 +350,7 @@ export function useTeacherLessonsPage() {
                     "Öğretmen ders ataması silinemedi.",
                     "error"
                 );
+
                 return;
             }
 
@@ -405,8 +393,6 @@ export function useTeacherLessonsPage() {
         toast,
         search,
         setSearch,
-        statusFilter,
-        setStatusFilter,
         handleOpenCreateModal,
         handleOpenEditModal,
         handleCloseTeacherLessonModal,

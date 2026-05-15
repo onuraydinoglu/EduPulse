@@ -1,16 +1,12 @@
 import {
     AcademicCapIcon,
     BookOpenIcon,
-    CheckCircleIcon,
     ClipboardDocumentListIcon,
-    XCircleIcon,
 } from "@heroicons/react/24/outline";
 
 import {
     getTeacherLessonClassroomName,
-    getTeacherLessonIsActive,
     getTeacherLessonLessonName,
-    getTeacherLessonStatusLabel,
     getTeacherLessonTeacherName,
 } from "../utils/teacherLessonFormatters";
 
@@ -31,19 +27,9 @@ export const teacherLessonPdfColumns = [
         header: "Sınıf",
         accessor: getTeacherLessonClassroomName,
     },
-    {
-        header: "Durum",
-        accessor: getTeacherLessonStatusLabel,
-    },
 ];
 
 export const getTeacherLessonStats = (teacherLessons = []) => {
-    const activeCount = teacherLessons.filter((item) => {
-        return getTeacherLessonIsActive(item);
-    }).length;
-
-    const passiveCount = teacherLessons.length - activeCount;
-
     const uniqueTeacherCount = new Set(
         teacherLessons
             .map((item) => item.teacherId || item.TeacherId)
@@ -59,20 +45,6 @@ export const getTeacherLessonStats = (teacherLessons = []) => {
             color: "primary",
         },
         {
-            title: "Aktif Atama",
-            value: activeCount,
-            description: "Aktif durumda olan atama",
-            icon: CheckCircleIcon,
-            color: "success",
-        },
-        {
-            title: "Pasif Atama",
-            value: passiveCount,
-            description: "Pasif durumda olan atama",
-            icon: XCircleIcon,
-            color: "error",
-        },
-        {
             title: "Atanan Öğretmen",
             value: uniqueTeacherCount,
             description: "Ders ataması bulunan öğretmen",
@@ -86,7 +58,6 @@ export const teacherLessonTableHeaders = [
     "Öğretmen",
     "Ders",
     "Sınıf",
-    "Durum",
     "İşlemler",
 ];
 

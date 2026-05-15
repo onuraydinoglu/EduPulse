@@ -22,15 +22,6 @@ export const getTeacherLessonLessonName = (item) =>
 export const getTeacherLessonClassroomName = (item) =>
     item?.classroomName || item?.ClassroomName || "-";
 
-export const getTeacherLessonIsActive = (item) =>
-    item?.isActive !== false && item?.IsActive !== false;
-
-export const getTeacherLessonStatus = (item) =>
-    getTeacherLessonIsActive(item) ? "Aktif" : "Pasif";
-
-export const getTeacherLessonStatusLabel = (item) =>
-    getTeacherLessonIsActive(item) ? "Aktif" : "Pasif";
-
 export const getListData = (result) => {
     if (Array.isArray(result)) return result;
     if (Array.isArray(result?.data)) return result.data;
@@ -103,7 +94,12 @@ export const mapLessonsToOptions = (lessons = []) => [
     },
     ...lessons.map((lesson) => ({
         value: lesson.id || lesson.Id,
-        label: lesson.name || lesson.Name || lesson.lessonName || lesson.LessonName || "-",
+        label:
+            lesson.name ||
+            lesson.Name ||
+            lesson.lessonName ||
+            lesson.LessonName ||
+            "-",
     })),
 ];
 
@@ -115,6 +111,7 @@ export const mapClassroomsToOptions = (classrooms = []) => [
     ...classrooms.map((classroom) => {
         const grade = classroom.grade || classroom.Grade || "";
         const section = classroom.section || classroom.Section || "";
+
         const classroomName =
             classroom.name ||
             classroom.Name ||
@@ -152,7 +149,6 @@ const getComparableDate = (item) => {
 
 const getClassroomSortValue = (classroomName = "") => {
     const text = String(classroomName).trim();
-
     const match = text.match(/(\d+)\s*[-/.]?\s*([A-Za-zÇĞİÖŞÜçğıöşü])?/);
 
     if (!match) {
@@ -219,15 +215,12 @@ export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
                 classroomIds: [],
                 ClassroomIds: [],
                 items: [],
-                isActive: false,
-                IsActive: false,
                 _firstIndex: index,
                 _sortDate: getComparableDate(item),
             });
         }
 
         const group = groupedMap.get(groupKey);
-
         const classroomName = getTeacherLessonClassroomName(item);
         const classroomId = getTeacherLessonClassroomId(item);
 
@@ -240,11 +233,6 @@ export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
         if (classroomId) {
             group.classroomIds.push(classroomId);
             group.ClassroomIds.push(classroomId);
-        }
-
-        if (getTeacherLessonIsActive(item)) {
-            group.isActive = true;
-            group.IsActive = true;
         }
 
         const itemDate = getComparableDate(item);
@@ -261,7 +249,6 @@ export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
             ]);
 
             const uniqueClassroomIds = [...new Set(group.classroomIds)];
-
             const classroomNameText = uniqueClassroomNames.join(", ") || "-";
             const firstClassroomId = uniqueClassroomIds[0] || "";
 
@@ -286,21 +273,10 @@ export const getGroupedTeacherLessonItems = (teacherLessons = []) => {
         .map(({ _firstIndex, _sortDate, ...item }) => item);
 };
 
-export const filterTeacherLessons = (
-    teacherLessons = [],
-    search = "",
-    statusFilter = "all"
-) => {
+export const filterTeacherLessons = (teacherLessons = [], search = "") => {
     const normalizedSearch = search.toLowerCase().trim();
 
     return teacherLessons.filter((item) => {
-        const isActive = getTeacherLessonIsActive(item);
-
-        const matchesStatus =
-            statusFilter === "all" ||
-            (statusFilter === "active" && isActive) ||
-            (statusFilter === "passive" && !isActive);
-
         const searchableText = [
             getTeacherLessonTeacherName(item),
             getTeacherLessonLessonName(item),
@@ -309,7 +285,7 @@ export const filterTeacherLessons = (
             .join(" ")
             .toLowerCase();
 
-        return matchesStatus && searchableText.includes(normalizedSearch);
+        return searchableText.includes(normalizedSearch);
     });
 };
 

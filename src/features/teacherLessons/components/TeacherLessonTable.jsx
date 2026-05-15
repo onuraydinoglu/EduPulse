@@ -1,8 +1,8 @@
-import FilterSelect from "../../../components/ui/FilterSelect";
 import Pagination from "../../../components/ui/Pagination";
 import SearchInput from "../../../components/ui/SearchInput";
+
 import { usePagination } from "../../../hooks/usePagination";
-import { teacherLessonStatusFilterOptions } from "../constants/teacherLessonFilters";
+
 import TeacherLessonTableRow from "./TeacherLessonTableRow";
 
 function TeacherLessonTable({
@@ -10,8 +10,6 @@ function TeacherLessonTable({
   items,
   search,
   setSearch,
-  statusFilter,
-  setStatusFilter,
   onEdit,
   onDelete,
 }) {
@@ -31,7 +29,7 @@ function TeacherLessonTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(safeTeacherLessons, 10);
+  } = usePagination(safeTeacherLessons, 5);
 
   const tableHeadTextClass =
     "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
@@ -54,14 +52,6 @@ function TeacherLessonTable({
             value={search}
             onChange={setSearch}
             placeholder="Öğretmen, ders veya sınıf ara..."
-          />
-
-          <FilterSelect
-            value={statusFilter}
-            onChange={setStatusFilter}
-            hideLabel
-            className="w-full shrink-0 sm:w-48"
-            options={teacherLessonStatusFilterOptions}
           />
         </div>
       </div>
@@ -101,7 +91,7 @@ function TeacherLessonTable({
             {safeTeacherLessons.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={4}
                   className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Öğretmen ders ataması bulunamadı.

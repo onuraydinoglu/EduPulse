@@ -1,5 +1,4 @@
 import FormSelect from "../../../components/ui/FormSelect";
-import ActiveCheckbox from "../../../components/ui/ActiveCheckbox";
 
 function TeacherLessonForm({
   formData,
@@ -9,11 +8,7 @@ function TeacherLessonForm({
   classrooms = [],
   errors = {},
   onSubmit,
-  isEdit = false,
-  isEditing = false,
 }) {
-  const editMode = isEdit || isEditing;
-
   const handleChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -174,13 +169,6 @@ function TeacherLessonForm({
           Aynı öğretmen ve ders için birden fazla sınıf seçebilirsiniz.
         </p>
       </div>
-
-      {editMode && (
-        <ActiveCheckbox
-          checked={formData.isActive}
-          onChange={(value) => handleChange("isActive", value)}
-        />
-      )}
     </form>
   );
 }
