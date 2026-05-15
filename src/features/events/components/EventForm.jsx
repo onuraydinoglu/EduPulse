@@ -20,7 +20,7 @@ function EventForm({
         [field]: value,
       };
 
-      if (field === "isPaid" && value === "false") {
+      if (field === "isPaid" && value !== "true") {
         next.pricePerStudent = "";
       }
 
@@ -113,6 +113,7 @@ function EventForm({
           <h4 className="text-sm font-semibold text-base-content">
             Sorumlu Öğretmenler
           </h4>
+
           <p className="text-xs text-base-content/50">
             Birden fazla öğretmen seçilebilir. Zorunlu değildir.
           </p>
@@ -126,7 +127,7 @@ function EventForm({
           <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
             {teacherOptions.map((teacher) => {
               const checked = formData.responsibleTeacherIds?.includes(
-                teacher.value,
+                teacher.value
               );
 
               return (
@@ -140,6 +141,7 @@ function EventForm({
                     checked={checked}
                     onChange={() => toggleTeacher(teacher.value)}
                   />
+
                   <span className="text-sm font-medium text-base-content">
                     {teacher.label}
                   </span>

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
-
 import TableActions from "../../../components/ui/TableActions";
+import StatusBadge from "../../../components/ui/StatusBadge";
 import {
     getEventDateText,
     getEventId,
+    getEventIsPaid,
     getEventLocation,
     getEventName,
     getEventPaymentText,
@@ -23,6 +24,7 @@ function EventTableRow({
     const eventId = getEventId(event);
     const teacherNames = getEventResponsibleTeacherNames(event, teachers);
     const statusText = getEventStatusText(event);
+    const isPaid = getEventIsPaid(event);
 
     return (
         <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
@@ -57,20 +59,17 @@ function EventTableRow({
             </td>
 
             <td>
-                <span className="badge rounded-xl border-0 bg-blue-100 px-3 py-3 text-xs font-medium text-blue-700">
-                    {getEventPaymentText(event)}
-                </span>
+                {isPaid ? (
+                    <span className="badge rounded-xl border-0 bg-blue-100 px-3 py-3 text-xs font-medium text-blue-700">
+                        {getEventPaymentText(event)}
+                    </span>
+                ) : (
+                    <span className="text-sm text-base-content/50">Ücretsiz</span>
+                )}
             </td>
 
             <td>
-                <span
-                    className={`badge rounded-xl border-0 px-3 py-3 text-xs font-medium ${statusText === "Aktif"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                        }`}
-                >
-                    {statusText}
-                </span>
+                <StatusBadge status={statusText} />
             </td>
 
             <td>
