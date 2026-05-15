@@ -1,19 +1,17 @@
 import {
-  getEventIsPaid,
   getStudentFullName,
   getStudentId,
   getStudentNumber,
 } from "../utils/eventMemberFormatters";
 
 function EventMemberForm({
-  event,
   formData,
   setFormData,
   students = [],
   errors = {},
+  isPaymentEdit = false,
+  isPaidEvent = false,
 }) {
-  const isEventPaid = getEventIsPaid(event);
-
   const studentOptions = students.map((student) => {
     const id = getStudentId(student);
     const fullName = getStudentFullName(student);
@@ -25,47 +23,52 @@ function EventMemberForm({
     };
   });
 
+  const showStudentSelect = !isPaymentEdit;
+  const showPaymentFields = isPaidEvent || isPaymentEdit;
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {errors.general && (
         <div className="alert alert-error rounded-2xl text-sm">
           {errors.general}
         </div>
       )}
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-base-content">
-          Öğrenci
-        </label>
+      {showStudentSelect && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-base-content/70">
+            Öğrenci
+          </label>
 
-        <select
-          value={formData.studentId}
-          onChange={(event) =>
-            setFormData((prev) => ({
-              ...prev,
-              studentId: event.target.value,
-            }))
-          }
-          className={`select select-bordered w-full rounded-xl ${errors.studentId ? "select-error" : ""
-            }`}
-        >
-          <option value="">Öğrenci seçiniz</option>
+          <select
+            value={formData.studentId}
+            onChange={(event) =>
+              setFormData((prev) => ({
+                ...prev,
+                studentId: event.target.value,
+              }))
+            }
+            className={`select select-bordered w-full rounded-xl ${errors.studentId ? "select-error" : ""
+              }`}
+          >
+            <option value="">Öğrenci seçiniz</option>
 
-          {studentOptions.map((student) => (
-            <option key={student.value} value={student.value}>
-              {student.label}
-            </option>
-          ))}
-        </select>
+            {studentOptions.map((student) => (
+              <option key={student.value} value={student.value}>
+                {student.label}
+              </option>
+            ))}
+          </select>
 
-        {errors.studentId && (
-          <p className="mt-1 text-sm text-error">{errors.studentId}</p>
-        )}
-      </div>
+          {errors.studentId && (
+            <p className="mt-1 text-xs text-error">{errors.studentId}</p>
+          )}
+        </div>
+      )}
 
-      {isEventPaid && (
-        <div className="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-          <label className="flex cursor-pointer items-center gap-3">
+      {showPaymentFields && (
+        <>
+          <label className="flex items-center gap-3 rounded-2xl border border-base-300/70 bg-base-200/40 px-4 py-3">
             <input
               type="checkbox"
               checked={formData.isPaid}
@@ -79,14 +82,14 @@ function EventMemberForm({
               className="checkbox checkbox-primary"
             />
 
-            <span className="text-sm font-medium text-base-content">
+            <span className="text-sm font-semibold text-base-content/75">
               Ödeme yapıldı
             </span>
           </label>
 
           {formData.isPaid && (
-            <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium text-base-content">
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-base-content/70">
                 Ödenen Tutar
               </label>
 
@@ -106,11 +109,13 @@ function EventMemberForm({
               />
 
               {errors.paidAmount && (
-                <p className="mt-1 text-sm text-error">{errors.paidAmount}</p>
+                <p className="mt-1 text-xs text-error">
+                  {errors.paidAmount}
+                </p>
               )}
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

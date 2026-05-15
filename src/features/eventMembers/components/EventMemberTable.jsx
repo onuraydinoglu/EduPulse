@@ -4,11 +4,12 @@ import { usePagination } from "../../../hooks/usePagination";
 import EventMemberTableRow from "./EventMemberTableRow";
 
 function EventMemberTable({
-  event,
   members,
   search,
   setSearch,
   canManage = true,
+  canEditPayment = false,
+  onEditPayment,
   onDelete,
 }) {
   const {
@@ -80,9 +81,10 @@ function EventMemberTable({
             {paginatedItems.map((member) => (
               <EventMemberTableRow
                 key={member.id || member.Id}
-                event={event}
                 member={member}
                 canManage={canManage}
+                canEditPayment={canEditPayment}
+                onEditPayment={onEditPayment}
                 onDelete={onDelete}
               />
             ))}

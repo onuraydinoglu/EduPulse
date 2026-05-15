@@ -9,6 +9,7 @@ import {
   EVENT_MEMBER_MODAL_ID,
 } from "../constants/eventMemberConstants";
 import { useEventMembersPage } from "../hooks/useEventMembersPage";
+import { getEventIsPaid } from "../utils/eventMemberFormatters";
 
 function EventMembersPage() {
   const {
@@ -24,10 +25,13 @@ function EventMembersPage() {
     loading,
     savingMember,
     toast,
+    editingPaymentMember,
     handleBackToEvents,
     handleOpenCreateModal,
     handleCloseCreateModal,
+    handleOpenPaymentEditModal,
     handleCreateMember,
+    handleUpdatePayment,
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDeleteMember,
@@ -35,6 +39,7 @@ function EventMembersPage() {
   } = useEventMembersPage();
 
   const canManage = true;
+  const isPaidEvent = getEventIsPaid(event);
 
   if (loading) {
     return (
@@ -49,8 +54,8 @@ function EventMembersPage() {
 
   if (!event) {
     return (
-      <div className="rounded-3xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
-        <h2 className="text-xl font-semibold text-base-content">
+      <div className="modern-card rounded-3xl border border-base-300/70 bg-base-100/90 p-8 text-center shadow-sm">
+        <h2 className="text-xl font-bold text-base-content">
           Etkinlik bulunamadı.
         </h2>
 
@@ -66,41 +71,48 @@ function EventMembersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
       {toast.message && <Toast message={toast.message} type={toast.type} />}
 
-      <EventMembersPageHeader
-        event={event}
-        totalMembers={members.length}
-        canManage={canManage}
-        onBack={handleBackToEvents}
-        onCreate={() => handleOpenCreateModal(EVENT_MEMBER_MODAL_ID)}
-        onExport={handleExportMembersPdf}
-      />
+      <div className="space-y-6">
+        <EventMembersPageHeader
+          event={event}
+          onBack={handleBackToEvents}
+          onCreate={() => handleOpenCreateModal(EVENT_MEMBER_MODAL_ID)}
+          onExport={handleExportMembersPdf}
+        />
 
-      <EventMemberStatsCards event={event} members={members} />
+        <EventMemberStatsCards event={event} members={members} />
 
-      <EventMemberTable
-        event={event}
-        members={filteredMembers}
-        search={search}
-        setSearch={setSearch}
-        canManage={canManage}
-        onDelete={(memberId) =>
-          handleOpenDeleteModal(memberId, EVENT_MEMBER_DELETE_MODAL_ID)
-        }
-      />
+        <EventMemberTable
+          members={filteredMembers}
+          search={search}
+          setSearch={setSearch}
+          canManage={canManage}
+          canEditPayment={isPaidEvent}
+          onEditPayment={(member) =>
+            handleOpenPaymentEditModal(member, EVENT_MEMBER_MODAL_ID)
+          }
+          onDelete={(memberId) =>
+            handleOpenDeleteModal(memberId, EVENT_MEMBER_DELETE_MODAL_ID)
+          }
+        />
+      </div>
 
       <EventMemberFormModal
-        event={event}
         modalId={EVENT_MEMBER_MODAL_ID}
         formData={formData}
         setFormData={setFormData}
         students={selectableStudents}
         errors={errors}
         saving={savingMember}
+        isPaymentEdit={Boolean(editingPaymentMember)}
         onClose={() => handleCloseCreateModal(EVENT_MEMBER_MODAL_ID)}
-        onSubmit={() => handleCreateMember(EVENT_MEMBER_MODAL_ID)}
+        onSubmit={() =>
+          editingPaymentMember
+            ? handleUpdatePayment(EVENT_MEMBER_MODAL_ID)
+            : handleCreateMember(EVENT_MEMBER_MODAL_ID)
+        }
       />
 
       <EventMemberDeleteModal
@@ -108,7 +120,7 @@ function EventMembersPage() {
         onClose={() => handleCloseDeleteModal(EVENT_MEMBER_DELETE_MODAL_ID)}
         onConfirm={() => handleDeleteMember(EVENT_MEMBER_DELETE_MODAL_ID)}
       />
-    </div>
+    </>
   );
 }
 

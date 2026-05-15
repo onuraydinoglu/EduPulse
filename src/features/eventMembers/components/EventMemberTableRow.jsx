@@ -1,6 +1,5 @@
 import TableActions from "../../../components/ui/TableActions";
 import {
-  getEventIsPaid,
   getEventMemberClassroomName,
   getEventMemberId,
   getEventMemberIsPaid,
@@ -9,9 +8,14 @@ import {
   getEventMemberStudentNumber,
 } from "../utils/eventMemberFormatters";
 
-function EventMemberTableRow({ event, member, canManage = true, onDelete }) {
+function EventMemberTableRow({
+  member,
+  canManage = true,
+  canEditPayment = false,
+  onEditPayment,
+  onDelete,
+}) {
   const memberId = getEventMemberId(member);
-  const isEventPaid = getEventIsPaid(event);
   const isPaid = getEventMemberIsPaid(member);
   const paidAmount = getEventMemberPaidAmount(member);
 
@@ -36,7 +40,7 @@ function EventMemberTableRow({ event, member, canManage = true, onDelete }) {
       </td>
 
       <td>
-        {isEventPaid ? (
+        {canEditPayment ? (
           <span
             className={`badge rounded-xl ${isPaid ? "badge-success" : "badge-warning"
               }`}
@@ -50,13 +54,22 @@ function EventMemberTableRow({ event, member, canManage = true, onDelete }) {
 
       <td>
         <span className="text-sm font-medium text-base-content/70">
-          {isEventPaid ? `${paidAmount} ₺` : "Ücretsiz"}
+          {canEditPayment ? `${paidAmount} ₺` : "Ücretsiz"}
         </span>
       </td>
 
       {canManage && (
         <td className="text-right">
-          <TableActions onDelete={() => onDelete(memberId)} />
+          <div className="flex justify-end">
+            <TableActions
+              onEdit={
+                canEditPayment && onEditPayment
+                  ? () => onEditPayment(member)
+                  : undefined
+              }
+              onDelete={() => onDelete(memberId)}
+            />
+          </div>
         </td>
       )}
     </tr>

@@ -11,7 +11,9 @@ import {
     filterEventMembers,
     getData,
     getErrorMessage,
-    getEventIsPaid,
+    getEventMemberId,
+    getEventMemberIsPaid,
+    getEventMemberPaidAmount,
     getEventName,
     getSelectableStudents,
 } from "../utils/eventMemberFormatters";
@@ -26,9 +28,11 @@ export function useEventMembersPage() {
     const [formData, setFormData] = useState(emptyEventMemberForm);
     const [errors, setErrors] = useState({});
     const [deletingMemberId, setDeletingMemberId] = useState(null);
+    const [editingPaymentMember, setEditingPaymentMember] = useState(null);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [savingMember, setSavingMember] = useState(false);
+
     const [toast, setToast] = useState({
         message: "",
         type: "success",
@@ -79,6 +83,7 @@ export function useEventMembersPage() {
     const loadPage = async () => {
         try {
             setLoading(true);
+
             await Promise.all([fetchEvent(), fetchMembers(), fetchStudents()]);
         } catch (error) {
             console.error(error);
@@ -111,26 +116,40 @@ export function useEventMembersPage() {
     };
 
     const handleOpenCreateModal = (modalId) => {
+        setEditingPaymentMember(null);
         setFormData(emptyEventMemberForm);
         setErrors({});
         openModal(modalId);
     };
 
     const handleCloseCreateModal = (modalId) => {
+        setEditingPaymentMember(null);
         setFormData(emptyEventMemberForm);
         setErrors({});
         closeModal(modalId);
     };
 
+    const handleOpenPaymentEditModal = (member, modalId) => {
+        setEditingPaymentMember(member);
+
+        setFormData({
+            studentId: "",
+            isPaid: getEventMemberIsPaid(member),
+            paidAmount: getEventMemberPaidAmount(member),
+        });
+
+        setErrors({});
+        openModal(modalId);
+    };
+
     const validateForm = () => {
         const newErrors = {};
-        const isEventPaid = getEventIsPaid(event);
 
-        if (!formData.studentId) {
+        if (!editingPaymentMember && !formData.studentId) {
             newErrors.studentId = "Öğrenci seçiniz.";
         }
 
-        if (isEventPaid && Number(formData.paidAmount) < 0) {
+        if (Number(formData.paidAmount) < 0) {
             newErrors.paidAmount = "Ödenen tutar 0'dan küçük olamaz.";
         }
 
@@ -145,21 +164,19 @@ export function useEventMembersPage() {
             return;
         }
 
-        const isEventPaid = getEventIsPaid(event);
-
         try {
             setSavingMember(true);
 
             await eventMemberService.create({
                 eventId,
                 studentId: formData.studentId,
-                isPaid: isEventPaid ? formData.isPaid : false,
-                paidAmount: isEventPaid ? Number(formData.paidAmount || 0) : 0,
+                isPaid: formData.isPaid,
+                paidAmount: Number(formData.paidAmount || 0),
             });
 
             await fetchMembers();
-
             handleCloseCreateModal(modalId);
+
             showToast("Öğrenci etkinliğe başarıyla eklendi.");
         } catch (error) {
             console.error(error);
@@ -167,6 +184,45 @@ export function useEventMembersPage() {
             const message = getErrorMessage(
                 error,
                 "Öğrenci etkinliğe eklenirken hata oluştu.",
+            );
+
+            setErrors({
+                general: message,
+            });
+
+            showToast(message, "error");
+        } finally {
+            setSavingMember(false);
+        }
+    };
+
+    const handleUpdatePayment = async (modalId) => {
+        if (!editingPaymentMember) return;
+
+        if (!validateForm()) {
+            showToast("Eksik veya hatalı alanlar var.", "error");
+            return;
+        }
+
+        try {
+            setSavingMember(true);
+
+            await eventMemberService.updatePayment({
+                id: getEventMemberId(editingPaymentMember),
+                isPaid: formData.isPaid,
+                paidAmount: Number(formData.paidAmount || 0),
+            });
+
+            await fetchMembers();
+            handleCloseCreateModal(modalId);
+
+            showToast("Ödeme bilgisi başarıyla güncellendi.");
+        } catch (error) {
+            console.error(error);
+
+            const message = getErrorMessage(
+                error,
+                "Ödeme bilgisi güncellenirken hata oluştu.",
             );
 
             setErrors({
@@ -195,30 +251,28 @@ export function useEventMembersPage() {
         try {
             await eventMemberService.delete(deletingMemberId);
             await fetchMembers();
-
             handleCloseDeleteModal(modalId);
+
             showToast("Öğrenci etkinlikten çıkarıldı.");
         } catch (error) {
             console.error(error);
 
             showToast(
-                getErrorMessage(error, "Öğrenci etkinlikten çıkarılırken hata oluştu."),
+                getErrorMessage(
+                    error,
+                    "Öğrenci etkinlikten çıkarılırken hata oluştu.",
+                ),
                 "error",
             );
         }
     };
 
     const handleExportMembersPdf = () => {
-        const isEventPaid = getEventIsPaid(event);
-
         exportToPdf({
             title: `${getEventName(event)} Etkinlik Katılımcı Listesi`,
             fileName: "etkinlik-katilimci-listesi.pdf",
             columns: eventMemberPdfColumns,
-            data: members.map((member) => ({
-                ...member,
-                eventIsPaid: isEventPaid,
-            })),
+            data: members,
         });
     };
 
@@ -231,6 +285,7 @@ export function useEventMembersPage() {
         setFormData,
         errors,
         deletingMemberId,
+        editingPaymentMember,
         search,
         setSearch,
         loading,
@@ -239,7 +294,9 @@ export function useEventMembersPage() {
         handleBackToEvents,
         handleOpenCreateModal,
         handleCloseCreateModal,
+        handleOpenPaymentEditModal,
         handleCreateMember,
+        handleUpdatePayment,
         handleOpenDeleteModal,
         handleCloseDeleteModal,
         handleDeleteMember,
