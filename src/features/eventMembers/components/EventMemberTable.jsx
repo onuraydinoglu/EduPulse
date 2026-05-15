@@ -56,10 +56,6 @@ function EventMemberTable({
               </th>
 
               <th>
-                <span className={tableHeadTextClass}>Öğrenci No</span>
-              </th>
-
-              <th>
                 <span className={tableHeadTextClass}>Sınıf</span>
               </th>
 

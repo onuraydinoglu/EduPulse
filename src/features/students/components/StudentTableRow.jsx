@@ -31,15 +31,14 @@ function StudentTableRow({ student, backPath, onEdit, onDelete }) {
   return (
     <tr className="border-b border-base-200 transition hover:bg-base-200/40 [&_td]:px-6">
       <td>
-        <div className="font-semibold text-base-content">
-          {getStudentFullName(student)}
+        <div>
+          <p className="font-semibold text-base-content">
+            {getStudentFullName(student)}
+          </p>
+          <p className="text-xs text-base-content/50">
+            {getStudentNumber(student)}
+          </p>
         </div>
-      </td>
-
-      <td>
-        <span className="badge badge-ghost">
-          {getStudentNumber(student) || "-"}
-        </span>
       </td>
 
       <td>
@@ -51,10 +50,6 @@ function StudentTableRow({ student, backPath, onEdit, onDelete }) {
       <td>{getStudentEmail(student) || "-"}</td>
 
       <td>{getStudentPhoneNumber(student) || "-"}</td>
-
-      <td>
-        <StatusBadge status={getStudentStatus(student)} />
-      </td>
 
       <td className="text-right">
         <TableActions

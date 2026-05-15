@@ -68,15 +68,11 @@ function StudentTable({
             <tr className="border-b border-base-300 [&_th]:px-6">
               <th>Öğrenci</th>
 
-              <th>Öğrenci No</th>
-
               <th>Sınıf</th>
 
               <th>E-Posta</th>
 
               <th>Telefon</th>
-
-              <th>Durum</th>
 
               <th className="text-right">İşlemler</th>
             </tr>
