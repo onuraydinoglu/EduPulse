@@ -51,4 +51,12 @@ export const teacherLessonService = {
 
     return response.data;
   },
+
+  deleteSelectedLessonAssignments: async (id) => {
+    const response = await axiosInstance.delete(
+      `${API_ENDPOINTS.TEACHER_LESSONS}/selected-lesson/${id}`
+    );
+
+    return response.data;
+  },
 };

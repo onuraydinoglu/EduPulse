@@ -341,7 +341,7 @@ export function useTeacherLessonsPage() {
         if (!deletingId) return;
 
         try {
-            const result = await teacherLessonService.delete(deletingId);
+            const result = await teacherLessonService.deleteSelectedLessonAssignments(deletingId);
 
             if (result?.isSuccess === false || result?.IsSuccess === false) {
                 showToast(

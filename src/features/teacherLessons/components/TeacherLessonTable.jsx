@@ -29,7 +29,7 @@ function TeacherLessonTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(safeTeacherLessons, 5);
+  } = usePagination(safeTeacherLessons, 10);
 
   const tableHeadTextClass =
     "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
