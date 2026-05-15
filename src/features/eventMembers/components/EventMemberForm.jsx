@@ -1,15 +1,19 @@
 import {
+  getEventIsPaid,
   getStudentFullName,
   getStudentId,
   getStudentNumber,
 } from "../utils/eventMemberFormatters";
 
 function EventMemberForm({
+  event,
   formData,
   setFormData,
   students = [],
   errors = {},
 }) {
+  const isEventPaid = getEventIsPaid(event);
+
   const studentOptions = students.map((student) => {
     const id = getStudentId(student);
     const fullName = getStudentFullName(student);
@@ -59,53 +63,55 @@ function EventMemberForm({
         )}
       </div>
 
-      <div className="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={formData.isPaid}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                isPaid: event.target.checked,
-                paidAmount: event.target.checked ? prev.paidAmount : 0,
-              }))
-            }
-            className="checkbox checkbox-primary"
-          />
-
-          <span className="text-sm font-medium text-base-content">
-            Ödeme yapıldı
-          </span>
-        </label>
-
-        {formData.isPaid && (
-          <div className="mt-4">
-            <label className="mb-2 block text-sm font-medium text-base-content">
-              Ödenen Tutar
-            </label>
-
+      {isEventPaid && (
+        <div className="rounded-2xl border border-base-300 bg-base-200/40 p-4">
+          <label className="flex cursor-pointer items-center gap-3">
             <input
-              type="number"
-              min="0"
-              value={formData.paidAmount}
+              type="checkbox"
+              checked={formData.isPaid}
               onChange={(event) =>
                 setFormData((prev) => ({
                   ...prev,
-                  paidAmount: event.target.value,
+                  isPaid: event.target.checked,
+                  paidAmount: event.target.checked ? prev.paidAmount : 0,
                 }))
               }
-              placeholder="0"
-              className={`input input-bordered w-full rounded-xl ${errors.paidAmount ? "input-error" : ""
-                }`}
+              className="checkbox checkbox-primary"
             />
 
-            {errors.paidAmount && (
-              <p className="mt-1 text-sm text-error">{errors.paidAmount}</p>
-            )}
-          </div>
-        )}
-      </div>
+            <span className="text-sm font-medium text-base-content">
+              Ödeme yapıldı
+            </span>
+          </label>
+
+          {formData.isPaid && (
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-medium text-base-content">
+                Ödenen Tutar
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                value={formData.paidAmount}
+                onChange={(event) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    paidAmount: event.target.value,
+                  }))
+                }
+                placeholder="0"
+                className={`input input-bordered w-full rounded-xl ${errors.paidAmount ? "input-error" : ""
+                  }`}
+              />
+
+              {errors.paidAmount && (
+                <p className="mt-1 text-sm text-error">{errors.paidAmount}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
     filterEventMembers,
     getData,
     getErrorMessage,
+    getEventIsPaid,
     getEventName,
     getSelectableStudents,
 } from "../utils/eventMemberFormatters";
@@ -28,7 +29,6 @@ export function useEventMembersPage() {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [savingMember, setSavingMember] = useState(false);
-
     const [toast, setToast] = useState({
         message: "",
         type: "success",
@@ -65,6 +65,7 @@ export function useEventMembersPage() {
 
     const fetchMembers = async () => {
         const data = await eventMemberService.getByEventId(eventId);
+
         setMembers(Array.isArray(data) ? data : []);
     };
 
@@ -78,7 +79,6 @@ export function useEventMembersPage() {
     const loadPage = async () => {
         try {
             setLoading(true);
-
             await Promise.all([fetchEvent(), fetchMembers(), fetchStudents()]);
         } catch (error) {
             console.error(error);
@@ -124,12 +124,13 @@ export function useEventMembersPage() {
 
     const validateForm = () => {
         const newErrors = {};
+        const isEventPaid = getEventIsPaid(event);
 
         if (!formData.studentId) {
             newErrors.studentId = "Öğrenci seçiniz.";
         }
 
-        if (Number(formData.paidAmount) < 0) {
+        if (isEventPaid && Number(formData.paidAmount) < 0) {
             newErrors.paidAmount = "Ödenen tutar 0'dan küçük olamaz.";
         }
 
@@ -144,14 +145,16 @@ export function useEventMembersPage() {
             return;
         }
 
+        const isEventPaid = getEventIsPaid(event);
+
         try {
             setSavingMember(true);
 
             await eventMemberService.create({
                 eventId,
                 studentId: formData.studentId,
-                isPaid: formData.isPaid,
-                paidAmount: Number(formData.paidAmount || 0),
+                isPaid: isEventPaid ? formData.isPaid : false,
+                paidAmount: isEventPaid ? Number(formData.paidAmount || 0) : 0,
             });
 
             await fetchMembers();
@@ -206,11 +209,16 @@ export function useEventMembersPage() {
     };
 
     const handleExportMembersPdf = () => {
+        const isEventPaid = getEventIsPaid(event);
+
         exportToPdf({
             title: `${getEventName(event)} Etkinlik Katılımcı Listesi`,
             fileName: "etkinlik-katilimci-listesi.pdf",
             columns: eventMemberPdfColumns,
-            data: members,
+            data: members.map((member) => ({
+                ...member,
+                eventIsPaid: isEventPaid,
+            })),
         });
     };
 

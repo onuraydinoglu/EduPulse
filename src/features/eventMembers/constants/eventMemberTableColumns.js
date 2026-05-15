@@ -1,6 +1,6 @@
 import {
     getEventMemberClassroomName,
-    getEventMemberPaidAmount,
+    getEventMemberPaidAmountText,
     getEventMemberPaymentStatusText,
     getEventMemberStudentFullName,
     getEventMemberStudentNumber,
@@ -29,6 +29,6 @@ export const eventMemberPdfColumns = [
     },
     {
         header: "Ödenen Tutar",
-        accessor: (member) => `${getEventMemberPaidAmount(member)} ₺`,
+        accessor: getEventMemberPaidAmountText,
     },
 ];

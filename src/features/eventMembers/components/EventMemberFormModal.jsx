@@ -2,6 +2,7 @@ import Modal from "../../../components/ui/Modal";
 import EventMemberForm from "./EventMemberForm";
 
 function EventMemberFormModal({
+    event,
     modalId,
     formData,
     setFormData,
@@ -18,6 +19,7 @@ function EventMemberFormModal({
             description="Seçili etkinliğe katılacak öğrenciyi belirleyin."
         >
             <EventMemberForm
+                event={event}
                 formData={formData}
                 setFormData={setFormData}
                 students={students}

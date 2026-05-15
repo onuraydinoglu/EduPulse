@@ -1,6 +1,6 @@
 import TableActions from "../../../components/ui/TableActions";
-
 import {
+  getEventIsPaid,
   getEventMemberClassroomName,
   getEventMemberId,
   getEventMemberIsPaid,
@@ -9,8 +9,9 @@ import {
   getEventMemberStudentNumber,
 } from "../utils/eventMemberFormatters";
 
-function EventMemberTableRow({ member, canManage = true, onDelete }) {
+function EventMemberTableRow({ event, member, canManage = true, onDelete }) {
   const memberId = getEventMemberId(member);
+  const isEventPaid = getEventIsPaid(event);
   const isPaid = getEventMemberIsPaid(member);
   const paidAmount = getEventMemberPaidAmount(member);
 
@@ -21,6 +22,7 @@ function EventMemberTableRow({ member, canManage = true, onDelete }) {
           <p className="font-semibold text-base-content">
             {getEventMemberStudentFullName(member)}
           </p>
+
           <p className="text-xs text-base-content/50">
             {getEventMemberStudentNumber(member)}
           </p>
@@ -34,17 +36,21 @@ function EventMemberTableRow({ member, canManage = true, onDelete }) {
       </td>
 
       <td>
-        <span
-          className={`badge rounded-xl ${isPaid ? "badge-success" : "badge-warning"
-            }`}
-        >
-          {isPaid ? "Ödendi" : "Ödenmedi"}
-        </span>
+        {isEventPaid ? (
+          <span
+            className={`badge rounded-xl ${isPaid ? "badge-success" : "badge-warning"
+              }`}
+          >
+            {isPaid ? "Ödendi" : "Ödenmedi"}
+          </span>
+        ) : (
+          <span className="badge badge-info rounded-xl">Ücretsiz</span>
+        )}
       </td>
 
       <td>
         <span className="text-sm font-medium text-base-content/70">
-          {paidAmount} ₺
+          {isEventPaid ? `${paidAmount} ₺` : "Ücretsiz"}
         </span>
       </td>
 

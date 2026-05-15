@@ -4,6 +4,7 @@ import { usePagination } from "../../../hooks/usePagination";
 import EventMemberTableRow from "./EventMemberTableRow";
 
 function EventMemberTable({
+  event,
   members,
   search,
   setSearch,
@@ -79,6 +80,7 @@ function EventMemberTable({
             {paginatedItems.map((member) => (
               <EventMemberTableRow
                 key={member.id || member.Id}
+                event={event}
                 member={member}
                 canManage={canManage}
                 onDelete={onDelete}
@@ -88,7 +90,7 @@ function EventMemberTable({
             {members.length === 0 && (
               <tr>
                 <td
-                  colSpan={canManage ? 6 : 5}
+                  colSpan={canManage ? 5 : 4}
                   className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Bu etkinlikte öğrenci bulunamadı.

@@ -223,8 +223,24 @@ export const getEventMemberPaidAmount = (member) => {
     return member?.paidAmount ?? member?.PaidAmount ?? 0;
 };
 
+export const getEventMemberEventIsPaid = (member) => {
+    return member?.eventIsPaid ?? member?.EventIsPaid ?? true;
+};
+
 export const getEventMemberPaymentStatusText = (member) => {
+    if (!getEventMemberEventIsPaid(member)) {
+        return "Ücretsiz";
+    }
+
     return getEventMemberIsPaid(member) ? "Ödendi" : "Ödenmedi";
+};
+
+export const getEventMemberPaidAmountText = (member) => {
+    if (!getEventMemberEventIsPaid(member)) {
+        return "Ücretsiz";
+    }
+
+    return `${getEventMemberPaidAmount(member)} ₺`;
 };
 
 /* STUDENT FORMATTERS */

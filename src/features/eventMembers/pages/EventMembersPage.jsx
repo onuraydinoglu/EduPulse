@@ -1,16 +1,13 @@
 import Toast from "../../../components/ui/Toast";
-
 import EventMemberDeleteModal from "../components/EventMemberDeleteModal";
 import EventMemberFormModal from "../components/EventMemberFormModal";
 import EventMemberStatsCards from "../components/EventMemberStatsCards";
 import EventMemberTable from "../components/EventMemberTable";
 import EventMembersPageHeader from "../components/EventMembersPageHeader";
-
 import {
   EVENT_MEMBER_DELETE_MODAL_ID,
   EVENT_MEMBER_MODAL_ID,
 } from "../constants/eventMemberConstants";
-
 import { useEventMembersPage } from "../hooks/useEventMembersPage";
 
 function EventMembersPage() {
@@ -84,6 +81,7 @@ function EventMembersPage() {
       <EventMemberStatsCards event={event} members={members} />
 
       <EventMemberTable
+        event={event}
         members={filteredMembers}
         search={search}
         setSearch={setSearch}
@@ -94,6 +92,7 @@ function EventMembersPage() {
       />
 
       <EventMemberFormModal
+        event={event}
         modalId={EVENT_MEMBER_MODAL_ID}
         formData={formData}
         setFormData={setFormData}
