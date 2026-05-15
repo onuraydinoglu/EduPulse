@@ -127,6 +127,31 @@ const enrichEventMembersWithEvents = (eventMembers = [], events = []) => {
     });
 };
 
+const getLessonId = (grade) => {
+    return grade?.lessonId || "";
+};
+
+const getLessonName = (lesson) => {
+    return lesson?.name || "-";
+};
+
+const enrichGradesWithLessons = (grades = [], lessons = []) => {
+    return grades.map((grade) => {
+        if (grade?.lessonName) {
+            return grade;
+        }
+
+        const lesson = lessons.find((item) =>
+            isSameId(getId(item), getLessonId(grade))
+        );
+
+        return {
+            ...grade,
+            lessonName: getLessonName(lesson),
+        };
+    });
+};
+
 const getStudentProfile = async (id) => {
     const [
         studentResult,
@@ -137,6 +162,7 @@ const getStudentProfile = async (id) => {
         eventsResult,
         classroomsResult,
         teachersResult,
+        lessonsResult,
     ] = await Promise.all([
         safeGet(`${API_ENDPOINTS.STUDENTS}/${id}`, null),
         safeGet(API_ENDPOINTS.STUDENT_GRADES, []),
@@ -146,11 +172,13 @@ const getStudentProfile = async (id) => {
         safeGet(API_ENDPOINTS.EVENTS, []),
         safeGet(API_ENDPOINTS.CLASSROOMS, []),
         safeGet(API_ENDPOINTS.TEACHERS, []),
+        safeGet(API_ENDPOINTS.LESSONS, []),
     ]);
 
     const student = unwrapData(studentResult);
     const classrooms = toArray(classroomsResult);
     const teachers = toArray(teachersResult);
+    const lessons = toArray(lessonsResult);
 
     const enrichedStudent = enrichStudentWithClassroomTeacher(
         student,
@@ -158,8 +186,11 @@ const getStudentProfile = async (id) => {
         teachers
     );
 
-    const grades = toArray(gradesResult).filter((item) =>
-        isRelatedToStudent(item, id)
+    const grades = enrichGradesWithLessons(
+        toArray(gradesResult).filter((item) =>
+            isRelatedToStudent(item, id)
+        ),
+        lessons
     );
 
     const trialExams = toArray(trialExamsResult).filter((item) =>
