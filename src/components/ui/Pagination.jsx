@@ -52,7 +52,7 @@ function Pagination({
               type="button"
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
-              className="flex xl:h-8 xl:w-8 2xl:h-10 2xl:h-10 items-center justify-center rounded-full border border-primary/20 bg-base-100 text-base-content/40 transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex xl:h-8 xl:w-8 items-center justify-center rounded-full border border-primary/20 bg-base-100 text-base-content/40 transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeftIcon className="h-4 w-4" />
             </button>
