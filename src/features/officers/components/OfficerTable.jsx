@@ -25,7 +25,7 @@ function OfficerTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(officers, 5);
+  } = usePagination(officers, 10);
 
   return (
     <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">

@@ -31,7 +31,7 @@ function ExamTable({
         paginatedItems,
         startItem,
         endItem,
-    } = usePagination(exams, 5);
+    } = usePagination(exams, 10);
 
     return (
         <div className="rounded-3xl border border-base-300/70 bg-base-100 shadow-sm">

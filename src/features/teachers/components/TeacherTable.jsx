@@ -27,7 +27,7 @@ function TeacherTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(teachers, 5);
+  } = usePagination(teachers, 10);
 
   return (
     <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">

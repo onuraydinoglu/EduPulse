@@ -20,7 +20,7 @@ function ClubMemberTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(members, 5);
+  } = usePagination(members, 10);
 
   const tableHeadTextClass =
     "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";

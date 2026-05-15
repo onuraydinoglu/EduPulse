@@ -31,7 +31,7 @@ function EventTable({
         paginatedItems,
         startItem,
         endItem,
-    } = usePagination(events, 5);
+    } = usePagination(events, 10);
 
     const tableHeadTextClass =
         "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";

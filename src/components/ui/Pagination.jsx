@@ -14,7 +14,7 @@ function Pagination({
   pageSize,
   setPageSize,
   onPageChange,
-  pageSizeOptions = [5, 10, 20, 50],
+  pageSizeOptions = [5, 10, 20],
 }) {
   if (totalItems === 0) return null;
 

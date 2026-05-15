@@ -30,7 +30,7 @@ function StudentTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(students, 5);
+  } = usePagination(students, 10);
 
   return (
     <div className="rounded-3xl border border-base-300/60 bg-base-100 shadow-sm">

@@ -26,7 +26,7 @@ function ClassTable({
     paginatedItems,
     startItem,
     endItem,
-  } = usePagination(classes, 5);
+  } = usePagination(classes, 10);
 
   const tableHeadTextClass =
     "text-[11px] font-semibold uppercase tracking-[0.16em] text-base-content/45";
