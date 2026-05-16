@@ -1,16 +1,17 @@
 import { useState } from "react";
 import StudentTable from "../../../students/components/StudentTable";
+import { getClassroomLabel } from "../../../students/utils/studentFormatters";
 
 function ClassroomWorkspaceTabs({
   activeTab,
   students,
   grades,
   classroom,
+  classrooms = [],
   onEditStudent,
   onDeleteStudent,
 }) {
   const [studentSearch, setStudentSearch] = useState("");
-
   const [studentClassroomFilter, setStudentClassroomFilter] = useState("all");
 
   const classroomId = classroom?.id || classroom?.Id;
@@ -19,20 +20,10 @@ function ClassroomWorkspaceTabs({
     ? `/dashboard/classes/${classroomId}`
     : "/dashboard/classes";
 
-  const classroomOptions = classroom
-    ? [
-      {
-        value: classroomId,
-
-        label:
-          classroom.name ||
-          classroom.className ||
-          classroom.ClassName ||
-          `${classroom.grade || classroom.Grade || ""}-${classroom.section || classroom.Section || ""
-          }`,
-      },
-    ]
-    : [];
+  const classroomOptions = classrooms.map((item) => ({
+    value: item.id || item.Id,
+    label: getClassroomLabel(item),
+  }));
 
   return (
     <div className="space-y-4">

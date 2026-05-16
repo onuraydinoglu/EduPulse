@@ -2,26 +2,22 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import Toast from "../../../components/ui/Toast";
 
-import ClassroomWorkspaceHeader from "../components/workspace/ClassroomWorkspaceHeader";
-import ClassroomWorkspaceSummary from "../components/workspace/ClassroomWorkspaceSummary";
-
-import ClassroomWorkspaceTabs from "../components/workspace/ClassroomWorkspaceTabs";
-
-import ClassroomStudentCreateModal from "../components/workspace/ClassroomStudentCreateModal";
-
 import StudentDeleteModal from "../../students/components/StudentDeleteModal";
 import StudentFormModal from "../../students/components/StudentFormModal";
 
-import {
-  STUDENT_DELETE_MODAL_ID,
-  STUDENT_MODAL_ID,
-} from "../../students/constants/studentConstants";
+import ClassroomWorkspaceHeader from "../components/workspace/ClassroomWorkspaceHeader";
+import ClassroomWorkspaceSummary from "../components/workspace/ClassroomWorkspaceSummary";
+import ClassroomWorkspaceTabs from "../components/workspace/ClassroomWorkspaceTabs";
+import ClassroomStudentCreateModal from "../components/workspace/ClassroomStudentCreateModal";
 
 import { useClassroomWorkspace } from "../hooks/useClassroomWorkspace";
 
+const CLASSROOM_STUDENT_CREATE_MODAL_ID = "classroom_student_modal";
+const CLASSROOM_STUDENT_EDIT_MODAL_ID = "classroom_student_edit_modal";
+const CLASSROOM_STUDENT_DELETE_MODAL_ID = "classroom_student_delete_modal";
+
 function ClassroomWorkspacePage() {
   const params = useParams();
-
   const navigate = useNavigate();
   const classId = params.classId || params.classroomId || params.id;
 
@@ -57,15 +53,14 @@ function ClassroomWorkspacePage() {
 
   const handleOpenStudentModal = () => {
     if (!canManageStudents) return;
-    resetStudentForm();
 
-    document.getElementById("classroom_student_modal")?.showModal();
+    resetStudentForm();
+    document.getElementById(CLASSROOM_STUDENT_CREATE_MODAL_ID)?.showModal();
   };
 
   const handleCloseStudentModal = () => {
     resetStudentForm();
-
-    document.getElementById("classroom_student_modal")?.close();
+    document.getElementById(CLASSROOM_STUDENT_CREATE_MODAL_ID)?.close();
   };
 
   const handleCreateStudent = async () => {
@@ -113,14 +108,15 @@ function ClassroomWorkspacePage() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           classroom={classroom}
+          classrooms={classrooms}
           students={classStudents}
           grades={classGrades}
           teachers={teachers}
           onEditStudent={(student) =>
-            openEditStudentModal(student, STUDENT_MODAL_ID)
+            openEditStudentModal(student, CLASSROOM_STUDENT_EDIT_MODAL_ID)
           }
           onDeleteStudent={(id) =>
-            openDeleteStudentModal(id, STUDENT_DELETE_MODAL_ID)
+            openDeleteStudentModal(id, CLASSROOM_STUDENT_DELETE_MODAL_ID)
           }
         />
       </div>
@@ -139,20 +135,22 @@ function ClassroomWorkspacePage() {
           />
 
           <StudentFormModal
-            modalId={STUDENT_MODAL_ID}
+            modalId={CLASSROOM_STUDENT_EDIT_MODAL_ID}
             isEditing={isEditingStudent}
             formData={studentFormData}
             setFormData={setStudentFormData}
-            classrooms={classroom ? [classroom] : []}
+            classrooms={classrooms}
             errors={studentErrors}
-            onClose={() => closeEditStudentModal(STUDENT_MODAL_ID)}
-            onSubmit={() => updateStudent(STUDENT_MODAL_ID)}
+            onClose={() => closeEditStudentModal(CLASSROOM_STUDENT_EDIT_MODAL_ID)}
+            onSubmit={() => updateStudent(CLASSROOM_STUDENT_EDIT_MODAL_ID)}
           />
 
           <StudentDeleteModal
-            modalId={STUDENT_DELETE_MODAL_ID}
-            onClose={() => closeDeleteStudentModal(STUDENT_DELETE_MODAL_ID)}
-            onConfirm={() => deleteStudent(STUDENT_DELETE_MODAL_ID)}
+            modalId={CLASSROOM_STUDENT_DELETE_MODAL_ID}
+            onClose={() =>
+              closeDeleteStudentModal(CLASSROOM_STUDENT_DELETE_MODAL_ID)
+            }
+            onConfirm={() => deleteStudent(CLASSROOM_STUDENT_DELETE_MODAL_ID)}
           />
         </>
       )}

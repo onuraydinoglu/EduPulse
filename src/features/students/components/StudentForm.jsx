@@ -47,16 +47,11 @@ function StudentForm({
       name: "classroomId",
       label: "Sınıf",
       type: "select",
-      options: [
-        {
-          value: "",
-          label: "Sınıf seçiniz",
-        },
-        ...classrooms.map((classroom) => ({
-          value: classroom.id || classroom.Id,
-          label: getClassroomLabel(classroom),
-        })),
-      ],
+      placeholder: "Sınıf seçiniz",
+      options: classrooms.map((classroom) => ({
+        value: classroom.id || classroom.Id,
+        label: getClassroomLabel(classroom),
+      })),
     },
   ];
 

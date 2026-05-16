@@ -31,7 +31,9 @@ const getStudentNumber = (student) =>
 
 const getErrorMessage = (error, fallback) => {
   const data = error?.response?.data;
+
   if (typeof data === "string") return data;
+
   return (
     data?.message ||
     data?.Message ||
@@ -48,12 +50,16 @@ const getErrorMessage = (error, fallback) => {
 const getBackendFieldErrors = (error) => {
   const data = error?.response?.data;
   const backendErrors = data?.errors || data?.Errors;
+
   if (!backendErrors || Array.isArray(backendErrors)) return {};
+
   const fieldErrors = {};
+
   Object.entries(backendErrors).forEach(([key, value]) => {
     const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
     fieldErrors[fieldName] = Array.isArray(value) ? value[0] : value;
   });
+
   return fieldErrors;
 };
 
@@ -113,6 +119,7 @@ export function useClassroomWorkspace(classId) {
     return grades.filter((grade) => {
       const studentId = grade?.studentId || grade?.StudentId;
       const gradeClassroomId = grade?.classroomId || grade?.ClassroomId;
+
       return gradeClassroomId === classId || classStudentIds.includes(studentId);
     });
   }, [grades, classStudents, classId]);
@@ -159,9 +166,10 @@ export function useClassroomWorkspace(classId) {
       setGrades([]);
     } catch (error) {
       console.error(error);
+
       showToast(
         getErrorMessage(error, "Sınıf çalışma alanı yüklenirken hata oluştu."),
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -181,7 +189,7 @@ export function useClassroomWorkspace(classId) {
 
     const validationErrors = validateForm(
       preparedFormData,
-      studentValidationSchema
+      studentValidationSchema,
     );
 
     setStudentErrors(validationErrors);
@@ -208,9 +216,11 @@ export function useClassroomWorkspace(classId) {
 
       if (result?.isSuccess === false) {
         const message = result.message || "Öğrenci kaydedilemedi.";
+
         setStudentErrors({
           general: message,
         });
+
         showToast(message, "error");
         return false;
       }
@@ -224,7 +234,7 @@ export function useClassroomWorkspace(classId) {
 
       const message = getErrorMessage(
         error,
-        "Öğrenci kaydedilirken hata oluştu."
+        "Öğrenci kaydedilirken hata oluştu.",
       );
 
       const backendFieldErrors = getBackendFieldErrors(error);
@@ -247,6 +257,7 @@ export function useClassroomWorkspace(classId) {
     setEditingStudentId(getId(student));
     setDeletingStudentId(null);
     setStudentErrors({});
+
     setStudentFormData({
       firstName: getFirstName(student),
       lastName: getLastName(student),
@@ -279,7 +290,7 @@ export function useClassroomWorkspace(classId) {
 
     const validationErrors = validateForm(
       preparedFormData,
-      studentValidationSchema
+      studentValidationSchema,
     );
 
     setStudentErrors(validationErrors);
@@ -307,9 +318,11 @@ export function useClassroomWorkspace(classId) {
 
       if (result?.isSuccess === false) {
         const message = result.message || "Öğrenci güncellenemedi.";
+
         setStudentErrors({
           general: message,
         });
+
         showToast(message, "error");
         return false;
       }
@@ -323,7 +336,7 @@ export function useClassroomWorkspace(classId) {
 
       const message = getErrorMessage(
         error,
-        "Öğrenci güncellenirken hata oluştu."
+        "Öğrenci güncellenirken hata oluştu.",
       );
 
       const backendFieldErrors = getBackendFieldErrors(error);
@@ -342,6 +355,7 @@ export function useClassroomWorkspace(classId) {
 
   const openDeleteStudentModal = (id, modalId) => {
     if (!canManageStudents || !id) return;
+
     setDeletingStudentId(id);
     setEditingStudentId(null);
     openModal(modalId);
@@ -374,10 +388,12 @@ export function useClassroomWorkspace(classId) {
       return true;
     } catch (error) {
       console.error(error);
+
       showToast(
         getErrorMessage(error, "Öğrenci silinirken hata oluştu."),
-        "error"
+        "error",
       );
+
       return false;
     }
   };
