@@ -1,13 +1,19 @@
 import Toast from "../../../components/ui/Toast";
+
 import EventMemberDeleteModal from "../components/EventMemberDeleteModal";
 import EventMemberFormModal from "../components/EventMemberFormModal";
+
 import EventMemberStatsCards from "../components/EventMemberStatsCards";
+
 import EventMemberTable from "../components/EventMemberTable";
+
 import EventMembersPageHeader from "../components/EventMembersPageHeader";
+
 import {
   EVENT_MEMBER_DELETE_MODAL_ID,
   EVENT_MEMBER_MODAL_ID,
 } from "../constants/eventMemberConstants";
+
 import { useEventMembersPage } from "../hooks/useEventMembersPage";
 import { getEventIsPaid } from "../utils/eventMemberFormatters";
 
@@ -39,12 +45,14 @@ function EventMembersPage() {
   } = useEventMembersPage();
 
   const canManage = true;
+
   const isPaidEvent = getEventIsPaid(event);
 
   if (loading) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
         <span className="loading loading-spinner loading-lg text-primary" />
+
         <span className="ml-3 text-sm text-base-content/60">
           Etkinlik bilgileri yükleniyor...
         </span>
@@ -107,6 +115,7 @@ function EventMembersPage() {
         errors={errors}
         saving={savingMember}
         isPaymentEdit={Boolean(editingPaymentMember)}
+        isPaidEvent={isPaidEvent}
         onClose={() => handleCloseCreateModal(EVENT_MEMBER_MODAL_ID)}
         onSubmit={() =>
           editingPaymentMember
