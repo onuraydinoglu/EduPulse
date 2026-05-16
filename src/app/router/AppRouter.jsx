@@ -2,10 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import RegisterSchoolPage from "../../features/auth/pages/RegisterSchoolPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
-
 import DashboardLayout from "../layout/DashboardLayout";
 import DashboardPage from "../../features/dashboard/pages/DashboardPage";
-
 import SchoolsPage from "../../features/schools/pages/SchoolsPage";
 import TeachersPage from "../../features/teachers/pages/TeachersPage";
 import OfficersPage from "../../features/officers/pages/OfficersPage";
@@ -23,7 +21,6 @@ import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLesso
 import EventsPage from "../../features/events/pages/EventsPage";
 import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
 import ProfilePage from "../../features/profiles/pages/ProfilePage";
-
 
 function AppRouter() {
   return (
@@ -52,7 +49,6 @@ function AppRouter() {
           <Route path="lessons" element={<LessonsPage />} />
           <Route path="teacher-lessons" element={<TeacherLessonsPage />} />
 
-          { /* <Route path="exams" element={<ExamsPage />} /> */}
           <Route path="trial-exams" element={<TrialExamsPage />} />
 
           <Route path="clubs" element={<ClubsPage />} />
@@ -61,6 +57,11 @@ function AppRouter() {
           <Route path="events" element={<EventsPage />} />
           <Route path="events/:eventId/members" element={<EventMembersPage />} />
 
+          {/* Menüde kullanılan güncel rapor yolları */}
+          <Route path="reports/principal" element={<PrincipalReportsPage />} />
+          <Route path="reports/teacher" element={<TeacherReportsPage />} />
+
+          {/* Eski linkler bozulmasın diye bırakıldı */}
           <Route path="principal-reports" element={<PrincipalReportsPage />} />
           <Route path="teacher-reports" element={<TeacherReportsPage />} />
 

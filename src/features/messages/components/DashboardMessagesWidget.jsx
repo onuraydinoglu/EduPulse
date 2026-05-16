@@ -57,10 +57,10 @@ function DashboardMessagesWidget() {
           </div>
 
           <CreateButton
-            label="Mesaj Gönder"
             icon={PaperAirplaneIcon}
-            onClick={() => handleOpenCreateModal(MESSAGE_MODAL_ID)}
-          />
+            onClick={() => handleOpenCreateModal(MESSAGE_MODAL_ID)} >
+            Mesaj Gönder
+          </ CreateButton>
         </div>
 
         <MessageTabs
