@@ -8,5 +8,4 @@ export const emptyStudentForm = {
   phoneNumber: "",
   studentNumber: "",
   classroomId: "",
-  isActive: true,
 };

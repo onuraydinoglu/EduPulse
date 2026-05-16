@@ -16,7 +16,6 @@ const emptyStudentForm = {
   phoneNumber: "",
   studentNumber: "",
   classroomId: "",
-  isActive: true,
 };
 
 const getResultData = (result) => result?.data || result?.Data || result || [];
@@ -29,8 +28,6 @@ const getPhoneNumber = (student) =>
   student?.phoneNumber || student?.PhoneNumber || "";
 const getStudentNumber = (student) =>
   student?.studentNumber || student?.StudentNumber || "";
-const getIsActive = (student) =>
-  student?.isActive !== false && student?.IsActive !== false;
 
 const getErrorMessage = (error, fallback) => {
   const data = error?.response?.data;
@@ -63,6 +60,7 @@ const getBackendFieldErrors = (error) => {
 export function useClassroomWorkspace(classId) {
   const [activeTab, setActiveTab] = useState("students");
   const [classroom, setClassroom] = useState(null);
+  const [classrooms, setClassrooms] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState([]);
@@ -133,13 +131,19 @@ export function useClassroomWorkspace(classId) {
     try {
       setLoading(true);
 
-      const [classResult, studentResult] = await Promise.all([
+      const [classResult, classesResult, studentResult] = await Promise.all([
         classService.getById(classId),
+        classService.getAll(),
         studentService.getAll(),
       ]);
 
       if (classResult?.isSuccess === false) {
         showToast(classResult.message || "Sınıf bilgisi getirilemedi.", "error");
+        return;
+      }
+
+      if (classesResult?.isSuccess === false) {
+        showToast(classesResult.message || "Sınıflar getirilemedi.", "error");
         return;
       }
 
@@ -149,6 +153,7 @@ export function useClassroomWorkspace(classId) {
       }
 
       setClassroom(getResultData(classResult));
+      setClassrooms(getResultData(classesResult));
       setTeachers([]);
       setStudents(getResultData(studentResult));
       setGrades([]);
@@ -249,7 +254,6 @@ export function useClassroomWorkspace(classId) {
       phoneNumber: getPhoneNumber(student),
       studentNumber: getStudentNumber(student),
       classroomId: getClassroomId(student) || classId,
-      isActive: getIsActive(student),
     });
 
     openModal(modalId);
@@ -293,7 +297,7 @@ export function useClassroomWorkspace(classId) {
       phoneNumber: cleanPhone(preparedFormData.phoneNumber),
       studentNumber: preparedFormData.studentNumber.trim(),
       classroomId: preparedFormData.classroomId,
-      isActive: preparedFormData.isActive,
+      isActive: true,
     };
 
     try {
@@ -386,6 +390,7 @@ export function useClassroomWorkspace(classId) {
     activeTab,
     setActiveTab,
     classroom,
+    classrooms,
     teachers,
     students,
     grades,

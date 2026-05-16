@@ -1,6 +1,5 @@
 import Button from "../../../components/ui/Button";
 import Modal from "../../../components/ui/Modal";
-
 import StudentForm from "./StudentForm";
 
 function StudentFormModal({
@@ -28,7 +27,6 @@ function StudentFormModal({
         setFormData={setFormData}
         classrooms={classrooms}
         errors={errors}
-        isEditing={isEditing}
       />
 
       <div className="mt-6 flex justify-end gap-3">

@@ -135,7 +135,6 @@ export function useStudentsPage() {
       phoneNumber: getStudentPhoneNumber(student),
       studentNumber: getStudentNumber(student),
       classroomId: getStudentClassroomId(student),
-      isActive: getStudentIsActive(student),
     });
 
     openModal(modalId);
@@ -166,7 +165,7 @@ export function useStudentsPage() {
       phoneNumber: cleanPhone(formData.phoneNumber),
       studentNumber: formData.studentNumber.trim(),
       classroomId: formData.classroomId,
-      isActive: isEditing ? formData.isActive : true,
+      isActive: true,
     };
   };
 

@@ -6,15 +6,14 @@ function StudentForm({
   setFormData,
   classrooms = [],
   errors = {},
-  isEditing = false,
   lockedClassroomId = "",
   hideClassroomSelect = false,
 }) {
   const preparedFormData = lockedClassroomId
     ? {
-        ...formData,
-        classroomId: lockedClassroomId,
-      }
+      ...formData,
+      classroomId: lockedClassroomId,
+    }
     : formData;
 
   const studentFields = [
@@ -64,14 +63,6 @@ function StudentForm({
   const visibleFields = hideClassroomSelect
     ? studentFields.filter((field) => field.name !== "classroomId")
     : studentFields;
-
-  if (isEditing) {
-    visibleFields.push({
-      name: "isActive",
-      label: "Aktif mi?",
-      type: "checkbox",
-    });
-  }
 
   return (
     <FormFields

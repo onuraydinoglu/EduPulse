@@ -27,47 +27,27 @@ function ClassroomWorkspacePage() {
 
   const {
     activeTab,
-
     setActiveTab,
-
     classroom,
-
+    classrooms,
     teachers,
-
     classStudents,
-
     classGrades,
-
     studentFormData,
-
     setStudentFormData,
-
     studentErrors,
-
     isEditingStudent,
-
     savingStudent,
-
     loading,
-
     toast,
-
     canManageStudents,
-
     resetStudentForm,
-
     createStudent,
-
     openEditStudentModal,
-
     closeEditStudentModal,
-
     updateStudent,
-
     openDeleteStudentModal,
-
     closeDeleteStudentModal,
-
     deleteStudent,
   } = useClassroomWorkspace(classId);
 

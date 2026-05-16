@@ -4,28 +4,29 @@ function FormSelect({
   onChange,
   options = [],
   className = "",
+  placeholder = "Seçiniz",
 }) {
   return (
     <div className={className}>
-      <label className="label">
-        <span className="label-text font-medium">{label}</span>
-      </label>
+      {label && (
+        <label className="mb-2 block text-sm font-semibold text-gray-700">
+          {label}
+        </label>
+      )}
 
-      <div className="rounded-xl transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50">
-        <select
-          className="select w-full rounded-xl border border-gray-200 bg-white pl-3 text-sm text-gray-700 outline-none transition focus:border-blue-400 focus:outline-none focus:ring-0 focus-visible:outline-none"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          <option value="">Seçiniz</option>
+      <select
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        className="select select-bordered h-11 w-full rounded-xl border-gray-200 bg-white text-sm text-gray-700 shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-50"
+      >
+        <option value="">{placeholder}</option>
 
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

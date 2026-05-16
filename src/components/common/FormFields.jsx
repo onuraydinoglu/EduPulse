@@ -42,10 +42,10 @@ function FormFields({
             <FormSelect
               key={field.name}
               label={field.label}
-              value={fieldValue}
+              value={formData[field.name] || ""}
               onChange={(value) => updateField(field, value)}
               options={field.options || []}
-              error={errors?.[field.name]}
+              error={errors[field.name]}
               className={field.className}
               disabled={field.disabled}
               placeholder={field.placeholder}
