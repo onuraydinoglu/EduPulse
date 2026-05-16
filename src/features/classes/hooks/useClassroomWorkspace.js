@@ -16,6 +16,11 @@ const emptyStudentForm = {
   phoneNumber: "",
   studentNumber: "",
   classroomId: "",
+  motherFullName: "",
+  fatherFullName: "",
+  motherPhoneNumber: "",
+  fatherPhoneNumber: "",
+  address: "",
 };
 
 const getResultData = (result) => result?.data || result?.Data || result || [];
@@ -28,6 +33,16 @@ const getPhoneNumber = (student) =>
   student?.phoneNumber || student?.PhoneNumber || "";
 const getStudentNumber = (student) =>
   student?.studentNumber || student?.StudentNumber || "";
+const getMotherFullName = (student) =>
+  student?.motherFullName || student?.MotherFullName || "";
+const getFatherFullName = (student) =>
+  student?.fatherFullName || student?.FatherFullName || "";
+const getMotherPhoneNumber = (student) =>
+  student?.motherPhoneNumber || student?.MotherPhoneNumber || "";
+const getFatherPhoneNumber = (student) =>
+  student?.fatherPhoneNumber || student?.FatherPhoneNumber || "";
+const getAddress = (student) =>
+  student?.address || student?.Address || "";
 
 const getErrorMessage = (error, fallback) => {
   const data = error?.response?.data;
@@ -206,6 +221,11 @@ export function useClassroomWorkspace(classId) {
       phoneNumber: cleanPhone(preparedFormData.phoneNumber),
       studentNumber: preparedFormData.studentNumber.trim(),
       classroomId: classId,
+      motherFullName: preparedFormData.motherFullName.trim(),
+      fatherFullName: preparedFormData.fatherFullName.trim(),
+      motherPhoneNumber: cleanPhone(preparedFormData.motherPhoneNumber),
+      fatherPhoneNumber: cleanPhone(preparedFormData.fatherPhoneNumber),
+      address: preparedFormData.address.trim(),
       isActive: true,
     };
 
@@ -265,6 +285,11 @@ export function useClassroomWorkspace(classId) {
       phoneNumber: getPhoneNumber(student),
       studentNumber: getStudentNumber(student),
       classroomId: getClassroomId(student) || classId,
+      motherFullName: getMotherFullName(student),
+      fatherFullName: getFatherFullName(student),
+      motherPhoneNumber: getMotherPhoneNumber(student),
+      fatherPhoneNumber: getFatherPhoneNumber(student),
+      address: getAddress(student),
     });
 
     openModal(modalId);
@@ -308,6 +333,11 @@ export function useClassroomWorkspace(classId) {
       phoneNumber: cleanPhone(preparedFormData.phoneNumber),
       studentNumber: preparedFormData.studentNumber.trim(),
       classroomId: preparedFormData.classroomId,
+      motherFullName: preparedFormData.motherFullName.trim(),
+      fatherFullName: preparedFormData.fatherFullName.trim(),
+      motherPhoneNumber: cleanPhone(preparedFormData.motherPhoneNumber),
+      fatherPhoneNumber: cleanPhone(preparedFormData.fatherPhoneNumber),
+      address: preparedFormData.address.trim(),
       isActive: true,
     };
 

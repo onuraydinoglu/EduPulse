@@ -1,4 +1,5 @@
 export const STUDENT_MODAL_ID = "student_modal";
+
 export const STUDENT_DELETE_MODAL_ID = "student_delete_modal";
 
 export const emptyStudentForm = {
@@ -8,4 +9,10 @@ export const emptyStudentForm = {
   phoneNumber: "",
   studentNumber: "",
   classroomId: "",
+  motherFullName: "",
+  fatherFullName: "",
+  motherPhoneNumber: "",
+  fatherPhoneNumber: "",
+  address: "",
+  isActive: true,
 };

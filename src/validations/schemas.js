@@ -73,6 +73,10 @@ export const studentValidationSchema = {
   studentNumber: [validators.required("Öğrenci numarası zorunludur.")],
 
   classroomId: [validators.required("Sınıf seçilmelidir.")],
+
+  motherPhoneNumber: [validators.phone()],
+
+  fatherPhoneNumber: [validators.phone()],
 };
 
 export const lessonValidationSchema = {

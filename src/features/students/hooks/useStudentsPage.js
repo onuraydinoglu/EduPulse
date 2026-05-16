@@ -23,7 +23,6 @@ import {
   getStudentEmail,
   getStudentFirstName,
   getStudentId,
-  getStudentIsActive,
   getStudentLastName,
   getStudentNumber,
   getStudentPhoneNumber,
@@ -135,6 +134,11 @@ export function useStudentsPage() {
       phoneNumber: getStudentPhoneNumber(student),
       studentNumber: getStudentNumber(student),
       classroomId: getStudentClassroomId(student),
+      motherFullName: student?.motherFullName || student?.MotherFullName || "",
+      fatherFullName: student?.fatherFullName || student?.FatherFullName || "",
+      motherPhoneNumber: student?.motherPhoneNumber || student?.MotherPhoneNumber || "",
+      fatherPhoneNumber: student?.fatherPhoneNumber || student?.FatherPhoneNumber || "",
+      address: student?.address || student?.Address || "",
     });
 
     openModal(modalId);
@@ -165,6 +169,11 @@ export function useStudentsPage() {
       phoneNumber: cleanPhone(formData.phoneNumber),
       studentNumber: formData.studentNumber.trim(),
       classroomId: formData.classroomId,
+      motherFullName: formData.motherFullName.trim(),
+      fatherFullName: formData.fatherFullName.trim(),
+      motherPhoneNumber: cleanPhone(formData.motherPhoneNumber),
+      fatherPhoneNumber: cleanPhone(formData.fatherPhoneNumber),
+      address: formData.address.trim(),
       isActive: true,
     };
   };

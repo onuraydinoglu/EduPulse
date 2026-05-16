@@ -5,6 +5,7 @@ import {
     ClipboardDocumentCheckIcon,
     EnvelopeIcon,
     HashtagIcon,
+    MapPinIcon,
     PhoneIcon,
     UserCircleIcon,
     UserGroupIcon,
@@ -42,6 +43,31 @@ function StudentProfileDetails({ profile, details }) {
         ["classroomName", "ClassroomName", "className", "ClassName"],
         "-"
     );
+    const motherFullName = getValue(
+        profile,
+        ["motherFullName", "MotherFullName"],
+        "-"
+    );
+
+    const fatherFullName = getValue(
+        profile,
+        ["fatherFullName", "FatherFullName"],
+        "-"
+    );
+
+    const motherPhoneNumber = getValue(
+        profile,
+        ["motherPhoneNumber", "MotherPhoneNumber"],
+        "-"
+    );
+
+    const fatherPhoneNumber = getValue(
+        profile,
+        ["fatherPhoneNumber", "FatherPhoneNumber"],
+        "-"
+    );
+
+    const address = getValue(profile, ["address", "Address"], "-");
 
     const getEventId = (eventMember) => {
         return eventMember?.eventId || "";
@@ -129,6 +155,36 @@ function StudentProfileDetails({ profile, details }) {
                         icon={PhoneIcon}
                         label="Telefon"
                         value={getPhoneNumber(profile)}
+                    />
+
+                    <ProfileInfoCard
+                        icon={UserGroupIcon}
+                        label="Anne Adı Soyadı"
+                        value={motherFullName}
+                    />
+
+                    <ProfileInfoCard
+                        icon={UserGroupIcon}
+                        label="Baba Adı Soyadı"
+                        value={fatherFullName}
+                    />
+
+                    <ProfileInfoCard
+                        icon={PhoneIcon}
+                        label="Anne Telefon Numarası"
+                        value={motherPhoneNumber}
+                    />
+
+                    <ProfileInfoCard
+                        icon={PhoneIcon}
+                        label="Baba Telefon Numarası"
+                        value={fatherPhoneNumber}
+                    />
+
+                    <ProfileInfoCard
+                        icon={MapPinIcon}
+                        label="Adres"
+                        value={address}
                     />
                 </div>
             </ProfileSection>

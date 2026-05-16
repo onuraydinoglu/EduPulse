@@ -1,4 +1,5 @@
 import FormFields from "../../../components/common/FormFields";
+
 import { getClassroomLabel } from "../utils/studentFormatters";
 
 function StudentForm({
@@ -52,6 +53,31 @@ function StudentForm({
         value: classroom.id || classroom.Id,
         label: getClassroomLabel(classroom),
       })),
+    },
+    {
+      name: "motherFullName",
+      label: "Anne Adı Soyadı",
+      placeholder: "Örn: Ayşe Yıldız",
+    },
+    {
+      name: "fatherFullName",
+      label: "Baba Adı Soyadı",
+      placeholder: "Örn: Mehmet Yıldız",
+    },
+    {
+      name: "motherPhoneNumber",
+      label: "Anne Telefon Numarası",
+      placeholder: "Örn: 05555555555",
+    },
+    {
+      name: "fatherPhoneNumber",
+      label: "Baba Telefon Numarası",
+      placeholder: "Örn: 05555555555",
+    },
+    {
+      name: "address",
+      label: "Adres",
+      placeholder: "Örn: Atakum / Samsun",
     },
   ];
 
