@@ -1,6 +1,6 @@
 import {
     AcademicCapIcon,
-    BuildingOffice2Icon,
+    CalendarDaysIcon,
     ChartBarIcon,
     CheckCircleIcon,
     HomeModernIcon,
@@ -24,18 +24,18 @@ export const getPrincipalReportStats = (schoolInfo) => [
         icon: AcademicCapIcon,
     },
     {
-        title: "Aktif Sınıf",
-        value: schoolInfo.classCount,
-        description: "Takip edilen sınıf sayısı",
+        title: "Toplam Kulüp",
+        value: schoolInfo.clubCount,
+        description: "Okuldaki kulüp sayısı",
         color: "success",
-        icon: BuildingOffice2Icon,
+        icon: UserPlusIcon,
     },
     {
-        title: "Kulüpler",
-        value: schoolInfo.clubCount,
-        description: "Okuldaki aktif kulüp sayısı",
+        title: "Toplam Etkinlik",
+        value: schoolInfo.eventCount,
+        description: "Okuldaki etkinlik sayısı",
         color: "warning",
-        icon: UserPlusIcon,
+        icon: CalendarDaysIcon,
     },
 ];
 

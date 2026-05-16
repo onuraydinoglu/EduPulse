@@ -1,3 +1,4 @@
+import Toast from "../../../components/ui/Toast";
 import PrincipalReportSection from "../components/PrincipalReportSection";
 import ReportPageHeader from "../components/ReportPageHeader";
 import ReportStatsCards from "../components/ReportStatsCards";
@@ -9,6 +10,8 @@ function PrincipalReportsPage() {
     setGradeFilter,
     filteredClassReports,
     stats,
+    isLoading,
+    toast,
     handleExportPrincipalReport,
   } = usePrincipalReportsPage();
 
@@ -24,11 +27,19 @@ function PrincipalReportsPage() {
 
       <ReportStatsCards items={stats} />
 
-      <PrincipalReportSection
-        reports={filteredClassReports}
-        gradeFilter={gradeFilter}
-        setGradeFilter={setGradeFilter}
-      />
+      {isLoading ? (
+        <section className="radius-card border border-gray-200 bg-white p-6 text-sm text-gray-500">
+          Müdür raporları yükleniyor...
+        </section>
+      ) : (
+        <PrincipalReportSection
+          reports={filteredClassReports}
+          gradeFilter={gradeFilter}
+          setGradeFilter={setGradeFilter}
+        />
+      )}
+
+      {toast.message && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }
