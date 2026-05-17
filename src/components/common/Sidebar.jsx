@@ -2,10 +2,7 @@ import { useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { menuItems } from "../../constants/menuItems";
 import { authStorage } from "../../features/auth/services/authStorage";
-import {
-  AcademicCapIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 function Sidebar({ collapsed }) {
   const navigate = useNavigate();
@@ -61,25 +58,25 @@ function Sidebar({ collapsed }) {
         className={`flex min-h-full flex-col border-r border-base-300/70 bg-base-100/80 shadow-xl backdrop-blur-2xl transition-all duration-300 ${collapsed ? "lg:w-20" : "lg:w-66"
           } w-66`}
       >
-        <div className={`${collapsed ? "lg:px-3" : "lg:px-6"} px-6 py-6`}>
+        <div className={`${collapsed ? "lg:px-3 lg:py-2" : "lg:px-6"}`}>
           <div
-            className={`flex items-center ${collapsed ? "lg:justify-center" : "lg:gap-3"
-              } gap-3`}
+            className={`flex items-center ${collapsed ? "lg:justify-center" : "lg:justify-start"
+              }`}
           >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <AcademicCapIcon className="h-6 w-6" />
-            </div>
-
-            <div className={`${collapsed ? "lg:hidden" : ""}`}>
-              <h1 className="text-lg font-bold leading-tight">EduPulse</h1>
-              <p className="text-xs text-base-content/50">
-                Okul Yönetim Sistemi
-              </p>
-            </div>
+            <NavLink to="/dashboard" aria-label="Ana sayfaya git">
+              <img
+                src={collapsed ? "/images/StudRiIcon.png" : "/images/StudRiLogo.png"}
+                alt="StudRi"
+                className={`object-contain transition-all duration-300 ${collapsed
+                  ? "h-11 w-11 lg:h-12 lg:w-12"
+                  : "h-16 w-auto max-w-[150px]"
+                  }`}
+              />
+            </NavLink>
           </div>
         </div>
 
-        <nav className="flex-1 px-3 pb-6 pt-3">
+        <nav className="flex-1 px-3 pb-6 pt-6">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
 
