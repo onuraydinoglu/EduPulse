@@ -13,6 +13,7 @@ import {
 
 import { getClassStats } from "../constants/classTableColumns";
 import { useClassesPage } from "../hooks/useClassesPage";
+import { getCurrentRole } from "../../../utils/authUser";
 
 function ClassesPage() {
   const {
@@ -41,11 +42,17 @@ function ClassesPage() {
     handleExportClassesPdf,
   } = useClassesPage();
 
+  const currentRole = getCurrentRole();
+
+  const canManageClasses =
+    currentRole === "schooladmin" || currentRole === "officer";
+
   return (
     <div className="space-y-6">
       <Toast message={toast.message} type={toast.type} />
 
       <ClassesPageHeader
+        canManage={canManageClasses}
         onCreate={() => handleOpenCreateModal(CLASS_MODAL_ID)}
         onExport={handleExportClassesPdf}
       />
@@ -59,25 +66,30 @@ function ClassesPage() {
         setSearch={setSearch}
         gradeFilter={gradeFilter}
         setGradeFilter={setGradeFilter}
+        canManage={canManageClasses}
         onEdit={(classItem) => handleOpenEditModal(classItem, CLASS_MODAL_ID)}
         onDelete={(id) => handleOpenDeleteModal(id, CLASS_DELETE_MODAL_ID)}
       />
 
-      <ClassFormModal
-        modalId={CLASS_MODAL_ID}
-        isEditing={isEditing}
-        formData={formData}
-        setFormData={setFormData}
-        teachers={teachers}
-        errors={errors}
-        onClose={() => handleCloseClassModal(CLASS_MODAL_ID)}
-        onSubmit={() => handleSubmit(CLASS_MODAL_ID)}
-      />
+      {canManageClasses && (
+        <>
+          <ClassFormModal
+            modalId={CLASS_MODAL_ID}
+            teachers={teachers}
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            isEditing={isEditing}
+            onClose={() => handleCloseClassModal(CLASS_MODAL_ID)}
+            onSubmit={() => handleSubmit(CLASS_MODAL_ID)}
+          />
 
-      <ClassDeleteModal
-        modalId={CLASS_DELETE_MODAL_ID}
-        onConfirm={() => handleDelete(CLASS_DELETE_MODAL_ID)}
-      />
+          <ClassDeleteModal
+            modalId={CLASS_DELETE_MODAL_ID}
+            onDelete={() => handleDelete(CLASS_DELETE_MODAL_ID)}
+          />
+        </>
+      )}
     </div>
   );
 }

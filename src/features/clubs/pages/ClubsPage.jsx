@@ -13,6 +13,7 @@ import {
 
 import { getClubStats } from "../constants/clubTableColumns";
 import { useClubsPage } from "../hooks/useClubsPage";
+import { getCurrentRole } from "../../../utils/authUser";
 
 function ClubsPage() {
   const {
@@ -45,6 +46,11 @@ function ClubsPage() {
     handleExportClubsPdf,
   } = useClubsPage();
 
+  const currentRole = getCurrentRole();
+
+  const canManageClubs =
+    currentRole === "schooladmin" || currentRole === "officer";
+
   return (
     <div className="space-y-6">
       {toast.message && (
@@ -52,6 +58,7 @@ function ClubsPage() {
       )}
 
       <ClubsPageHeader
+        canManage={canManageClubs}
         onCreate={() => handleOpenCreateModal(CLUB_MODAL_ID)}
         onExport={handleExportClubsPdf}
       />
@@ -65,6 +72,7 @@ function ClubsPage() {
         setSearch={setSearch}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
+        canManage={canManageClubs}
         onEdit={(club) => handleOpenEditModal(club, CLUB_MODAL_ID)}
         onDelete={(id) => handleOpenDeleteModal(id, CLUB_DELETE_MODAL_ID)}
       />

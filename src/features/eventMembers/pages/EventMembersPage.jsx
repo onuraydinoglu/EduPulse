@@ -16,6 +16,7 @@ import {
 
 import { useEventMembersPage } from "../hooks/useEventMembersPage";
 import { getEventIsPaid } from "../utils/eventMemberFormatters";
+import { getCurrentRole } from "../../../utils/authUser";
 
 function EventMembersPage() {
   const {
@@ -44,7 +45,10 @@ function EventMembersPage() {
     handleExportMembersPdf,
   } = useEventMembersPage();
 
-  const canManage = true;
+  const currentRole = getCurrentRole();
+
+  const canManage =
+    currentRole === "schooladmin" || currentRole === "officer";
 
   const isPaidEvent = getEventIsPaid(event);
 
@@ -86,6 +90,7 @@ function EventMembersPage() {
         <EventMembersPageHeader
           event={event}
           onBack={handleBackToEvents}
+          canManage={canManage}
           onCreate={() => handleOpenCreateModal(EVENT_MEMBER_MODAL_ID)}
           onExport={handleExportMembersPdf}
         />

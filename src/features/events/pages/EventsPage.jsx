@@ -10,6 +10,7 @@ import {
 } from "../constants/eventConstants";
 import { getEventStats } from "../constants/eventTableColumns";
 import { useEventsPage } from "../hooks/useEventsPage";
+import { getCurrentRole } from "../../../utils/authUser";
 
 function EventsPage() {
   const {
@@ -37,11 +38,17 @@ function EventsPage() {
     handleExportEventsPdf,
   } = useEventsPage();
 
+  const currentRole = getCurrentRole();
+
+  const canManageEvents =
+    currentRole === "schooladmin" || currentRole === "officer";
+
   return (
     <div className="space-y-6">
       {toast.message && <Toast message={toast.message} type={toast.type} />}
 
       <EventsPageHeader
+        canManage={canManageEvents}
         onCreate={() => handleOpenCreateModal(EVENT_MODAL_ID)}
         onExport={handleExportEventsPdf}
       />
@@ -57,6 +64,7 @@ function EventsPage() {
         setStatusFilter={setStatusFilter}
         paymentFilter={paymentFilter}
         setPaymentFilter={setPaymentFilter}
+        canManage={canManageEvents}
         onEdit={(event) => handleOpenEditModal(event, EVENT_MODAL_ID)}
         onDelete={(id) => handleOpenDeleteModal(id, EVENT_DELETE_MODAL_ID)}
       />
