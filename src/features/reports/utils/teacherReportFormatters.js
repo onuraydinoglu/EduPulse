@@ -2,23 +2,21 @@ const getValue = (item, camelKey, pascalKey, fallback = "") => {
     return item?.[camelKey] ?? item?.[pascalKey] ?? fallback;
 };
 
-const normalizeString = (value) => {
-    return value === null || value === undefined ? "" : String(value);
-};
+export const getTeacherReportErrorMessage = (error, fallbackMessage) => {
+    const data = error?.response?.data;
 
-const getNestedValue = (item, camelKey, pascalKey, fallback = "") => {
+    if (typeof data === "string") return data;
+
     return (
-        item?.[camelKey] ??
-        item?.[pascalKey] ??
-        item?.user?.[camelKey] ??
-        item?.user?.[pascalKey] ??
-        item?.User?.[camelKey] ??
-        item?.User?.[pascalKey] ??
-        item?.data?.[camelKey] ??
-        item?.data?.[pascalKey] ??
-        item?.Data?.[camelKey] ??
-        item?.Data?.[pascalKey] ??
-        fallback
+        data?.message ||
+        data?.Message ||
+        data?.error ||
+        data?.Error ||
+        data?.title ||
+        data?.errors?.[0] ||
+        data?.Errors?.[0] ||
+        error?.message ||
+        fallbackMessage
     );
 };
 
@@ -65,8 +63,14 @@ const parseJwtPayload = (token) => {
 
 const getCurrentUserId = (currentUser) => {
     const directId =
-        getNestedValue(currentUser, "id", "Id") ||
-        getNestedValue(currentUser, "userId", "UserId");
+        getValue(currentUser, "id", "Id") ||
+        getValue(currentUser, "userId", "UserId") ||
+        getValue(currentUser?.user, "id", "Id") ||
+        getValue(currentUser?.user, "userId", "UserId") ||
+        getValue(currentUser?.data, "id", "Id") ||
+        getValue(currentUser?.data, "userId", "UserId") ||
+        getValue(currentUser?.Data, "id", "Id") ||
+        getValue(currentUser?.Data, "userId", "UserId");
 
     if (directId) return directId;
 
@@ -91,6 +95,29 @@ const getId = (item) => {
     return getValue(item, "id", "Id");
 };
 
+const getFullName = (item) => {
+    if (!item) return "-";
+
+    const fullName =
+        getValue(item, "fullName", "FullName") ||
+        getValue(item, "studentFullName", "StudentFullName") ||
+        getValue(item, "teacherFullName", "TeacherFullName");
+
+    if (fullName) return fullName;
+
+    const firstName =
+        getValue(item, "firstName", "FirstName") ||
+        getValue(item, "studentFirstName", "StudentFirstName") ||
+        getValue(item, "teacherFirstName", "TeacherFirstName");
+
+    const lastName =
+        getValue(item, "lastName", "LastName") ||
+        getValue(item, "studentLastName", "StudentLastName") ||
+        getValue(item, "teacherLastName", "TeacherLastName");
+
+    return `${firstName} ${lastName}`.trim() || "-";
+};
+
 const getTeacherId = (teacher) => {
     return getValue(teacher, "id", "Id");
 };
@@ -108,11 +135,11 @@ const getClassTeacherId = (classItem) => {
 };
 
 const getClassGrade = (classItem) => {
-    return normalizeString(getValue(classItem, "grade", "Grade"));
+    return String(getValue(classItem, "grade", "Grade") || "");
 };
 
 const getClassSection = (classItem) => {
-    return normalizeString(getValue(classItem, "section", "Section"));
+    return String(getValue(classItem, "section", "Section") || "");
 };
 
 const getClassName = (classItem) => {
@@ -147,27 +174,6 @@ const getStudentNumber = (student) => {
         getValue(student, "schoolNumber", "SchoolNumber") ||
         "-"
     );
-};
-
-const getFullName = (item) => {
-    const fullName =
-        getValue(item, "fullName", "FullName") ||
-        getValue(item, "studentFullName", "StudentFullName") ||
-        getValue(item, "teacherFullName", "TeacherFullName");
-
-    if (fullName) return fullName;
-
-    const firstName =
-        getValue(item, "firstName", "FirstName") ||
-        getValue(item, "studentFirstName", "StudentFirstName") ||
-        getValue(item, "teacherFirstName", "TeacherFirstName");
-
-    const lastName =
-        getValue(item, "lastName", "LastName") ||
-        getValue(item, "studentLastName", "StudentLastName") ||
-        getValue(item, "teacherLastName", "TeacherLastName");
-
-    return `${firstName} ${lastName}`.trim() || "-";
 };
 
 const getParentName = (student) => {
@@ -255,9 +261,16 @@ const getStudentLessons = (student, studentGrades = []) => {
             id: getId(studentGrade),
             name: getStudentGradeLessonName(studentGrade),
             average: getGradeAverage(studentGrade),
-            exam1: getValue(studentGrade, "exam1", "Exam1", "-"),
-            exam2: getValue(studentGrade, "exam2", "Exam2", "-"),
-            project: getValue(studentGrade, "project", "Project", "-"),
+            examGrades: [
+                getValue(studentGrade, "exam1", "Exam1", "-"),
+                getValue(studentGrade, "exam2", "Exam2", "-"),
+            ],
+            projectGrade: getValue(studentGrade, "project", "Project", "-"),
+            activityGrades: [
+                getValue(studentGrade, "activity1", "Activity1", "-"),
+                getValue(studentGrade, "activity2", "Activity2", "-"),
+                getValue(studentGrade, "activity3", "Activity3", "-"),
+            ],
         }));
 };
 
@@ -268,13 +281,23 @@ const getStudentTrialExams = (student, trialExams = []) => {
 
     const studentId = getStudentId(student);
 
-    return trialExams.filter((trialExam) => {
-        const trialExamStudentId =
-            getValue(trialExam, "studentId", "StudentId") ||
-            getValue(trialExam, "studentID", "StudentID");
+    return trialExams
+        .filter((trialExam) => {
+            const trialExamStudentId = getValue(trialExam, "studentId", "StudentId");
 
-        return trialExamStudentId === studentId;
-    });
+            return trialExamStudentId === studentId;
+        })
+        .map((trialExam) => ({
+            id: getId(trialExam),
+            name:
+                getValue(trialExam, "name", "Name") ||
+                getValue(trialExam, "examName", "ExamName") ||
+                "Deneme Sınavı",
+            net:
+                getValue(trialExam, "net", "Net", null) ??
+                getValue(trialExam, "totalNet", "TotalNet", null) ??
+                getValue(trialExam, "score", "Score", "-"),
+        }));
 };
 
 const getStudentClubName = ({ student, clubs = [], clubMembers = [] }) => {
@@ -306,33 +329,12 @@ const getStudentClubName = ({ student, clubs = [], clubMembers = [] }) => {
     );
 };
 
-const findClassTeacher = (classItem, teachers = []) => {
-    const classTeacherId = getClassTeacherId(classItem);
-
-    if (!classTeacherId) return null;
-
-    return (
-        teachers.find((teacher) => {
-            const teacherId = getTeacherId(teacher);
-            const teacherUserId = getTeacherUserId(teacher);
-
-            return teacherId === classTeacherId || teacherUserId === classTeacherId;
-        }) || null
-    );
-};
-
 export const getStudentReportStatus = (average = 0) => {
     if (average >= 90) return "Çok Başarılı";
     if (average >= 75) return "Başarılı";
     if (average >= 60) return "Takip Edilmeli";
 
     return "Riskli";
-};
-
-export const filterClassReportsByGrade = (reports = [], gradeFilter = "all") => {
-    if (gradeFilter === "all") return reports;
-
-    return reports.filter((item) => item.grade === gradeFilter);
 };
 
 export const buildTeacherClass = ({
@@ -348,7 +350,7 @@ export const buildTeacherClass = ({
             const teacherUserId = getTeacherUserId(teacher);
 
             return teacherId === currentUserId || teacherUserId === currentUserId;
-        }) || (teachers.length === 1 ? teachers[0] : null);
+        }) || null;
 
     const currentTeacherId = getTeacherId(currentTeacher);
     const currentTeacherUserId = getTeacherUserId(currentTeacher);
@@ -372,7 +374,6 @@ export const buildTeacherClass = ({
 export const buildTeacherStudentReports = ({
     students = [],
     classes = [],
-    teachers = [],
     clubs = [],
     clubMembers = [],
     studentGrades = [],
@@ -390,7 +391,6 @@ export const buildTeacherStudentReports = ({
                 (classData) => getClassId(classData) === getStudentClassroomId(student)
             );
 
-            const teacher = findClassTeacher(classItem, teachers);
             const average = getStudentAverage(student, studentGrades);
             const lessons = getStudentLessons(student, studentGrades);
             const studentTrialExams = getStudentTrialExams(student, trialExams);
@@ -399,13 +399,9 @@ export const buildTeacherStudentReports = ({
                 studentTrialExams.length > 0
                     ? Math.round(
                         studentTrialExams.reduce((total, trialExam) => {
-                            const score =
-                                Number(getValue(trialExam, "score", "Score", 0)) ||
-                                Number(getValue(trialExam, "totalNet", "TotalNet", 0)) ||
-                                Number(getValue(trialExam, "average", "Average", 0)) ||
-                                0;
+                            const net = Number(trialExam.net);
 
-                            return total + score;
+                            return total + (Number.isNaN(net) ? 0 : net);
                         }, 0) / studentTrialExams.length
                     )
                     : 0;
@@ -417,7 +413,6 @@ export const buildTeacherStudentReports = ({
                 schoolNumber: getStudentNumber(student),
                 parentName: getParentName(student),
                 className: getClassName(classItem),
-                classTeacher: getFullName(teacher),
                 club: getStudentClubName({
                     student,
                     clubs,
@@ -428,7 +423,7 @@ export const buildTeacherStudentReports = ({
                 lessonAverage: average,
                 examAverage: average,
                 trialExamAverage,
-                projectCount: lessons.filter((lesson) => lesson.project !== "-").length,
+                projectCount: lessons.filter((lesson) => lesson.projectGrade !== "-").length,
                 schoolRank:
                     getValue(student, "schoolRank", "SchoolRank") ||
                     getValue(student, "rank", "Rank") ||
@@ -448,8 +443,10 @@ export const getTeacherClassStats = (students = []) => {
     const average =
         studentCount > 0
             ? Math.round(
-                students.reduce((total, student) => total + Number(student.average || 0), 0) /
-                studentCount
+                students.reduce(
+                    (total, student) => total + Number(student.average || 0),
+                    0
+                ) / studentCount
             )
             : 0;
 
@@ -480,7 +477,9 @@ export const filterTeacherStudents = ({
             student.fullName?.toLowerCase().includes(normalizedSearch) ||
             student.club?.toLowerCase().includes(normalizedSearch) ||
             student.className?.toLowerCase().includes(normalizedSearch) ||
-            student.schoolNumber?.toLowerCase().includes(normalizedSearch) ||
+            String(student.schoolNumber || "")
+                .toLowerCase()
+                .includes(normalizedSearch) ||
             student.parentName?.toLowerCase().includes(normalizedSearch);
 
         const matchesStatus = status === "all" || student.status === status;

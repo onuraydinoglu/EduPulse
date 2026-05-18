@@ -1,31 +1,86 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-    classes,
-    clubs,
-    students as mockStudents,
-    teachers,
-} from "../../../data/mockData";
-import { teacherClass } from "../constants/reportConstants";
 import { getTeacherReportStats } from "../constants/reportStats";
+import { teacherReportService } from "../services/teacherReportService";
 import {
+    buildTeacherClass,
     buildTeacherStudentReports,
     filterTeacherStudents,
     getTeacherClassStats,
-} from "../utils/reportFormatters";
+    getTeacherReportErrorMessage,
+} from "../utils/teacherReportFormatters";
+
+const emptyTeacherClass = {
+    id: "",
+    className: "-",
+};
 
 export function useTeacherReportsPage() {
+    const [teacherClass, setTeacherClass] = useState(emptyTeacherClass);
+    const [students, setStudents] = useState([]);
     const [studentSearch, setStudentSearch] = useState("");
     const [studentStatus, setStudentStatus] = useState("all");
+    const [isLoading, setIsLoading] = useState(false);
+    const [toast, setToast] = useState({
+        message: "",
+        type: "success",
+    });
 
-    const students = useMemo(() => {
-        return buildTeacherStudentReports({
-            students: mockStudents,
-            classes,
-            teachers,
-            clubs,
-            teacherClass,
+    const showToast = (message, type = "success") => {
+        setToast({
+            message,
+            type,
         });
+
+        setTimeout(() => {
+            setToast({
+                message: "",
+                type: "success",
+            });
+        }, 2500);
+    };
+
+    const loadTeacherReports = async () => {
+        setIsLoading(true);
+
+        try {
+            const result = await teacherReportService.getTeacherReportData();
+
+            const nextTeacherClass = buildTeacherClass({
+                teachers: result.teachers,
+                classes: result.classes,
+                currentUser: result.currentUser,
+            });
+
+            const nextStudents = buildTeacherStudentReports({
+                students: result.students,
+                classes: result.classes,
+                clubs: result.clubs,
+                clubMembers: result.clubMembers,
+                studentGrades: result.studentGrades,
+                trialExams: result.trialExams,
+                teacherClass: nextTeacherClass,
+            });
+
+            setTeacherClass(nextTeacherClass);
+            setStudents(nextStudents);
+        } catch (error) {
+            console.error(error);
+
+            showToast(
+                getTeacherReportErrorMessage(
+                    error,
+                    "Öğretmen raporları yüklenirken hata oluştu."
+                ),
+                "error"
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadTeacherReports();
     }, []);
 
     const teacherClassStats = useMemo(() => {
@@ -34,7 +89,7 @@ export function useTeacherReportsPage() {
 
     const stats = useMemo(() => {
         return getTeacherReportStats(teacherClass, teacherClassStats);
-    }, [teacherClassStats]);
+    }, [teacherClass, teacherClassStats]);
 
     const filteredStudents = useMemo(() => {
         return filterTeacherStudents({
@@ -60,6 +115,8 @@ export function useTeacherReportsPage() {
         setStudentStatus,
         filteredStudents,
         stats,
+        isLoading,
+        toast,
         handleExportTeacherReport,
         handlePrepareParentReport,
     };
