@@ -1,24 +1,18 @@
 import Toast from "../../../components/ui/Toast";
-
 import ClubDeleteModal from "../components/ClubDeleteModal";
-
 import ClubFormModal from "../components/ClubFormModal";
-
 import ClubsPageHeader from "../components/ClubsPageHeader";
-
 import ClubStatsCards from "../components/ClubStatsCards";
-
 import ClubTable from "../components/ClubTable";
 
 import {
   CLUB_DELETE_MODAL_ID,
+
   CLUB_MODAL_ID,
 } from "../constants/clubConstants";
 
 import { getClubStats } from "../constants/clubTableColumns";
-
 import { useClubsPage } from "../hooks/useClubsPage";
-
 import { canManageSchoolData } from "../../../utils/authUser";
 
 function ClubsPage() {
@@ -35,6 +29,8 @@ function ClubsPage() {
     setSearch,
     statusFilter,
     setStatusFilter,
+    isStudent,
+    studentClubStats,
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseClubModal,
@@ -46,6 +42,7 @@ function ClubsPage() {
   } = useClubsPage();
 
   const canManageClubs = canManageSchoolData();
+  const statItems = isStudent ? studentClubStats : getClubStats(clubs);
 
   return (
     <div className="space-y-6">
@@ -57,7 +54,7 @@ function ClubsPage() {
         onExport={handleExportClubsPdf}
       />
 
-      <ClubStatsCards items={getClubStats(clubs)} />
+      <ClubStatsCards items={statItems} />
 
       <ClubTable
         clubs={filteredClubs}
@@ -67,6 +64,7 @@ function ClubsPage() {
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
         canManage={canManageClubs}
+        canOpenClub={!isStudent}
         onEdit={(club) => handleOpenEditModal(club, CLUB_MODAL_ID)}
         onDelete={(id) => handleOpenDeleteModal(id, CLUB_DELETE_MODAL_ID)}
       />

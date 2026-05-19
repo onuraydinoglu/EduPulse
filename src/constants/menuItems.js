@@ -5,16 +5,12 @@ import {
   AcademicCapIcon,
   BookOpenIcon,
   RectangleStackIcon,
-  ClipboardDocumentListIcon,
-  ClipboardDocumentCheckIcon,
   Squares2X2Icon,
   ChartBarIcon,
   RectangleGroupIcon,
-  DocumentChartBarIcon,
   IdentificationIcon,
   CalendarDaysIcon,
   UserGroupIcon,
-  UserPlusIcon, // ✅ EKLENDİ
 } from "@heroicons/react/24/outline";
 
 export const menuItems = [
@@ -22,7 +18,7 @@ export const menuItems = [
     title: "Anasayfa",
     path: "/dashboard",
     icon: HomeIcon,
-    roles: ["superadmin", "schooladmin", "teacher", "officer"],
+    roles: ["superadmin", "schooladmin", "teacher", "officer", "student"],
   },
 
   {
@@ -71,7 +67,6 @@ export const menuItems = [
     ],
   },
 
-
   {
     title: "Sınıflar",
     path: "/dashboard/classes",
@@ -79,25 +74,31 @@ export const menuItems = [
     roles: ["schooladmin", "officer", "teacher"],
   },
 
-  { /* {
-    title: "Deneme Sınavları (Sınıflardan Ulaşım olacak daha sonra kalkacak)",
-    path: "/dashboard/trial-exams",
-    icon: DocumentChartBarIcon,
-    roles: ["schooladmin", "teacher"],
-  }, */ },
+  {
+    title: "Sınavlar",
+    path: "/dashboard/exams",
+    icon: BookOpenIcon,
+    roles: ["student"],
+  },
 
+  {
+    title: "Deneme Sınavı",
+    path: "/dashboard/trial-exams",
+    icon: ChartBarIcon,
+    roles: ["student"],
+  },
 
   {
     title: "Kulüpler",
     path: "/dashboard/clubs",
     icon: Squares2X2Icon,
-    roles: ["schooladmin", "officer", "teacher"],
+    roles: ["schooladmin", "officer", "teacher", "student"],
   },
   {
     title: "Etkinlikler",
     path: "/dashboard/events",
     icon: CalendarDaysIcon,
-    roles: ["schooladmin", "officer", "teacher"],
+    roles: ["schooladmin", "officer", "teacher", "student"],
   },
 
   {

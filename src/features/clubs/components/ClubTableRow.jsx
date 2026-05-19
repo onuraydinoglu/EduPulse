@@ -1,19 +1,30 @@
 import { Link } from "react-router-dom";
+
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 import TableActions from "../../../components/ui/TableActions";
+
 import {
   getClubAdvisorTeacherName,
+
   getClubId,
+
   getClubMemberCount,
+
   getClubName,
 } from "../utils/clubFormatters";
 
 function ClubTableRow({
   club,
+
   teachers = [],
+
   canManage = true,
+
+  canOpenClub = true,
+
   onEdit,
+
   onDelete,
 }) {
   const clubId = getClubId(club);
@@ -38,15 +49,17 @@ function ClubTableRow({
         </span>
       </td>
 
-      <td>
-        <Link
-          to={`/dashboard/clubs/${clubId}/members`}
-          className="btn btn-sm rounded-xl border-base-300 bg-base-100 text-base-content hover:border-primary hover:bg-primary hover:text-primary-content"
-        >
-          <ArrowRightOnRectangleIcon className="h-4 w-4" />
-          Kulübe Git
-        </Link>
-      </td>
+      {canOpenClub && (
+        <td>
+          <Link
+            to={`/dashboard/clubs/${clubId}/members`}
+            className="btn btn-sm rounded-xl border-base-300 bg-base-100 text-base-content hover:border-primary hover:bg-primary hover:text-primary-content"
+          >
+            <ArrowRightOnRectangleIcon className="h-4 w-4" />
+            Kulübe Git
+          </Link>
+        </td>
+      )}
 
       {canManage && (
         <td className="text-right">

@@ -13,6 +13,7 @@ function ClubTable({
   statusFilter,
   setStatusFilter,
   canManage = true,
+  canOpenClub = true,
   onEdit,
   onDelete,
 }) {
@@ -77,9 +78,11 @@ function ClubTable({
                 <span className={tableHeadTextClass}>Üye Sayısı</span>
               </th>
 
-              <th>
-                <span className={tableHeadTextClass}>Kulüp İşlemi</span>
-              </th>
+              {canOpenClub && (
+                <th>
+                  <span className={tableHeadTextClass}>Kulüp İşlemi</span>
+                </th>
+              )}
 
               {canManage && (
                 <th className="text-right">
@@ -96,6 +99,7 @@ function ClubTable({
                 club={club}
                 teachers={teachers}
                 canManage={canManage}
+                canOpenClub={canOpenClub}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
@@ -104,7 +108,9 @@ function ClubTable({
             {clubs.length === 0 && (
               <tr>
                 <td
-                  colSpan={canManage ? 5 : 4}
+                  colSpan={
+                    3 + (canOpenClub ? 1 : 0) + (canManage ? 1 : 0)
+                  }
                   className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Kulüp kaydı bulunamadı.

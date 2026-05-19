@@ -1,289 +1,449 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { clubService } from "../services/clubService";
 import { teacherService } from "../../teachers/services/teacherService";
+import { clubMemberService } from "../../clubMembers/services/clubMemberService";
+import { authStorage } from "../../auth/services/authStorage";
 import { exportToPdf } from "../../../utils/exportToPdf";
 
 import { emptyClubForm } from "../constants/clubConstants";
+
 import { clubPdfColumns } from "../constants/clubTableColumns";
 
 import {
-    filterClubs,
-    getBackendFieldErrors,
-    getClubAdvisorTeacherId,
-    getClubId,
-    getClubIsActive,
-    getClubName,
-    getErrorMessage,
+  filterClubs,
+  getBackendFieldErrors,
+  getClubAdvisorTeacherId,
+  getClubAdvisorTeacherName,
+  getClubId,
+  getClubIsActive,
+  getClubMemberCount,
+  getClubName,
+  getErrorMessage,
 } from "../utils/clubFormatters";
 
+const normalizeId = (value) =>
+  value === undefined || value === null ? "" : String(value);
+
+const getCurrentUserRole = (user) =>
+  (
+    user?.roleName ||
+    user?.RoleName ||
+    user?.role ||
+    user?.Role ||
+    user?.user?.roleName ||
+    user?.user?.RoleName ||
+    user?.user?.role ||
+    user?.user?.Role ||
+    ""
+  )
+    .toString()
+    .toLowerCase();
+
+const getCurrentUserStudentId = (user) =>
+  user?.studentId ||
+  user?.StudentId ||
+  user?.user?.studentId ||
+  user?.user?.StudentId ||
+  user?.id ||
+  user?.Id ||
+  user?.userId ||
+  user?.UserId ||
+  user?.user?.id ||
+  user?.user?.Id ||
+  user?.user?.userId ||
+  user?.user?.UserId ||
+  "";
+
+const getMemberStudentId = (member) =>
+  member?.studentId ||
+  member?.StudentId ||
+  member?.student?.id ||
+  member?.Student?.Id ||
+  member?.student?.Id ||
+  member?.Student?.id ||
+  "";
+
+const getMemberClubId = (member) =>
+  member?.clubId ||
+  member?.ClubId ||
+  member?.club?.id ||
+  member?.Club?.Id ||
+  member?.club?.Id ||
+  member?.Club?.id ||
+  "";
+
 export function useClubsPage() {
-    const [clubs, setClubs] = useState([]);
-    const [teachers, setTeachers] = useState([]);
+  const [clubs, setClubs] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [clubMembers, setClubMembers] = useState([]);
+  const [formData, setFormData] = useState(emptyClubForm);
 
-    const [formData, setFormData] = useState(emptyClubForm);
-    const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
-    const [editingClubId, setEditingClubId] = useState(null);
-    const [deletingClubId, setDeletingClubId] = useState(null);
+  const [editingClubId, setEditingClubId] = useState(null);
 
-    const [toast, setToast] = useState({
-        message: "",
-        type: "success",
+  const [deletingClubId, setDeletingClubId] = useState(null);
+
+  const [toast, setToast] = useState({
+    message: "",
+
+    type: "success",
+  });
+
+  const [search, setSearch] = useState("");
+
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const currentUser = useMemo(() => authStorage.getUser(), []);
+  const currentRole = getCurrentUserRole(currentUser);
+  const isStudent = currentRole === "student";
+
+  const isEditing = editingClubId !== null;
+
+  const showToast = (message, type = "success") => {
+    setToast({
+      message,
+
+      type,
     });
 
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
+    setTimeout(() => {
+      setToast({
+        message: "",
 
-    const isEditing = editingClubId !== null;
+        type: "success",
+      });
+    }, 2500);
+  };
 
-    const showToast = (message, type = "success") => {
-        setToast({
-            message,
-            type,
-        });
+  const openModal = (id) => {
+    document.getElementById(id)?.showModal();
+  };
 
-        setTimeout(() => {
-            setToast({
-                message: "",
-                type: "success",
-            });
-        }, 2500);
+  const closeModal = (id) => {
+    document.getElementById(id)?.close();
+  };
+
+  const normalizeResultData = (result) => {
+    return result?.data || result?.Data || result || [];
+  };
+
+  const loadClubs = async () => {
+    try {
+      const result = await clubService.getAll();
+
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        showToast(
+          result.message || result.Message || "Kulüpler yüklenirken hata oluştu.",
+          "error",
+        );
+
+        return;
+      }
+
+      const data = normalizeResultData(result);
+
+      setClubs(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+
+      showToast(getErrorMessage(error, "Kulüpler yüklenirken hata oluştu."), "error");
+    }
+  };
+
+  const loadTeachers = async () => {
+    try {
+      const result = await teacherService.getAll();
+
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        showToast(
+          result.message || result.Message || "Öğretmenler yüklenirken hata oluştu.",
+
+          "error",
+        );
+
+        return;
+      }
+
+      const data = normalizeResultData(result);
+
+      const activeTeachers = Array.isArray(data)
+        ? data.filter((teacher) => {
+            return teacher.isActive !== false && teacher.IsActive !== false;
+          })
+        : [];
+
+      setTeachers(activeTeachers);
+    } catch (error) {
+      console.error(error);
+
+      showToast(getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."), "error");
+    }
+  };
+
+  const loadClubMembers = async () => {
+    if (!isStudent) return;
+
+    try {
+      const data = await clubMemberService.getAll();
+
+      setClubMembers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+
+      showToast(
+        getErrorMessage(error, "Kulüp üyeleri yüklenirken hata oluştu."),
+        "error",
+      );
+    }
+  };
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await Promise.all([loadClubs(), loadTeachers(), loadClubMembers()]);
     };
 
-    const openModal = (id) => {
-        document.getElementById(id)?.showModal();
-    };
+    loadInitialData();
+  }, []);
 
-    const closeModal = (id) => {
-        document.getElementById(id)?.close();
-    };
+  const filteredClubs = useMemo(() => {
+    return filterClubs(clubs, teachers, search, statusFilter);
+  }, [clubs, teachers, search, statusFilter]);
 
-    const normalizeResultData = (result) => {
-        return result?.data || result?.Data || result || [];
-    };
+  const studentClub = useMemo(() => {
+    if (!isStudent) return null;
 
-    const loadClubs = async () => {
-        try {
-            const result = await clubService.getAll();
+    const studentId = getCurrentUserStudentId(currentUser);
 
-            if (result?.isSuccess === false || result?.IsSuccess === false) {
-                showToast(result.message || result.Message || "Kulüpler yüklenirken hata oluştu.", "error");
-                return;
-            }
+    if (!studentId) return null;
 
-            const data = normalizeResultData(result);
-            setClubs(Array.isArray(data) ? data : []);
-        } catch (error) {
-            console.error(error);
-            showToast(getErrorMessage(error, "Kulüpler yüklenirken hata oluştu."), "error");
-        }
-    };
+    const currentStudentMember = clubMembers.find((member) => {
+      return normalizeId(getMemberStudentId(member)) === normalizeId(studentId);
+    });
 
-    const loadTeachers = async () => {
-        try {
-            const result = await teacherService.getAll();
+    if (!currentStudentMember) return null;
 
-            if (result?.isSuccess === false || result?.IsSuccess === false) {
-                showToast(
-                    result.message || result.Message || "Öğretmenler yüklenirken hata oluştu.",
-                    "error",
-                );
-                return;
-            }
+    const clubId = getMemberClubId(currentStudentMember);
 
-            const data = normalizeResultData(result);
+    return (
+      clubs.find((club) => {
+        return normalizeId(getClubId(club)) === normalizeId(clubId);
+      }) || null
+    );
+  }, [clubs, clubMembers, currentUser, isStudent]);
 
-            const activeTeachers = Array.isArray(data)
-                ? data.filter((teacher) => {
-                    return teacher.isActive !== false && teacher.IsActive !== false;
-                })
-                : [];
+  const studentClubStats = useMemo(() => {
+    if (!isStudent) return [];
+  
+    return [
+      {
+        title: "Katıldığı Kulüp",
+        value: studentClub ? getClubName(studentClub) : "-",
+        description: "Öğrencinin kayıtlı olduğu kulüp",
+      },
+      {
+        title: "Sorumlu Hoca",
+        value: studentClub
+          ? getClubAdvisorTeacherName(studentClub, teachers) || "-"
+          : "-",
+        description: "Kulübün sorumlu öğretmeni",
+      },
+      {
+        title: "Üye Sayısı",
+        value: studentClub ? getClubMemberCount(studentClub) : 0,
+        description: "Kulüpteki toplam üye sayısı",
+      },
+    ];
+  }, [isStudent, studentClub, teachers]);
 
-            setTeachers(activeTeachers);
-        } catch (error) {
-            console.error(error);
-            showToast(getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."), "error");
-        }
-    };
+  const handleOpenCreateModal = (modalId) => {
+    setEditingClubId(null);
 
-    useEffect(() => {
-        const loadInitialData = async () => {
-            await Promise.all([loadClubs(), loadTeachers()]);
-        };
+    setFormData(emptyClubForm);
 
-        loadInitialData();
-    }, []);
+    setErrors({});
 
-    const filteredClubs = useMemo(() => {
-        return filterClubs(clubs, teachers, search, statusFilter);
-    }, [clubs, teachers, search, statusFilter]);
+    openModal(modalId);
+  };
 
-    const handleOpenCreateModal = (modalId) => {
-        setEditingClubId(null);
-        setFormData(emptyClubForm);
-        setErrors({});
-        openModal(modalId);
-    };
+  const handleOpenEditModal = (club, modalId) => {
+    setEditingClubId(getClubId(club));
 
-    const handleOpenEditModal = (club, modalId) => {
-        setEditingClubId(getClubId(club));
-        setErrors({});
+    setErrors({});
 
-        setFormData({
-            name: getClubName(club) === "-" ? "" : getClubName(club),
-            advisorTeacherId: getClubAdvisorTeacherId(club),
-            isActive: String(getClubIsActive(club)),
-        });
+    setFormData({
+      name: getClubName(club) === "-" ? "" : getClubName(club),
 
-        openModal(modalId);
-    };
+      advisorTeacherId: getClubAdvisorTeacherId(club),
 
-    const handleCloseClubModal = (modalId) => {
-        setEditingClubId(null);
-        setFormData(emptyClubForm);
-        setErrors({});
-        closeModal(modalId);
-    };
+      isActive: String(getClubIsActive(club)),
+    });
 
-    const handleOpenDeleteModal = (id, modalId) => {
-        setDeletingClubId(id);
-        openModal(modalId);
-    };
+    openModal(modalId);
+  };
 
-    const handleCloseDeleteModal = (modalId) => {
-        setDeletingClubId(null);
-        closeModal(modalId);
-    };
+  const handleCloseClubModal = (modalId) => {
+    setEditingClubId(null);
 
-    const validateClubForm = () => {
-        const newErrors = {};
+    setFormData(emptyClubForm);
 
-        if (!formData.name.trim()) {
-            newErrors.name = "Kulüp adı zorunludur.";
-        }
+    setErrors({});
 
-        if (!formData.advisorTeacherId) {
-            newErrors.advisorTeacherId = "Sorumlu öğretmen seçiniz.";
-        }
+    closeModal(modalId);
+  };
 
-        setErrors(newErrors);
+  const handleOpenDeleteModal = (id, modalId) => {
+    setDeletingClubId(id);
 
-        return Object.keys(newErrors).length === 0;
-    };
+    openModal(modalId);
+  };
 
-    const prepareClubPayload = () => {
-        return {
-            name: formData.name.trim(),
-            advisorTeacherId: formData.advisorTeacherId,
-            isActive: isEditing
-                ? formData.isActive === true || formData.isActive === "true"
-                : true,
-        };
-    };
+  const handleCloseDeleteModal = (modalId) => {
+    setDeletingClubId(null);
 
-    const handleSubmit = async (modalId) => {
-        if (!validateClubForm()) {
-            showToast("Eksik veya hatalı alanlar var.", "error");
-            return;
-        }
+    closeModal(modalId);
+  };
 
-        const preparedData = prepareClubPayload();
+  const validateClubForm = () => {
+    const newErrors = {};
 
-        try {
-            const result = isEditing
-                ? await clubService.update({
-                    id: editingClubId,
-                    ...preparedData,
-                })
-                : await clubService.create(preparedData);
+    if (!formData.name.trim()) {
+      newErrors.name = "Kulüp adı zorunludur.";
+    }
 
-            if (result?.isSuccess === false || result?.IsSuccess === false) {
-                const message = result.message || result.Message || "İşlem başarısız.";
+    if (!formData.advisorTeacherId) {
+      newErrors.advisorTeacherId = "Sorumlu öğretmen seçiniz.";
+    }
 
-                setErrors({
-                    general: message,
-                });
+    setErrors(newErrors);
 
-                showToast(message, "error");
-                return;
-            }
+    return Object.keys(newErrors).length === 0;
+  };
 
-            await loadClubs();
-            handleCloseClubModal(modalId);
-            showToast(isEditing ? "Kulüp güncellendi." : "Kulüp eklendi.");
-        } catch (error) {
-            console.error(error);
-
-            const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
-            const backendFieldErrors = getBackendFieldErrors(error);
-
-            setErrors({
-                ...backendFieldErrors,
-                general: message,
-            });
-
-            showToast(message, "error");
-        }
-    };
-
-    const handleDelete = async (modalId) => {
-        if (!deletingClubId) return;
-
-        try {
-            const result = await clubService.delete(deletingClubId);
-
-            if (result?.isSuccess === false || result?.IsSuccess === false) {
-                showToast(result.message || result.Message || "Kulüp silinemedi.", "error");
-                return;
-            }
-
-            await loadClubs();
-            handleCloseDeleteModal(modalId);
-            showToast("Kulüp silindi.");
-        } catch (error) {
-            console.error(error);
-            showToast(getErrorMessage(error, "Kulüp silinirken hata oluştu."), "error");
-        }
-    };
-
-    const handleExportClubsPdf = () => {
-        exportToPdf({
-            title: "Kulüp Listesi",
-            fileName: "kulup-listesi.pdf",
-            columns: clubPdfColumns,
-            data: clubs,
-        });
-    };
-
+  const prepareClubPayload = () => {
     return {
-        clubs,
-        filteredClubs,
-        teachers,
+      name: formData.name.trim(),
 
-        formData,
-        setFormData,
-        errors,
+      advisorTeacherId: formData.advisorTeacherId,
 
-        isEditing,
-        deletingClubId,
-
-        toast,
-
-        search,
-        setSearch,
-
-        statusFilter,
-        setStatusFilter,
-
-        handleOpenCreateModal,
-        handleOpenEditModal,
-        handleCloseClubModal,
-
-        handleOpenDeleteModal,
-        handleCloseDeleteModal,
-        handleDelete,
-
-        handleSubmit,
-        handleExportClubsPdf,
+      isActive: isEditing
+        ? formData.isActive === true || formData.isActive === "true"
+        : true,
     };
+  };
+
+  const handleSubmit = async (modalId) => {
+    if (!validateClubForm()) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
+
+      return;
+    }
+
+    const preparedData = prepareClubPayload();
+
+    try {
+      const result = isEditing
+        ? await clubService.update({
+            id: editingClubId,
+
+            ...preparedData,
+          })
+        : await clubService.create(preparedData);
+
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        const message = result.message || result.Message || "İşlem başarısız.";
+
+        setErrors({
+          general: message,
+        });
+
+        showToast(message, "error");
+
+        return;
+      }
+
+      await loadClubs();
+
+      handleCloseClubModal(modalId);
+
+      showToast(isEditing ? "Kulüp güncellendi." : "Kulüp eklendi.");
+    } catch (error) {
+      console.error(error);
+
+      const message = getErrorMessage(error, "İşlem sırasında hata oluştu.");
+
+      const backendFieldErrors = getBackendFieldErrors(error);
+
+      setErrors({
+        ...backendFieldErrors,
+
+        general: message,
+      });
+
+      showToast(message, "error");
+    }
+  };
+
+  const handleDelete = async (modalId) => {
+    if (!deletingClubId) return;
+
+    try {
+      const result = await clubService.delete(deletingClubId);
+
+      if (result?.isSuccess === false || result?.IsSuccess === false) {
+        showToast(result.message || result.Message || "Kulüp silinemedi.", "error");
+
+        return;
+      }
+
+      await loadClubs();
+
+      handleCloseDeleteModal(modalId);
+
+      showToast("Kulüp silindi.");
+    } catch (error) {
+      console.error(error);
+
+      showToast(getErrorMessage(error, "Kulüp silinirken hata oluştu."), "error");
+    }
+  };
+
+  const handleExportClubsPdf = () => {
+    exportToPdf({
+      title: "Kulüp Listesi",
+
+      fileName: "kulup-listesi.pdf",
+
+      columns: clubPdfColumns,
+
+      data: clubs,
+    });
+  };
+
+  return {
+    clubs,
+    filteredClubs,
+    teachers,
+    formData,
+    setFormData,
+    errors,
+    isEditing,
+    deletingClubId,
+    toast,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    isStudent,
+    studentClubStats,
+    handleOpenCreateModal,
+    handleOpenEditModal,
+    handleCloseClubModal,
+    handleOpenDeleteModal,
+    handleCloseDeleteModal,
+    handleDelete,
+    handleSubmit,
+    handleExportClubsPdf,
+  };
 }
