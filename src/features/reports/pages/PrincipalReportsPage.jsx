@@ -19,12 +19,11 @@ function PrincipalReportsPage() {
     handleExportPrincipalReport,
   } = usePrincipalReportsPage();
 
-  const handleOpenClassReport = (report) => {
-    if (!report?.id) return;
-
-    navigate(`/dashboard/teacher-reports?classId=${report.id}`, {
+  const handleOpenClassAnalysis = (report) => {
+    navigate("/dashboard/reports/teacher", {
       state: {
-        selectedClassReport: report,
+        fromPrincipal: true,
+        report,
       },
     });
   };
@@ -50,7 +49,7 @@ function PrincipalReportsPage() {
           reports={filteredClassReports}
           gradeFilter={gradeFilter}
           setGradeFilter={setGradeFilter}
-          onOpenClassReport={handleOpenClassReport}
+          onOpenClassAnalysis={handleOpenClassAnalysis}
         />
       )}
 

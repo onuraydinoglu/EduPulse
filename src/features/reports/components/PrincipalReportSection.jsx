@@ -1,12 +1,14 @@
 import FilterSelect from "../../../components/ui/FilterSelect";
+
 import { gradeFilterOptions } from "../constants/reportFilters";
+
 import PrincipalReportTable from "./PrincipalReportTable";
 
 function PrincipalReportSection({
   reports,
   gradeFilter,
   setGradeFilter,
-  onOpenClassReport,
+  onOpenClassAnalysis,
 }) {
   return (
     <section className="radius-card overflow-hidden border border-gray-200 bg-white">
@@ -15,6 +17,7 @@ function PrincipalReportSection({
           <h2 className="text-lg font-semibold tracking-tight text-gray-950">
             Okul Sınıf Performansları
           </h2>
+
           <p className="mt-1 text-sm text-gray-500">
             Sınıfları 9, 10, 11 ve 12. sınıf seviyesine göre filtreleyin.
           </p>
@@ -29,7 +32,7 @@ function PrincipalReportSection({
 
       <PrincipalReportTable
         reports={reports}
-        onOpenClassReport={onOpenClassReport}
+        onOpenClassAnalysis={onOpenClassAnalysis}
       />
     </section>
   );

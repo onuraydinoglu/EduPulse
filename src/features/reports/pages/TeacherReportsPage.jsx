@@ -3,7 +3,9 @@ import {
   ChartBarIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import { useLocation, useNavigate } from "react-router-dom";
 
+import BackButton from "../../../components/ui/BackButton";
 import Button from "../../../components/ui/Button";
 import StatCard from "../../../components/ui/StatCard";
 import TeacherStudentReportTable from "../components/TeacherStudentReportTable";
@@ -11,6 +13,12 @@ import { teacherReportStatusOptions } from "../constants/reportConstants";
 import { useTeacherReportsPage } from "../hooks/useTeacherReportsPage";
 
 function TeacherReportsPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const principalReport = location.state?.report || null;
+  const isPrincipalView = location.state?.fromPrincipal === true;
+
   const {
     teacherClass,
     studentSearch,
@@ -23,16 +31,24 @@ function TeacherReportsPage() {
     toast,
     handleExportTeacherReport,
     handlePrepareParentReport,
-  } = useTeacherReportsPage();
+  } = useTeacherReportsPage({
+    classId: principalReport?.id,
+    className: principalReport?.className,
+  });
+
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   return (
     <div className="space-y-6">
       {toast.message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${toast.type === "error"
+          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+            toast.type === "error"
               ? "border-rose-200 bg-rose-50 text-rose-700"
               : "border-emerald-200 bg-emerald-50 text-emerald-700"
-            }`}
+          }`}
         >
           {toast.message}
         </div>
@@ -45,25 +61,38 @@ function TeacherReportsPage() {
               Öğretmen Raporları
             </p>
 
-            <h1 className="mt-2 flex items-center gap-3 text-2xl font-bold text-gray-900">
-              <ChartBarIcon className="h-7 w-7 text-blue-600" />
-              Sınıf Performans Raporu
-            </h1>
+            <div className="mt-2 flex items-center gap-4">
+              {isPrincipalView && (
+                <BackButton
+                  onClick={handleBack}
+                  title="Müdür raporlarına dön"
+                />
+              )}
+
+              <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900">
+                <ChartBarIcon className="h-7 w-7 text-blue-600" />
+                Sınıf Performans Raporu
+              </h1>
+            </div>
 
             <p className="mt-2 text-sm text-gray-500">
-              Kendi sınıfınıza ait öğrenci ve başarı raporlarını takip edin
+              {isPrincipalView
+                ? `${teacherClass.className} sınıfına ait öğrenci ve başarı raporlarını takip edin`
+                : "Kendi sınıfınıza ait öğrenci ve başarı raporlarını takip edin"}
             </p>
           </div>
 
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleExportTeacherReport}
-            disabled={isLoading}
-          >
-            <ArrowDownTrayIcon className="h-5 w-5" />
-            {teacherClass.className} Raporu Dışa Aktar
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleExportTeacherReport}
+              disabled={isLoading}
+            >
+              <ArrowDownTrayIcon className="h-5 w-5" />
+              {teacherClass.className} Raporu Dışa Aktar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -81,7 +110,9 @@ function TeacherReportsPage() {
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
-              Sorumlu olduğunuz sınıftaki öğrenci performansları
+              {isPrincipalView
+                ? "Seçilen sınıftaki öğrenci performansları"
+                : "Sorumlu olduğunuz sınıftaki öğrenci performansları"}
             </p>
           </div>
 

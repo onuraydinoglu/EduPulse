@@ -1,6 +1,6 @@
 import Button from "../../../components/ui/Button";
 
-function PrincipalReportTableRow({ report, onOpenClassReport }) {
+function PrincipalReportTableRow({ report, onOpenClassAnalysis }) {
   const successRateClass =
     report.successRate >= 75
       ? "bg-emerald-50 text-emerald-600"
@@ -38,9 +38,10 @@ function PrincipalReportTableRow({ report, onOpenClassReport }) {
 
       <td className="px-5 py-4 text-right">
         <Button
+          type="button"
           size="sm"
           variant="outline"
-          onClick={() => onOpenClassReport?.(report)}
+          onClick={() => onOpenClassAnalysis(report)}
         >
           Detaylı Analiz
         </Button>

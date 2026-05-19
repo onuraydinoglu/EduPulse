@@ -1,6 +1,6 @@
 import PrincipalReportTableRow from "./PrincipalReportTableRow";
 
-function PrincipalReportTable({ reports, onOpenClassReport }) {
+function PrincipalReportTable({ reports, onOpenClassAnalysis }) {
   return (
     <div className="overflow-hidden bg-white">
       <div className="overflow-x-auto">
@@ -21,7 +21,7 @@ function PrincipalReportTable({ reports, onOpenClassReport }) {
               <PrincipalReportTableRow
                 key={report.id}
                 report={report}
-                onOpenClassReport={onOpenClassReport}
+                onOpenClassAnalysis={onOpenClassAnalysis}
               />
             ))}
           </tbody>
