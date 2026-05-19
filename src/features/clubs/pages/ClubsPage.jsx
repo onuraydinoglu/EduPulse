@@ -1,9 +1,13 @@
 import Toast from "../../../components/ui/Toast";
 
 import ClubDeleteModal from "../components/ClubDeleteModal";
+
 import ClubFormModal from "../components/ClubFormModal";
+
 import ClubsPageHeader from "../components/ClubsPageHeader";
+
 import ClubStatsCards from "../components/ClubStatsCards";
+
 import ClubTable from "../components/ClubTable";
 
 import {
@@ -12,50 +16,40 @@ import {
 } from "../constants/clubConstants";
 
 import { getClubStats } from "../constants/clubTableColumns";
+
 import { useClubsPage } from "../hooks/useClubsPage";
-import { getCurrentRole } from "../../../utils/authUser";
+
+import { canManageSchoolData } from "../../../utils/authUser";
 
 function ClubsPage() {
   const {
     clubs,
     filteredClubs,
     teachers,
-
     formData,
     setFormData,
     errors,
-
     isEditing,
     toast,
-
     search,
     setSearch,
-
     statusFilter,
     setStatusFilter,
-
     handleOpenCreateModal,
     handleOpenEditModal,
     handleCloseClubModal,
-
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDelete,
-
     handleSubmit,
     handleExportClubsPdf,
   } = useClubsPage();
 
-  const currentRole = getCurrentRole();
-
-  const canManageClubs =
-    currentRole === "schooladmin" || currentRole === "officer";
+  const canManageClubs = canManageSchoolData();
 
   return (
     <div className="space-y-6">
-      {toast.message && (
-        <Toast message={toast.message} type={toast.type} />
-      )}
+      {toast.message && <Toast message={toast.message} type={toast.type} />}
 
       <ClubsPageHeader
         canManage={canManageClubs}
@@ -77,22 +71,26 @@ function ClubsPage() {
         onDelete={(id) => handleOpenDeleteModal(id, CLUB_DELETE_MODAL_ID)}
       />
 
-      <ClubFormModal
-        modalId={CLUB_MODAL_ID}
-        formData={formData}
-        setFormData={setFormData}
-        teachers={teachers}
-        errors={errors}
-        isEditing={isEditing}
-        onClose={() => handleCloseClubModal(CLUB_MODAL_ID)}
-        onSubmit={() => handleSubmit(CLUB_MODAL_ID)}
-      />
+      {canManageClubs && (
+        <>
+          <ClubFormModal
+            modalId={CLUB_MODAL_ID}
+            formData={formData}
+            setFormData={setFormData}
+            teachers={teachers}
+            errors={errors}
+            isEditing={isEditing}
+            onClose={() => handleCloseClubModal(CLUB_MODAL_ID)}
+            onSubmit={() => handleSubmit(CLUB_MODAL_ID)}
+          />
 
-      <ClubDeleteModal
-        modalId={CLUB_DELETE_MODAL_ID}
-        onClose={() => handleCloseDeleteModal(CLUB_DELETE_MODAL_ID)}
-        onConfirm={() => handleDelete(CLUB_DELETE_MODAL_ID)}
-      />
+          <ClubDeleteModal
+            modalId={CLUB_DELETE_MODAL_ID}
+            onClose={() => handleCloseDeleteModal(CLUB_DELETE_MODAL_ID)}
+            onConfirm={() => handleDelete(CLUB_DELETE_MODAL_ID)}
+          />
+        </>
+      )}
     </div>
   );
 }
