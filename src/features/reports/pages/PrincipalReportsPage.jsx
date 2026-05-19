@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import Toast from "../../../components/ui/Toast";
 import PrincipalReportSection from "../components/PrincipalReportSection";
 import ReportPageHeader from "../components/ReportPageHeader";
@@ -5,6 +7,8 @@ import ReportStatsCards from "../components/ReportStatsCards";
 import { usePrincipalReportsPage } from "../hooks/usePrincipalReportsPage";
 
 function PrincipalReportsPage() {
+  const navigate = useNavigate();
+
   const {
     gradeFilter,
     setGradeFilter,
@@ -14,6 +18,16 @@ function PrincipalReportsPage() {
     toast,
     handleExportPrincipalReport,
   } = usePrincipalReportsPage();
+
+  const handleOpenClassReport = (report) => {
+    if (!report?.id) return;
+
+    navigate(`/dashboard/teacher-reports?classId=${report.id}`, {
+      state: {
+        selectedClassReport: report,
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -36,6 +50,7 @@ function PrincipalReportsPage() {
           reports={filteredClassReports}
           gradeFilter={gradeFilter}
           setGradeFilter={setGradeFilter}
+          onOpenClassReport={handleOpenClassReport}
         />
       )}
 

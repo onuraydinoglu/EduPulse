@@ -1,12 +1,12 @@
 import Button from "../../../components/ui/Button";
 
-function PrincipalReportTableRow({ report }) {
+function PrincipalReportTableRow({ report, onOpenClassReport }) {
   const successRateClass =
     report.successRate >= 75
       ? "bg-emerald-50 text-emerald-600"
       : report.successRate >= 65
-        ? "bg-amber-50 text-amber-600"
-        : "bg-rose-50 text-rose-600";
+      ? "bg-amber-50 text-amber-600"
+      : "bg-rose-50 text-rose-600";
 
   return (
     <tr className="transition hover:bg-gray-50">
@@ -37,7 +37,11 @@ function PrincipalReportTableRow({ report }) {
       </td>
 
       <td className="px-5 py-4 text-right">
-        <Button size="sm" variant="outline">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onOpenClassReport?.(report)}
+        >
           Detaylı Analiz
         </Button>
       </td>
