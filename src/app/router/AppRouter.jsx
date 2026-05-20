@@ -21,6 +21,7 @@ import TeacherLessonsPage from "../../features/teacherLessons/pages/TeacherLesso
 import EventsPage from "../../features/events/pages/EventsPage";
 import EventMembersPage from "../../features/eventMembers/pages/EventMembersPage";
 import ProfilePage from "../../features/profiles/pages/ProfilePage";
+import StudentExamsPage from "../../features/profiles/pages/StudentExamsPage";
 
 function AppRouter() {
   return (
@@ -41,6 +42,7 @@ function AppRouter() {
           <Route path="officers" element={<OfficersPage />} />
 
           <Route path="profiles/:profileType/:id" element={<ProfilePage />} />
+          <Route path="student-exams" element={<StudentExamsPage />} />
 
           <Route path="classes" element={<ClassesPage />} />
           <Route path="classes/:classId" element={<ClassroomWorkspacePage />} />
@@ -55,7 +57,10 @@ function AppRouter() {
           <Route path="clubs/:clubId/members" element={<ClubMembersPage />} />
 
           <Route path="events" element={<EventsPage />} />
-          <Route path="events/:eventId/members" element={<EventMembersPage />} />
+          <Route
+            path="events/:eventId/members"
+            element={<EventMembersPage />}
+          />
 
           {/* Menüde kullanılan güncel rapor yolları */}
           <Route path="reports/principal" element={<PrincipalReportsPage />} />

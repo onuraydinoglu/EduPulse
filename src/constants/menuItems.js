@@ -11,6 +11,7 @@ import {
   IdentificationIcon,
   CalendarDaysIcon,
   UserGroupIcon,
+  ClipboardDocumentCheckIcon
 } from "@heroicons/react/24/outline";
 
 export const menuItems = [
@@ -75,9 +76,9 @@ export const menuItems = [
   },
 
   {
-    title: "Sınavlar",
-    path: "/dashboard/exams",
-    icon: BookOpenIcon,
+    title: "Sınavlarım",
+    path: "/dashboard/student-exams",
+    icon: ClipboardDocumentCheckIcon,
     roles: ["student"],
   },
 
