@@ -3,303 +3,264 @@ import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 import { exportToPdf } from "../../../utils/exportToPdf";
+import { authStorage } from "../../auth/services/authStorage";
 import { eventService } from "../../events/services/eventService";
 import { eventMemberService } from "../services/eventMemberService";
 import { emptyEventMemberForm } from "../constants/eventMemberConstants";
 import { eventMemberPdfColumns } from "../constants/eventMemberTableColumns";
 import {
-    filterEventMembers,
-    getData,
-    getErrorMessage,
-    getEventMemberId,
-    getEventMemberIsPaid,
-    getEventMemberPaidAmount,
-    getEventName,
-    getSelectableStudents,
+  filterEventMembers,
+  getData,
+  getErrorMessage,
+  getEventName,
+  getSelectableStudents,
 } from "../utils/eventMemberFormatters";
 
+const getCurrentRole = () => {
+  const user = authStorage.getUser();
+  return user?.RoleName?.toLowerCase() || "";
+};
+
 export function useEventMembersPage() {
-    const { eventId } = useParams();
-    const navigate = useNavigate();
+  const { eventId } = useParams();
+  const navigate = useNavigate();
 
-    const [event, setEvent] = useState(null);
-    const [members, setMembers] = useState([]);
-    const [students, setStudents] = useState([]);
-    const [formData, setFormData] = useState(emptyEventMemberForm);
-    const [errors, setErrors] = useState({});
-    const [deletingMemberId, setDeletingMemberId] = useState(null);
-    const [editingPaymentMember, setEditingPaymentMember] = useState(null);
-    const [search, setSearch] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [savingMember, setSavingMember] = useState(false);
+  const currentRole = getCurrentRole();
+  const isStudentRole = currentRole === "student";
 
-    const [toast, setToast] = useState({
-        message: "",
-        type: "success",
+  const [event, setEvent] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [formData, setFormData] = useState(emptyEventMemberForm);
+  const [errors, setErrors] = useState({});
+  const [deletingMemberId, setDeletingMemberId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [savingMember, setSavingMember] = useState(false);
+  const [toast, setToast] = useState({
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({
+      message,
+      type,
     });
 
-    const showToast = (message, type = "success") => {
-        setToast({
-            message,
-            type,
-        });
+    setTimeout(() => {
+      setToast({
+        message: "",
+        type: "success",
+      });
+    }, 2500);
+  };
 
-        setTimeout(() => {
-            setToast({
-                message: "",
-                type: "success",
-            });
-        }, 2500);
-    };
+  const openModal = (id) => {
+    document.getElementById(id)?.showModal();
+  };
 
-    const openModal = (id) => {
-        document.getElementById(id)?.showModal();
-    };
+  const closeModal = (id) => {
+    document.getElementById(id)?.close();
+  };
 
-    const closeModal = (id) => {
-        document.getElementById(id)?.close();
-    };
+  const fetchEvent = async () => {
+    const result = await eventService.getById(eventId);
+    const data = result?.data || result?.Data || result;
+    setEvent(data || null);
+  };
 
-    const fetchEvent = async () => {
-        const result = await eventService.getById(eventId);
-        const data = result?.data || result?.Data || result;
+  const fetchMembers = async () => {
+    const data = await eventMemberService.getByEventId(eventId);
+    setMembers(Array.isArray(data) ? data : []);
+  };
 
-        setEvent(data || null);
-    };
+  const fetchStudents = async () => {
+    const response = await axiosInstance.get(API_ENDPOINTS.STUDENTS);
+    const data = getData(response);
+    setStudents(Array.isArray(data) ? data : []);
+  };
 
-    const fetchMembers = async () => {
-        const data = await eventMemberService.getByEventId(eventId);
+  const loadPage = async () => {
+    try {
+      setLoading(true);
 
-        setMembers(Array.isArray(data) ? data : []);
-    };
+      if (isStudentRole) {
+        await fetchEvent();
+        setMembers([]);
+        setStudents([]);
+        return;
+      }
 
-    const fetchStudents = async () => {
-        const response = await axiosInstance.get(API_ENDPOINTS.STUDENTS);
-        const data = getData(response);
+      await Promise.all([fetchEvent(), fetchMembers(), fetchStudents()]);
+    } catch (error) {
+      console.error(error);
+      showToast(
+        getErrorMessage(error, "Etkinlik üye alanı yüklenirken hata oluştu."),
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setStudents(Array.isArray(data) ? data : []);
-    };
+  useEffect(() => {
+    if (!eventId) return;
 
-    const loadPage = async () => {
-        try {
-            setLoading(true);
+    loadPage();
+  }, [eventId]);
 
-            await Promise.all([fetchEvent(), fetchMembers(), fetchStudents()]);
-        } catch (error) {
-            console.error(error);
+  const selectableStudents = useMemo(() => {
+    if (isStudentRole) return [];
 
-            showToast(
-                getErrorMessage(error, "Etkinlik üye alanı yüklenirken hata oluştu."),
-                "error",
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+    return getSelectableStudents(students, members);
+  }, [students, members, isStudentRole]);
 
-    useEffect(() => {
-        if (!eventId) return;
+  const filteredMembers = useMemo(() => {
+    if (isStudentRole) return [];
 
-        loadPage();
-    }, [eventId]);
+    return filterEventMembers(members, search);
+  }, [members, search, isStudentRole]);
 
-    const selectableStudents = useMemo(() => {
-        return getSelectableStudents(students, members);
-    }, [students, members]);
+  const handleBackToEvents = () => {
+    navigate("/dashboard/events");
+  };
 
-    const filteredMembers = useMemo(() => {
-        return filterEventMembers(members, search);
-    }, [members, search]);
+  const handleOpenCreateModal = (modalId) => {
+    if (isStudentRole) return;
 
-    const handleBackToEvents = () => {
-        navigate("/dashboard/events");
-    };
+    setFormData(emptyEventMemberForm);
+    setErrors({});
+    openModal(modalId);
+  };
 
-    const handleOpenCreateModal = (modalId) => {
-        setEditingPaymentMember(null);
-        setFormData(emptyEventMemberForm);
-        setErrors({});
-        openModal(modalId);
-    };
+  const handleCloseCreateModal = (modalId) => {
+    setFormData(emptyEventMemberForm);
+    setErrors({});
+    closeModal(modalId);
+  };
 
-    const handleCloseCreateModal = (modalId) => {
-        setEditingPaymentMember(null);
-        setFormData(emptyEventMemberForm);
-        setErrors({});
-        closeModal(modalId);
-    };
+  const validateForm = () => {
+    const newErrors = {};
 
-    const handleOpenPaymentEditModal = (member, modalId) => {
-        setEditingPaymentMember(member);
+    if (!formData.studentId) {
+      newErrors.studentId = "Öğrenci seçiniz.";
+    }
 
-        setFormData({
-            studentId: "",
-            isPaid: getEventMemberIsPaid(member),
-            paidAmount: getEventMemberPaidAmount(member),
-        });
+    if (Number(formData.paidAmount) < 0) {
+      newErrors.paidAmount = "Ödenen tutar 0'dan küçük olamaz.";
+    }
 
-        setErrors({});
-        openModal(modalId);
-    };
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    const validateForm = () => {
-        const newErrors = {};
+  const handleCreateMember = async (modalId) => {
+    if (isStudentRole) return;
 
-        if (!editingPaymentMember && !formData.studentId) {
-            newErrors.studentId = "Öğrenci seçiniz.";
-        }
+    if (!validateForm()) {
+      showToast("Eksik veya hatalı alanlar var.", "error");
+      return;
+    }
 
-        if (Number(formData.paidAmount) < 0) {
-            newErrors.paidAmount = "Ödenen tutar 0'dan küçük olamaz.";
-        }
+    try {
+      setSavingMember(true);
 
-        setErrors(newErrors);
+      await eventMemberService.create({
+        eventId,
+        studentId: formData.studentId,
+        isPaid: formData.isPaid,
+        paidAmount: Number(formData.paidAmount || 0),
+      });
 
-        return Object.keys(newErrors).length === 0;
-    };
+      await fetchMembers();
+      handleCloseCreateModal(modalId);
+      showToast("Öğrenci etkinliğe başarıyla eklendi.");
+    } catch (error) {
+      console.error(error);
 
-    const handleCreateMember = async (modalId) => {
-        if (!validateForm()) {
-            showToast("Eksik veya hatalı alanlar var.", "error");
-            return;
-        }
+      const message = getErrorMessage(
+        error,
+        "Öğrenci etkinliğe eklenirken hata oluştu."
+      );
 
-        try {
-            setSavingMember(true);
+      setErrors({
+        general: message,
+      });
 
-            await eventMemberService.create({
-                eventId,
-                studentId: formData.studentId,
-                isPaid: formData.isPaid,
-                paidAmount: Number(formData.paidAmount || 0),
-            });
+      showToast(message, "error");
+    } finally {
+      setSavingMember(false);
+    }
+  };
 
-            await fetchMembers();
-            handleCloseCreateModal(modalId);
+  const handleOpenDeleteModal = (memberId, modalId) => {
+    if (isStudentRole) return;
 
-            showToast("Öğrenci etkinliğe başarıyla eklendi.");
-        } catch (error) {
-            console.error(error);
+    setDeletingMemberId(memberId);
+    openModal(modalId);
+  };
 
-            const message = getErrorMessage(
-                error,
-                "Öğrenci etkinliğe eklenirken hata oluştu.",
-            );
+  const handleCloseDeleteModal = (modalId) => {
+    setDeletingMemberId(null);
+    closeModal(modalId);
+  };
 
-            setErrors({
-                general: message,
-            });
+  const handleDeleteMember = async (modalId) => {
+    if (isStudentRole) return;
+    if (!deletingMemberId) return;
 
-            showToast(message, "error");
-        } finally {
-            setSavingMember(false);
-        }
-    };
+    try {
+      await eventMemberService.delete(deletingMemberId);
+      await fetchMembers();
+      handleCloseDeleteModal(modalId);
+      showToast("Öğrenci etkinlikten çıkarıldı.");
+    } catch (error) {
+      console.error(error);
+      showToast(
+        getErrorMessage(
+          error,
+          "Öğrenci etkinlikten çıkarılırken hata oluştu."
+        ),
+        "error"
+      );
+    }
+  };
 
-    const handleUpdatePayment = async (modalId) => {
-        if (!editingPaymentMember) return;
+  const handleExportMembersPdf = () => {
+    if (isStudentRole) return;
 
-        if (!validateForm()) {
-            showToast("Eksik veya hatalı alanlar var.", "error");
-            return;
-        }
+    exportToPdf({
+      title: `${getEventName(event)} Etkinlik Katılımcı Listesi`,
+      fileName: "etkinlik-katilimci-listesi.pdf",
+      columns: eventMemberPdfColumns,
+      data: members,
+    });
+  };
 
-        try {
-            setSavingMember(true);
-
-            await eventMemberService.updatePayment({
-                id: getEventMemberId(editingPaymentMember),
-                isPaid: formData.isPaid,
-                paidAmount: Number(formData.paidAmount || 0),
-            });
-
-            await fetchMembers();
-            handleCloseCreateModal(modalId);
-
-            showToast("Ödeme bilgisi başarıyla güncellendi.");
-        } catch (error) {
-            console.error(error);
-
-            const message = getErrorMessage(
-                error,
-                "Ödeme bilgisi güncellenirken hata oluştu.",
-            );
-
-            setErrors({
-                general: message,
-            });
-
-            showToast(message, "error");
-        } finally {
-            setSavingMember(false);
-        }
-    };
-
-    const handleOpenDeleteModal = (memberId, modalId) => {
-        setDeletingMemberId(memberId);
-        openModal(modalId);
-    };
-
-    const handleCloseDeleteModal = (modalId) => {
-        setDeletingMemberId(null);
-        closeModal(modalId);
-    };
-
-    const handleDeleteMember = async (modalId) => {
-        if (!deletingMemberId) return;
-
-        try {
-            await eventMemberService.delete(deletingMemberId);
-            await fetchMembers();
-            handleCloseDeleteModal(modalId);
-
-            showToast("Öğrenci etkinlikten çıkarıldı.");
-        } catch (error) {
-            console.error(error);
-
-            showToast(
-                getErrorMessage(
-                    error,
-                    "Öğrenci etkinlikten çıkarılırken hata oluştu.",
-                ),
-                "error",
-            );
-        }
-    };
-
-    const handleExportMembersPdf = () => {
-        exportToPdf({
-            title: `${getEventName(event)} Etkinlik Katılımcı Listesi`,
-            fileName: "etkinlik-katilimci-listesi.pdf",
-            columns: eventMemberPdfColumns,
-            data: members,
-        });
-    };
-
-    return {
-        event,
-        members,
-        filteredMembers,
-        selectableStudents,
-        formData,
-        setFormData,
-        errors,
-        deletingMemberId,
-        editingPaymentMember,
-        search,
-        setSearch,
-        loading,
-        savingMember,
-        toast,
-        handleBackToEvents,
-        handleOpenCreateModal,
-        handleCloseCreateModal,
-        handleOpenPaymentEditModal,
-        handleCreateMember,
-        handleUpdatePayment,
-        handleOpenDeleteModal,
-        handleCloseDeleteModal,
-        handleDeleteMember,
-        handleExportMembersPdf,
-    };
+  return {
+    event,
+    members,
+    filteredMembers,
+    selectableStudents,
+    formData,
+    setFormData,
+    errors,
+    deletingMemberId,
+    search,
+    setSearch,
+    loading,
+    savingMember,
+    toast,
+    isStudentRole,
+    canManageMembers: !isStudentRole,
+    handleBackToEvents,
+    handleOpenCreateModal,
+    handleCloseCreateModal,
+    handleCreateMember,
+    handleOpenDeleteModal,
+    handleCloseDeleteModal,
+    handleDeleteMember,
+    handleExportMembersPdf,
+  };
 }

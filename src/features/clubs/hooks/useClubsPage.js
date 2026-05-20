@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-
+import {
+  AcademicCapIcon,
+  UserGroupIcon,
+  UsersIcon,
+} from "@heroicons/react/24/outline";
 import { clubService } from "../services/clubService";
 import { teacherService } from "../../teachers/services/teacherService";
 import { clubMemberService } from "../../clubMembers/services/clubMemberService";
-import { authStorage } from "../../auth/services/authStorage";
 import { exportToPdf } from "../../../utils/exportToPdf";
-
 import { emptyClubForm } from "../constants/clubConstants";
-
 import { clubPdfColumns } from "../constants/clubTableColumns";
+import { getCurrentRole } from "../../../utils/authUser";
 
 import {
   filterClubs,
@@ -22,61 +24,49 @@ import {
   getErrorMessage,
 } from "../utils/clubFormatters";
 
-const normalizeId = (value) =>
-  value === undefined || value === null ? "" : String(value);
+const normalizeResultData = (result) => {
+  return result?.data || result?.Data || result || [];
+};
 
-const getCurrentUserRole = (user) =>
-  (
-    user?.roleName ||
-    user?.RoleName ||
-    user?.role ||
-    user?.Role ||
-    user?.user?.roleName ||
-    user?.user?.RoleName ||
-    user?.user?.role ||
-    user?.user?.Role ||
+const normalizeId = (value) => {
+  return (value || "").toString().trim().toLowerCase();
+};
+
+const getMembershipClubId = (membership) => {
+  return (
+    membership?.clubId ||
+    membership?.ClubId ||
+    membership?.club?.id ||
+    membership?.Club?.Id ||
+    membership?.club?.Id ||
+    membership?.Club?.id ||
     ""
-  )
-    .toString()
-    .toLowerCase();
+  );
+};
 
-const getCurrentUserStudentId = (user) =>
-  user?.studentId ||
-  user?.StudentId ||
-  user?.user?.studentId ||
-  user?.user?.StudentId ||
-  user?.id ||
-  user?.Id ||
-  user?.userId ||
-  user?.UserId ||
-  user?.user?.id ||
-  user?.user?.Id ||
-  user?.user?.userId ||
-  user?.user?.UserId ||
-  "";
+const getMembershipClubName = (membership) => {
+  return (
+    membership?.clubName ||
+    membership?.ClubName ||
+    membership?.club?.name ||
+    membership?.Club?.Name ||
+    membership?.club?.Name ||
+    membership?.Club?.name ||
+    "-"
+  );
+};
 
-const getMemberStudentId = (member) =>
-  member?.studentId ||
-  member?.StudentId ||
-  member?.student?.id ||
-  member?.Student?.Id ||
-  member?.student?.Id ||
-  member?.Student?.id ||
-  "";
-
-const getMemberClubId = (member) =>
-  member?.clubId ||
-  member?.ClubId ||
-  member?.club?.id ||
-  member?.Club?.Id ||
-  member?.club?.Id ||
-  member?.Club?.id ||
-  "";
+const getMembershipIsActive = (membership) => {
+  return membership?.isActive ?? membership?.IsActive ?? true;
+};
 
 export function useClubsPage() {
   const [clubs, setClubs] = useState([]);
+
   const [teachers, setTeachers] = useState([]);
+
   const [clubMembers, setClubMembers] = useState([]);
+
   const [formData, setFormData] = useState(emptyClubForm);
 
   const [errors, setErrors] = useState({});
@@ -95,8 +85,8 @@ export function useClubsPage() {
 
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const currentUser = useMemo(() => authStorage.getUser(), []);
-  const currentRole = getCurrentUserRole(currentUser);
+  const currentRole = getCurrentRole();
+
   const isStudent = currentRole === "student";
 
   const isEditing = editingClubId !== null;
@@ -125,10 +115,6 @@ export function useClubsPage() {
     document.getElementById(id)?.close();
   };
 
-  const normalizeResultData = (result) => {
-    return result?.data || result?.Data || result || [];
-  };
-
   const loadClubs = async () => {
     try {
       const result = await clubService.getAll();
@@ -148,11 +134,20 @@ export function useClubsPage() {
     } catch (error) {
       console.error(error);
 
-      showToast(getErrorMessage(error, "Kulüpler yüklenirken hata oluştu."), "error");
+      showToast(
+        getErrorMessage(error, "Kulüpler yüklenirken hata oluştu."),
+        "error",
+      );
     }
   };
 
   const loadTeachers = async () => {
+    if (isStudent) {
+      setTeachers([]);
+
+      return;
+    }
+
     try {
       const result = await teacherService.getAll();
 
@@ -178,22 +173,31 @@ export function useClubsPage() {
     } catch (error) {
       console.error(error);
 
-      showToast(getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."), "error");
+      showToast(
+        getErrorMessage(error, "Öğretmenler yüklenirken hata oluştu."),
+        "error",
+      );
     }
   };
 
   const loadClubMembers = async () => {
-    if (!isStudent) return;
+    if (!isStudent) {
+      setClubMembers([]);
+
+      return;
+    }
 
     try {
-      const data = await clubMemberService.getAll();
+      const result = await clubMemberService.getMyMemberships();
+
+      const data = normalizeResultData(result);
 
       setClubMembers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
 
       showToast(
-        getErrorMessage(error, "Kulüp üyeleri yüklenirken hata oluştu."),
+        getErrorMessage(error, "Kulüp üyelik bilgisi yüklenirken hata oluştu."),
         "error",
       );
     }
@@ -211,36 +215,44 @@ export function useClubsPage() {
     return filterClubs(clubs, teachers, search, statusFilter);
   }, [clubs, teachers, search, statusFilter]);
 
-  const studentClub = useMemo(() => {
+  const studentClubMembership = useMemo(() => {
     if (!isStudent) return null;
 
-    const studentId = getCurrentUserStudentId(currentUser);
+    return (
+      clubMembers.find((membership) => {
+        return getMembershipIsActive(membership);
+      }) || null
+    );
+  }, [clubMembers, isStudent]);
 
-    if (!studentId) return null;
+  const studentClub = useMemo(() => {
+    if (!isStudent || !studentClubMembership) return null;
 
-    const currentStudentMember = clubMembers.find((member) => {
-      return normalizeId(getMemberStudentId(member)) === normalizeId(studentId);
-    });
-
-    if (!currentStudentMember) return null;
-
-    const clubId = getMemberClubId(currentStudentMember);
+    const membershipClubId = getMembershipClubId(studentClubMembership);
 
     return (
       clubs.find((club) => {
-        return normalizeId(getClubId(club)) === normalizeId(clubId);
+        return normalizeId(getClubId(club)) === normalizeId(membershipClubId);
       }) || null
     );
-  }, [clubs, clubMembers, currentUser, isStudent]);
+  }, [clubs, isStudent, studentClubMembership]);
 
   const studentClubStats = useMemo(() => {
     if (!isStudent) return [];
-  
+
+    const clubName = studentClub
+      ? getClubName(studentClub)
+      : studentClubMembership
+        ? getMembershipClubName(studentClubMembership)
+        : "-";
+
     return [
       {
         title: "Katıldığı Kulüp",
-        value: studentClub ? getClubName(studentClub) : "-",
+        value: clubName,
         description: "Öğrencinin kayıtlı olduğu kulüp",
+        icon: UserGroupIcon,
+        color: "primary",
       },
       {
         title: "Sorumlu Hoca",
@@ -248,14 +260,18 @@ export function useClubsPage() {
           ? getClubAdvisorTeacherName(studentClub, teachers) || "-"
           : "-",
         description: "Kulübün sorumlu öğretmeni",
+        icon: AcademicCapIcon,
+        color: "info",
       },
       {
         title: "Üye Sayısı",
         value: studentClub ? getClubMemberCount(studentClub) : 0,
         description: "Kulüpteki toplam üye sayısı",
+        icon: UsersIcon,
+        color: "success",
       },
     ];
-  }, [isStudent, studentClub, teachers]);
+  }, [isStudent, studentClub, studentClubMembership, teachers]);
 
   const handleOpenCreateModal = (modalId) => {
     setEditingClubId(null);
@@ -405,7 +421,10 @@ export function useClubsPage() {
     } catch (error) {
       console.error(error);
 
-      showToast(getErrorMessage(error, "Kulüp silinirken hata oluştu."), "error");
+      showToast(
+        getErrorMessage(error, "Kulüp silinirken hata oluştu."),
+        "error",
+      );
     }
   };
 

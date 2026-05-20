@@ -108,9 +108,7 @@ function ClubTable({
             {clubs.length === 0 && (
               <tr>
                 <td
-                  colSpan={
-                    3 + (canOpenClub ? 1 : 0) + (canManage ? 1 : 0)
-                  }
+                  colSpan={3 + (canOpenClub ? 1 : 0) + (canManage ? 1 : 0)}
                   className="px-6 py-10 text-center text-sm text-base-content/60"
                 >
                   Kulüp kaydı bulunamadı.

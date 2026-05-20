@@ -1,4 +1,5 @@
 import axiosInstance from "../../../api/axiosInstance";
+
 import { API_ENDPOINTS } from "../../../api/endpoints";
 
 const getData = (response) => {
@@ -8,6 +9,13 @@ const getData = (response) => {
 export const clubMemberService = {
   getAll: async () => {
     const response = await axiosInstance.get(API_ENDPOINTS.CLUB_MEMBERS);
+
+    return getData(response);
+  },
+
+  getMyMemberships: async () => {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.CLUB_MEMBERS}/me`);
+
     return getData(response);
   },
 
@@ -21,6 +29,7 @@ export const clubMemberService = {
 
   create: async (data) => {
     const response = await axiosInstance.post(API_ENDPOINTS.CLUB_MEMBERS, data);
+
     return getData(response);
   },
 

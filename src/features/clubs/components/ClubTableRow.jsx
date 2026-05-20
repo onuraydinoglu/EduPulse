@@ -1,30 +1,19 @@
 import { Link } from "react-router-dom";
-
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
-
 import TableActions from "../../../components/ui/TableActions";
-
 import {
   getClubAdvisorTeacherName,
-
   getClubId,
-
   getClubMemberCount,
-
   getClubName,
 } from "../utils/clubFormatters";
 
 function ClubTableRow({
   club,
-
   teachers = [],
-
   canManage = true,
-
   canOpenClub = true,
-
   onEdit,
-
   onDelete,
 }) {
   const clubId = getClubId(club);

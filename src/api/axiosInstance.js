@@ -12,15 +12,6 @@ const getTokenFromUser = (user) => {
   return (
     user?.token ||
     user?.Token ||
-    user?.accessToken ||
-    user?.AccessToken ||
-    user?.jwtToken ||
-    user?.JwtToken ||
-    user?.user?.token ||
-    user?.user?.Token ||
-    user?.data?.token ||
-    user?.data?.Token ||
-    user?.Data?.Token ||
     ""
   );
 };

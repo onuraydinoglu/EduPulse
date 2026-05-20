@@ -4,17 +4,14 @@ import ClubFormModal from "../components/ClubFormModal";
 import ClubsPageHeader from "../components/ClubsPageHeader";
 import ClubStatsCards from "../components/ClubStatsCards";
 import ClubTable from "../components/ClubTable";
-
 import {
   CLUB_DELETE_MODAL_ID,
 
   CLUB_MODAL_ID,
 } from "../constants/clubConstants";
-
 import { getClubStats } from "../constants/clubTableColumns";
 import { useClubsPage } from "../hooks/useClubsPage";
 import { canManageSchoolData } from "../../../utils/authUser";
-
 function ClubsPage() {
   const {
     clubs,
@@ -42,6 +39,7 @@ function ClubsPage() {
   } = useClubsPage();
 
   const canManageClubs = canManageSchoolData();
+
   const statItems = isStudent ? studentClubStats : getClubStats(clubs);
 
   return (
