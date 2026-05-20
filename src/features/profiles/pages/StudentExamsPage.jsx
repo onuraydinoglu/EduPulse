@@ -1,122 +1,101 @@
+import { useEffect, useState } from "react";
 import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
-import Toast from "../../../components/ui/Toast";
-import { authStorage } from "../../auth/services/authStorage";
 import EmptyProfileState from "../components/EmptyProfileState";
 import ProfileSection from "../components/ProfileSection";
-import { useProfilePage } from "../hooks/useProfilePage";
 import { getValue } from "../utils/profileFormatters";
-
-const getCurrentStudentId = (user) => {
-  return (
-    user?.studentId ||
-    user?.StudentId ||
-    user?.id ||
-    user?.Id ||
-    user?.userId ||
-    user?.UserId ||
-    user?.student?.id ||
-    user?.student?.Id ||
-    user?.data?.studentId ||
-    user?.data?.StudentId ||
-    user?.data?.id ||
-    user?.data?.Id ||
-    ""
-  );
-};
+import { studentExamService } from "../services/studentExamService";
 
 const StudentExamsPage = () => {
-  const user = authStorage.getUser();
-  const studentId = getCurrentStudentId(user);
+  const [grades, setGrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const { details, loading, toast } = useProfilePage("student", studentId);
+  useEffect(() => {
+    const loadGrades = async () => {
+      try {
+        setLoading(true);
+        setErrorMessage("");
 
-  const grades = details?.grades || [];
+        const data = await studentExamService.getMyGrades();
+        setGrades(data);
+      } catch (error) {
+        console.error(error);
+        setGrades([]);
+        setErrorMessage(
+          error?.message || "Not bilgileriniz yüklenirken bir hata oluştu.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!studentId) {
-    return (
-      <div className="space-y-6">
-        {toast && <Toast type={toast.type} message={toast.message} />}
-
-        <ProfileSection
-          title="Ders Notları"
-          description="Ders bazlı sınav, proje, etkinlik ve ortalama bilgileriniz"
-          icon={ClipboardDocumentCheckIcon}
-        >
-          <EmptyProfileState text="Öğrenci bilgisi bulunamadı." />
-        </ProfileSection>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        {toast && <Toast type={toast.type} message={toast.message} />}
-
-        <ProfileSection
-          title="Ders Notları"
-          description="Ders bazlı sınav, proje, etkinlik ve ortalama bilgileriniz"
-          icon={ClipboardDocumentCheckIcon}
-        >
-          <EmptyProfileState text="Notlar yükleniyor..." />
-        </ProfileSection>
-      </div>
-    );
-  }
+    loadGrades();
+  }, []);
 
   return (
     <div className="space-y-6">
-      {toast && <Toast type={toast.type} message={toast.message} />}
-
       <ProfileSection
         title="Ders Notları"
         description="Ders bazlı sınav, proje, etkinlik ve ortalama bilgileriniz"
         icon={ClipboardDocumentCheckIcon}
       >
-        {grades.length === 0 ? (
-          <EmptyProfileState text="Henüz not bilgisi bulunmuyor." />
+        {loading ? (
+          <EmptyProfileState text="Notlar yükleniyor..." />
+        ) : errorMessage ? (
+          <EmptyProfileState text={errorMessage} />
+        ) : grades.length === 0 ? (
+          <EmptyProfileState text="Henüz not bilginiz bulunmuyor." />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-800 text-sm">
-              <thead className="bg-slate-950/60 text-left text-xs uppercase tracking-wide text-slate-400">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Ders</th>
-                  <th className="px-4 py-3 font-semibold">1. Sınav</th>
-                  <th className="px-4 py-3 font-semibold">2. Sınav</th>
-                  <th className="px-4 py-3 font-semibold">Proje</th>
-                  <th className="px-4 py-3 font-semibold">Etkinlik 1</th>
-                  <th className="px-4 py-3 font-semibold">Etkinlik 2</th>
-                  <th className="px-4 py-3 font-semibold">Etkinlik 3</th>
-                  <th className="px-4 py-3 font-semibold">Ortalama</th>
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <th className="px-4 py-3">Ders</th>
+                  <th className="px-4 py-3">1. Sınav</th>
+                  <th className="px-4 py-3">2. Sınav</th>
+                  <th className="px-4 py-3">Proje</th>
+                  <th className="px-4 py-3">Etkinlik 1</th>
+                  <th className="px-4 py-3">Etkinlik 2</th>
+                  <th className="px-4 py-3">Etkinlik 3</th>
+                  <th className="px-4 py-3">Ortalama</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-800 text-slate-200">
-                {grades.map((grade) => (
-                  <tr key={grade.id || grade.Id}>
-                    <td className="px-4 py-3 font-medium">
-                      {getValue(grade.lessonName || grade.LessonName)}
+              <tbody className="divide-y divide-slate-100">
+                {grades.map((grade, index) => (
+                  <tr key={getValue(grade, ["id", "Id"], index)}>
+                    <td className="px-4 py-3 font-semibold text-slate-900">
+                      {getValue(grade, ["lessonName", "LessonName"], "-")}
                     </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["exam1", "Exam1"], "-")}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["exam2", "Exam2"], "-")}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["project", "Project"], "-")}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["activity1", "Activity1"], "-")}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["activity2", "Activity2"], "-")}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {getValue(grade, ["activity3", "Activity3"], "-")}
+                    </td>
+
                     <td className="px-4 py-3">
-                      {getValue(grade.exam1 || grade.Exam1)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {getValue(grade.exam2 || grade.Exam2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {getValue(grade.project || grade.Project)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {getValue(grade.activity1 || grade.Activity1)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {getValue(grade.activity2 || grade.Activity2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {getValue(grade.activity3 || grade.Activity3)}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-emerald-300">
-                      {getValue(grade.average || grade.Average)}
+                      <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">
+                        {getValue(grade, ["average", "Average"], "-")}
+                      </span>
                     </td>
                   </tr>
                 ))}
