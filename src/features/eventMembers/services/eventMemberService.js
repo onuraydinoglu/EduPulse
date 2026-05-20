@@ -13,38 +13,51 @@ export const eventMemberService = {
 
   getByEventId: async (eventId) => {
     const response = await axiosInstance.get(
-      `${API_ENDPOINTS.EVENT_MEMBERS}/event/${eventId}`,
+      `${API_ENDPOINTS.EVENT_MEMBERS}/event/${eventId}`
     );
+
     return getData(response);
   },
 
   getByStudentId: async (studentId) => {
     const response = await axiosInstance.get(
-      `${API_ENDPOINTS.EVENT_MEMBERS}/student/${studentId}`,
+      `${API_ENDPOINTS.EVENT_MEMBERS}/student/${studentId}`
     );
+
+    return getData(response);
+  },
+
+  getMyEvents: async () => {
+    const response = await axiosInstance.get(
+      `${API_ENDPOINTS.EVENT_MEMBERS}/my-events`
+    );
+
     return getData(response);
   },
 
   create: async (data) => {
     const response = await axiosInstance.post(
       API_ENDPOINTS.EVENT_MEMBERS,
-      data,
+      data
     );
+
     return getData(response);
   },
 
   updatePayment: async (data) => {
     const response = await axiosInstance.put(
       `${API_ENDPOINTS.EVENT_MEMBERS}/payment`,
-      data,
+      data
     );
+
     return getData(response);
   },
 
   delete: async (id) => {
     const response = await axiosInstance.delete(
-      `${API_ENDPOINTS.EVENT_MEMBERS}/${id}`,
+      `${API_ENDPOINTS.EVENT_MEMBERS}/${id}`
     );
+
     return getData(response);
   },
 };

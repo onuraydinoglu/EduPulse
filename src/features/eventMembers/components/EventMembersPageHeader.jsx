@@ -10,10 +10,11 @@ function EventMembersPageHeader({
   onCreate,
   onExport,
   canManage = true,
+  isStudentView = false,
 }) {
   return (
-    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-      <div className="flex items-start gap-4">
+    <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex items-start gap-3">
         <BackButton onClick={onBack} />
 
         <div>
@@ -21,23 +22,23 @@ function EventMembersPageHeader({
             {getEventName(event)}
           </h1>
 
-          <p className="mt-2 text-sm text-base-content/60">
-            {canManage
-              ? "Etkinlik katılımcılarını yönetin, öğrenci atamalarını düzenleyin ve katılım süreçlerini takip edin."
-              : "Etkinlik bilgilerini görüntüleyin."}
+          <p className="mt-1 text-sm text-base-content/55">
+            {isStudentView
+              ? "Etkinlik ile ilgili tarih, saat, yer ve sorumlu öğretmen bilgilerini görüntüleyin."
+              : "Etkinlik katılımcılarını yönetin, öğrenci atamalarını düzenleyin ve katılım süreçlerini takip edin."}
           </p>
         </div>
       </div>
 
-      {canManage && (
-        <div className="flex flex-wrap gap-3">
-          <ExportButton onClick={onExport}>PDF İndir</ExportButton>
+      <div className="flex flex-wrap items-center gap-3">
+        {onExport && <ExportButton onClick={onExport}>PDF İndir</ExportButton>}
 
+        {canManage && (
           <CreateButton onClick={onCreate} icon={PlusIcon}>
             Öğrenci Ekle
           </CreateButton>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

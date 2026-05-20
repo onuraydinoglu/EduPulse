@@ -4,6 +4,7 @@ import EventFormModal from "../components/EventFormModal";
 import EventsPageHeader from "../components/EventsPageHeader";
 import EventStatsCards from "../components/EventStatsCards";
 import EventTable from "../components/EventTable";
+import StudentJoinedEventsSection from "../components/StudentJoinedEventsSection";
 import {
   EVENT_DELETE_MODAL_ID,
   EVENT_MODAL_ID,
@@ -16,6 +17,7 @@ function EventsPage() {
   const {
     events,
     filteredEvents,
+    joinedEvents,
     teachers,
     formData,
     setFormData,
@@ -54,6 +56,10 @@ function EventsPage() {
       />
 
       <EventStatsCards items={getEventStats(events)} />
+
+      {currentRole === "student" && (
+        <StudentJoinedEventsSection events={joinedEvents} />
+      )}
 
       <EventTable
         events={filteredEvents}

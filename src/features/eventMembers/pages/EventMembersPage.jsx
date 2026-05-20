@@ -4,11 +4,14 @@ import EventMemberFormModal from "../components/EventMemberFormModal";
 import EventMemberStatsCards from "../components/EventMemberStatsCards";
 import EventMemberTable from "../components/EventMemberTable";
 import EventMembersPageHeader from "../components/EventMembersPageHeader";
+import StudentEventDetailCard from "../components/StudentEventDetailCard";
 import {
   EVENT_MEMBER_DELETE_MODAL_ID,
   EVENT_MEMBER_MODAL_ID,
 } from "../constants/eventMemberConstants";
 import { useEventMembersPage } from "../hooks/useEventMembersPage";
+import { getEventIsPaid } from "../utils/eventMemberFormatters";
+import { getCurrentRole } from "../../../utils/authUser";
 
 function EventMembersPage() {
   const {
@@ -24,21 +27,34 @@ function EventMembersPage() {
     loading,
     savingMember,
     toast,
-    isStudentRole,
-    canManageMembers,
+    editingPaymentMember,
     handleBackToEvents,
     handleOpenCreateModal,
     handleCloseCreateModal,
+    handleOpenPaymentEditModal,
     handleCreateMember,
+    handleUpdatePayment,
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleDeleteMember,
     handleExportMembersPdf,
   } = useEventMembersPage();
 
+  const currentRole = getCurrentRole();
+
+  const isStudent = currentRole === "student";
+
+  const canManage =
+    currentRole === "schooladmin" || currentRole === "officer";
+
+  const canViewMembers =
+    canManage || currentRole === "teacher";
+
+  const isPaidEvent = getEventIsPaid(event);
+
   if (loading) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center">
+      <div className="flex min-h-[300px] items-center justify-center">
         <span className="loading loading-spinner loading-lg text-primary" />
         <span className="ml-3 text-sm text-base-content/60">
           Etkinlik bilgileri yükleniyor...
@@ -49,67 +65,92 @@ function EventMembersPage() {
 
   if (!event) {
     return (
-      <div className="rounded-3xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
+      <div className="space-y-4">
         <h2 className="text-xl font-bold text-base-content">
           Etkinlik bulunamadı.
         </h2>
 
-        <button
-          type="button"
-          onClick={handleBackToEvents}
-          className="btn btn-primary mt-5 rounded-2xl"
-        >
+        <button className="btn btn-outline" onClick={handleBackToEvents}>
           Etkinliklere Dön
         </button>
       </div>
     );
   }
 
+  if (isStudent) {
+    return (
+      <>
+        {toast.message && <Toast message={toast.message} type={toast.type} />}
+
+        <EventMembersPageHeader
+          event={event}
+          onBack={handleBackToEvents}
+          canManage={false}
+          isStudentView
+        />
+
+        <StudentEventDetailCard event={event} />
+      </>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <>
       {toast.message && <Toast message={toast.message} type={toast.type} />}
 
       <EventMembersPageHeader
         event={event}
         onBack={handleBackToEvents}
         onCreate={() => handleOpenCreateModal(EVENT_MEMBER_MODAL_ID)}
-        onExport={handleExportMembersPdf}
-        canManage={canManageMembers}
+        onExport={canViewMembers ? handleExportMembersPdf : undefined}
+        canManage={canManage}
       />
 
       <EventMemberStatsCards event={event} members={members} />
 
-      {!isStudentRole && (
-        <>
-          <EventMemberTable
-            members={filteredMembers}
-            search={search}
-            setSearch={setSearch}
-            canManage={canManageMembers}
-            onDelete={(memberId) =>
-              handleOpenDeleteModal(memberId, EVENT_MEMBER_DELETE_MODAL_ID)
-            }
-          />
+      {canViewMembers && (
+        <EventMemberTable
+          members={filteredMembers}
+          search={search}
+          setSearch={setSearch}
+          canManage={canManage}
+          canEditPayment={canManage && isPaidEvent}
+          onEditPayment={(member) =>
+            handleOpenPaymentEditModal(member, EVENT_MEMBER_MODAL_ID)
+          }
+          onDelete={(memberId) =>
+            handleOpenDeleteModal(memberId, EVENT_MEMBER_DELETE_MODAL_ID)
+          }
+        />
+      )}
 
+      {canManage && (
+        <>
           <EventMemberFormModal
-            id={EVENT_MEMBER_MODAL_ID}
-            students={selectableStudents}
+            modalId={EVENT_MEMBER_MODAL_ID}
             formData={formData}
             setFormData={setFormData}
             errors={errors}
-            loading={savingMember}
+            students={selectableStudents}
+            saving={savingMember}
+            isPaidEvent={isPaidEvent}
+            editingPaymentMember={editingPaymentMember}
             onClose={() => handleCloseCreateModal(EVENT_MEMBER_MODAL_ID)}
-            onSubmit={() => handleCreateMember(EVENT_MEMBER_MODAL_ID)}
+            onSubmit={() =>
+              editingPaymentMember
+                ? handleUpdatePayment(EVENT_MEMBER_MODAL_ID)
+                : handleCreateMember(EVENT_MEMBER_MODAL_ID)
+            }
           />
 
           <EventMemberDeleteModal
-            id={EVENT_MEMBER_DELETE_MODAL_ID}
+            modalId={EVENT_MEMBER_DELETE_MODAL_ID}
             onClose={() => handleCloseDeleteModal(EVENT_MEMBER_DELETE_MODAL_ID)}
             onConfirm={() => handleDeleteMember(EVENT_MEMBER_DELETE_MODAL_ID)}
           />
         </>
       )}
-    </div>
+    </>
   );
 }
 
