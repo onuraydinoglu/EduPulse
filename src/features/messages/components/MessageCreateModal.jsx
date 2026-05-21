@@ -7,6 +7,27 @@ import {
   getUserRoleName,
 } from "../utils/messageFormatters";
 
+const CLASSROOM_TARGET_PREFIX = "classroom:";
+
+const isClassroomTarget = (user) => {
+  const userId = getUserId(user);
+  const roleName = getUserRoleName(user);
+
+  return (
+    userId?.startsWith(CLASSROOM_TARGET_PREFIX) ||
+    roleName?.toLowerCase() === "sınıf"
+  );
+};
+
+const getClassroomGrade = (classroomName) => {
+  const grade = parseInt(classroomName?.split("-")[0], 10);
+  return Number.isNaN(grade) ? 999 : grade;
+};
+
+const getClassroomSection = (classroomName) => {
+  return classroomName?.split("-")[1]?.trim() || "";
+};
+
 function MessageCreateModal({
   id,
   users,
@@ -16,46 +37,111 @@ function MessageCreateModal({
   onClose,
   onSubmit,
 }) {
-  const userOptions = users.map((user) => {
-    const userId = getUserId(user);
-    const fullName = getUserFullName(user);
-    const roleName = getUserRoleName(user);
+  const personOptions = users
+    .filter((user) => !isClassroomTarget(user))
+    .map((user) => {
+      const userId = getUserId(user);
+      const fullName = getUserFullName(user);
+      const roleName = getUserRoleName(user);
 
-    return {
-      value: userId,
-      label: `${fullName} - ${roleName}`,
-    };
-  });
+      return {
+        value: userId,
+        label: `${fullName} - ${roleName}`,
+      };
+    })
+    .sort((first, second) => first.label.localeCompare(second.label, "tr"));
+
+  const classroomOptions = users
+    .filter((user) => isClassroomTarget(user))
+    .map((user) => {
+      const userId = getUserId(user);
+      const fullName = getUserFullName(user);
+
+      return {
+        value: userId,
+        label: fullName,
+      };
+    })
+    .sort((first, second) => {
+      const firstGrade = getClassroomGrade(first.label);
+      const secondGrade = getClassroomGrade(second.label);
+
+      if (firstGrade !== secondGrade) {
+        return firstGrade - secondGrade;
+      }
+
+      return getClassroomSection(first.label).localeCompare(
+        getClassroomSection(second.label),
+        "tr",
+      );
+    });
+
+  const selectedPersonIds = formData.receiverUserIds.filter((receiverUserId) =>
+    personOptions.some((option) => option.value === receiverUserId),
+  );
+
+  const selectedClassroomIds = formData.receiverUserIds.filter(
+    (receiverUserId) =>
+      classroomOptions.some((option) => option.value === receiverUserId),
+  );
+
+  const handlePersonChange = (selectedValues) => {
+    onChange("receiverUserIds", [...selectedValues, ...selectedClassroomIds]);
+  };
+
+  const handleClassroomChange = (selectedValues) => {
+    onChange("receiverUserIds", [...selectedPersonIds, ...selectedValues]);
+  };
 
   return (
     <Modal
       id={id}
-      title="Mesaj Gönder"
-      description="Okul içi kullanıcılara mesaj gönderin"
+      title="Yeni Mesaj"
       footer={
         <>
-          <Button variant="outline" onClick={onClose}>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={submitLoading}
+            onClick={onClose}
+          >
             Vazgeç
           </Button>
 
-          <Button onClick={onSubmit} disabled={submitLoading}>
+          <Button
+            type="button"
+            variant="primary"
+            disabled={submitLoading}
+            onClick={onSubmit}
+          >
             {submitLoading ? "Gönderiliyor..." : "Gönder"}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <MultiSelectDropdown
-          label="Alıcı"
-          value={formData.receiverUserIds}
-          onChange={(value) => onChange("receiverUserIds", value)}
-          options={userOptions}
-          placeholder="Alıcı seçiniz"
-          emptyText="Alıcı bulunamadı"
-        />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <MultiSelectDropdown
+            label="Kişilere Mesaj"
+            value={selectedPersonIds}
+            onChange={handlePersonChange}
+            options={personOptions}
+            placeholder="Kişi seçiniz"
+            emptyText="Kişi bulunamadı"
+          />
+
+          <MultiSelectDropdown
+            label="Sınıflara Mesaj"
+            value={selectedClassroomIds}
+            onChange={handleClassroomChange}
+            options={classroomOptions}
+            placeholder="Sınıf seçiniz"
+            emptyText="Sınıf bulunamadı"
+          />
+        </div>
 
         <div>
-          <label className="mb-1 block text-sm font-semibold text-base-content/70">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
             Başlık
           </label>
 
@@ -69,7 +155,7 @@ function MessageCreateModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-semibold text-base-content/70">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
             Mesaj
           </label>
 
