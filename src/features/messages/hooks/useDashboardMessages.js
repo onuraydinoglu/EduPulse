@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { messageService } from "../services/messageService";
 import {
   emptyMessageForm,
@@ -23,7 +22,8 @@ export function useDashboardMessages() {
   const [toast, setToast] = useState(null);
 
   const unreadCount = useMemo(() => {
-    return inboxMessages.filter((message) => !getMessageIsRead(message)).length;
+    return inboxMessages.filter((message) => !getMessageIsRead(message))
+      .length;
   }, [inboxMessages]);
 
   const activeMessages =
@@ -134,7 +134,7 @@ export function useDashboardMessages() {
 
   const handleSendMessage = async (modalId) => {
     if (!formData.receiverUserIds.length) {
-      showToast("En az bir alıcı seçmelisiniz.", "error");
+      showToast("Alıcı seçmelisiniz.", "error");
       return;
     }
 
@@ -164,7 +164,7 @@ export function useDashboardMessages() {
       handleCloseCreateModal(modalId);
       await loadMessages();
 
-      showToast("Mesajlar başarıyla gönderildi.");
+      showToast("Mesaj başarıyla gönderildi.");
     } catch (error) {
       showToast(error.message || "Mesaj gönderilirken hata oluştu.", "error");
     } finally {

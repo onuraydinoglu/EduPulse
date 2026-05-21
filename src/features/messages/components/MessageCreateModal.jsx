@@ -21,6 +21,7 @@ const isClassroomTarget = (user) => {
 
 const getClassroomGrade = (classroomName) => {
   const grade = parseInt(classroomName?.split("-")[0], 10);
+
   return Number.isNaN(grade) ? 999 : grade;
 };
 
