@@ -1,5 +1,9 @@
 import TableActions from "../../../components/ui/TableActions";
+import Pagination from "../../../components/ui/Pagination";
+import usePagination from "../../../hooks/usePagination";
+
 import { MESSAGE_TABS } from "../constants/messageConstants";
+
 import {
   formatMessageDate,
   getMessageContent,
@@ -18,6 +22,18 @@ function MessageList({
   onOpenDetail,
   onOpenDelete,
 }) {
+  const {
+    currentPage,
+    totalPages,
+    pageSize,
+    paginatedItems,
+    totalItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(activeMessages, 5);
+
   if (loading) {
     return (
       <div className="rounded-2xl border border-base-300 bg-base-100 p-6 text-sm text-gray-500">
@@ -38,7 +54,7 @@ function MessageList({
 
   return (
     <div className="space-y-3">
-      {activeMessages.map((message) => {
+      {paginatedItems.map((message) => {
         const id = getMessageId(message);
         const title = getMessageTitle(message);
         const content = getMessageContent(message);
@@ -93,6 +109,17 @@ function MessageList({
           </div>
         );
       })}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

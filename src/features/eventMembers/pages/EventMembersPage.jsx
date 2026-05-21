@@ -44,11 +44,9 @@ function EventMembersPage() {
 
   const isStudent = currentRole === "student";
 
-  const canManage =
-    currentRole === "schooladmin" || currentRole === "officer";
+  const canManage = currentRole === "schooladmin" || currentRole === "officer";
 
-  const canViewMembers =
-    canManage || currentRole === "teacher";
+  const canViewMembers = canManage || currentRole === "teacher";
 
   const isPaidEvent = getEventIsPaid(event);
 
@@ -134,7 +132,7 @@ function EventMembersPage() {
             students={selectableStudents}
             saving={savingMember}
             isPaidEvent={isPaidEvent}
-            editingPaymentMember={editingPaymentMember}
+            isPaymentEdit={Boolean(editingPaymentMember)}
             onClose={() => handleCloseCreateModal(EVENT_MEMBER_MODAL_ID)}
             onSubmit={() =>
               editingPaymentMember
