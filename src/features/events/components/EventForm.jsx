@@ -1,9 +1,7 @@
 import FormInput from "../../../components/ui/FormInput";
 import FormSelect from "../../../components/ui/FormSelect";
-import {
-  eventPaymentOptions,
-  eventStatusOptions,
-} from "../constants/eventConstants";
+import ActiveCheckbox from "../../../components/ui/ActiveCheckbox";
+import { eventPaymentOptions } from "../constants/eventConstants";
 import { getTeacherSelectOptions } from "../utils/eventFormatters";
 
 function EventForm({
@@ -127,7 +125,7 @@ function EventForm({
           <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
             {teacherOptions.map((teacher) => {
               const checked = formData.responsibleTeacherIds?.includes(
-                teacher.value
+                teacher.value,
               );
 
               return (
@@ -153,12 +151,9 @@ function EventForm({
       </div>
 
       {isEditing && (
-        <FormSelect
-          label="Durum"
-          value={String(formData.isActive)}
-          error={errors.isActive}
-          options={eventStatusOptions}
-          onChange={(value) => updateField("isActive", value)}
+        <ActiveCheckbox
+          checked={formData.isActive === true || formData.isActive === "true"}
+          onChange={(checked) => updateField("isActive", String(checked))}
         />
       )}
     </div>

@@ -72,7 +72,9 @@ function FormFields({
       {isEditing && showActiveCheckbox && (
         <ActiveCheckbox
           className="md:col-span-2"
-          checked={formData?.isActive !== false && formData?.isActive !== "false"}
+          checked={
+            formData?.isActive !== false && formData?.isActive !== "false"
+          }
           onChange={(value) =>
             setFormData?.((prev) => ({
               ...(prev || {}),
