@@ -8,7 +8,7 @@ const lessonFields = [
   },
 ];
 
-function LessonForm({ formData, setFormData, errors = {}, isEditing = false }) {
+function LessonForm({ formData, setFormData, errors = {} }) {
   return (
     <>
       {errors?.general && (
@@ -23,29 +23,6 @@ function LessonForm({ formData, setFormData, errors = {}, isEditing = false }) {
         setFormData={setFormData}
         errors={errors}
       />
-
-      {isEditing && (
-        <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-primary"
-            checked={formData.isActive}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                isActive: event.target.checked,
-              }))
-            }
-          />
-
-          <div>
-            <p className="text-sm font-semibold text-gray-700">Aktif Ders</p>
-            <p className="text-xs text-gray-500">
-              Pasife alınan dersler listede pasif olarak görünür.
-            </p>
-          </div>
-        </label>
-      )}
     </>
   );
 }

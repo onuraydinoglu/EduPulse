@@ -238,11 +238,18 @@ export function useClassesPage() {
   };
 
   const handleDelete = async (modalId) => {
-    if (!deletingClassId) return;
-
+    if (
+      deletingClassId === null ||
+      deletingClassId === undefined ||
+      String(deletingClassId).trim() === ""
+    ) {
+      showToast("Silinecek sınıf bilgisi bulunamadı.", "error");
+      return;
+    }
+  
     try {
       const result = await classService.delete(deletingClassId);
-
+  
       if (result?.isSuccess === false || result?.IsSuccess === false) {
         showToast(
           result.message || result.Message || "Sınıf silinemedi.",
@@ -250,13 +257,12 @@ export function useClassesPage() {
         );
         return;
       }
-
+  
       await loadClasses();
       handleCloseDeleteModal(modalId);
       showToast("Sınıf silindi.");
     } catch (error) {
       console.error(error);
-
       showToast(
         getErrorMessage(error, "Sınıf silinirken hata oluştu."),
         "error",

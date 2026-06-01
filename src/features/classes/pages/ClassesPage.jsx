@@ -86,7 +86,7 @@ function ClassesPage() {
 
           <ClassDeleteModal
             modalId={CLASS_DELETE_MODAL_ID}
-            onDelete={() => handleDelete(CLASS_DELETE_MODAL_ID)}
+            onConfirm={() => handleDelete(CLASS_DELETE_MODAL_ID)}
           />
         </>
       )}

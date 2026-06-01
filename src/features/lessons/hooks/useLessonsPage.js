@@ -5,208 +5,200 @@ import { emptyLessonForm } from "../constants/lessonConstants";
 import { filterLessons, getLessonId } from "../utils/lessonFormatters";
 
 import {
-    validateForm,
-    hasValidationError,
+  validateForm,
+  hasValidationError,
 } from "../../../validations/validationRules";
 
 import { lessonValidationSchema } from "../../../validations/schemas";
 
 export function useLessonsPage() {
-    const [lessons, setLessons] = useState([]);
-    const [formData, setFormData] = useState(emptyLessonForm);
+  const [lessons, setLessons] = useState([]);
+  const [formData, setFormData] = useState(emptyLessonForm);
+  const [editingLessonId, setEditingLessonId] = useState(null);
+  const [deletingLessonId, setDeletingLessonId] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "success" });
+  const [errors, setErrors] = useState({});
+  const [search, setSearch] = useState("");
 
-    const [editingLessonId, setEditingLessonId] = useState(null);
-    const [deletingLessonId, setDeletingLessonId] = useState(null);
+  const isEditing = editingLessonId !== null;
 
-    const [toast, setToast] = useState({ message: "", type: "success" });
-    const [errors, setErrors] = useState({});
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
 
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
+    setTimeout(() => {
+      setToast({ message: "", type: "success" });
+    }, 2500);
+  };
 
-    const isEditing = editingLessonId !== null;
+  const normalizeResultData = (result) => {
+    return result?.data || result?.Data || [];
+  };
 
-    const showToast = (message, type = "success") => {
-        setToast({ message, type });
+  const getLessons = async () => {
+    try {
+      const result = await lessonService.getAll();
 
-        setTimeout(() => {
-            setToast({ message: "", type: "success" });
-        }, 2500);
+      if (!result.isSuccess) {
+        showToast(result.message || "Dersler getirilemedi.", "error");
+        return;
+      }
+
+      setLessons(normalizeResultData(result));
+    } catch (error) {
+      console.error(error);
+      showToast(error.message || "Sunucu hatası oluştu.", "error");
+    }
+  };
+
+  useEffect(() => {
+    getLessons();
+  }, []);
+
+  const filteredLessons = useMemo(() => {
+    return filterLessons(lessons, search);
+  }, [lessons, search]);
+
+  const openModal = (modalId) => {
+    document.getElementById(modalId)?.showModal();
+  };
+
+  const closeModal = (modalId) => {
+    document.getElementById(modalId)?.close();
+  };
+
+  const handleOpenCreateModal = (modalId) => {
+    setEditingLessonId(null);
+    setFormData(emptyLessonForm);
+    setErrors({});
+    openModal(modalId);
+  };
+
+  const handleOpenEditModal = (lesson, modalId) => {
+    setEditingLessonId(getLessonId(lesson));
+
+    setFormData({
+      name: lesson.name || lesson.Name || "",
+    });
+
+    setErrors({});
+    openModal(modalId);
+  };
+
+  const handleCloseLessonModal = (modalId) => {
+    setEditingLessonId(null);
+    setFormData(emptyLessonForm);
+    setErrors({});
+    closeModal(modalId);
+  };
+
+  const handleOpenDeleteModal = (id, modalId) => {
+    setDeletingLessonId(id);
+    openModal(modalId);
+  };
+
+  const handleCloseDeleteModal = (modalId) => {
+    setDeletingLessonId(null);
+    closeModal(modalId);
+  };
+
+  const handleSubmit = async (modalId) => {
+    const validationErrors = validateForm(formData, lessonValidationSchema);
+
+    if (hasValidationError(validationErrors)) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const preparedLesson = {
+      name: formData.name.trim(),
     };
 
-    const normalizeResultData = (result) => {
-        return result?.data || result?.Data || [];
-    };
+    try {
+      const result = isEditing
+        ? await lessonService.update({
+            id: editingLessonId,
+            ...preparedLesson,
+          })
+        : await lessonService.create(preparedLesson);
 
-    const getLessons = async () => {
-        try {
-            const result = await lessonService.getAll();
-
-            if (!result.isSuccess) {
-                showToast(result.message || "Dersler getirilemedi.", "error");
-                return;
-            }
-
-            setLessons(normalizeResultData(result));
-        } catch (error) {
-            console.error(error);
-            showToast(error.message || "Sunucu hatası oluştu.", "error");
-        }
-    };
-
-    useEffect(() => {
-        getLessons();
-    }, []);
-
-    const filteredLessons = useMemo(() => {
-        return filterLessons(lessons, search, statusFilter);
-    }, [lessons, search, statusFilter]);
-
-    const openModal = (modalId) => {
-        document.getElementById(modalId)?.showModal();
-    };
-
-    const closeModal = (modalId) => {
-        document.getElementById(modalId)?.close();
-    };
-
-    const handleOpenCreateModal = (modalId) => {
-        setEditingLessonId(null);
-        setFormData(emptyLessonForm);
-        setErrors({});
-        openModal(modalId);
-    };
-
-    const handleOpenEditModal = (lesson, modalId) => {
-        setEditingLessonId(getLessonId(lesson));
-
-        setFormData({
-            name: lesson.name || lesson.Name || "",
-            isActive: lesson.isActive ?? lesson.IsActive ?? true,
+      if (!result.isSuccess) {
+        setErrors({
+          general: result.message || "İşlem başarısız.",
         });
+        return;
+      }
 
-        setErrors({});
-        openModal(modalId);
-    };
+      await getLessons();
 
-    const handleCloseLessonModal = (modalId) => {
-        setEditingLessonId(null);
-        setFormData(emptyLessonForm);
-        setErrors({});
-        closeModal(modalId);
-    };
+      setFormData(emptyLessonForm);
+      setEditingLessonId(null);
+      setErrors({});
+      closeModal(modalId);
 
-    const handleOpenDeleteModal = (id, modalId) => {
-        setDeletingLessonId(id);
-        openModal(modalId);
-    };
+      showToast(
+        isEditing
+          ? "Ders başarıyla güncellendi."
+          : "Yeni ders başarıyla eklendi."
+      );
+    } catch (error) {
+      console.error(error);
 
-    const handleCloseDeleteModal = (modalId) => {
-        setDeletingLessonId(null);
-        closeModal(modalId);
-    };
+      setErrors({
+        general:
+          error.response?.data?.message ||
+          error.response?.data?.Message ||
+          error.response?.data?.title ||
+          error.message ||
+          "Sunucu hatası oluştu.",
+      });
+    }
+  };
 
-    const handleSubmit = async (modalId) => {
-        const validationErrors = validateForm(formData, lessonValidationSchema);
+  const handleDelete = async (modalId) => {
+    try {
+      const result = await lessonService.delete(deletingLessonId);
 
-        if (hasValidationError(validationErrors)) {
-            setErrors(validationErrors);
-            return;
-        }
+      if (!result.isSuccess) {
+        showToast(result.message || "Ders silinemedi.", "error");
+        return;
+      }
 
-        setErrors({});
+      await getLessons();
 
-        const preparedLesson = {
-            name: formData.name.trim(),
-            isActive: isEditing ? formData.isActive : true,
-        };
+      setDeletingLessonId(null);
+      closeModal(modalId);
+      showToast("Ders başarıyla silindi.");
+    } catch (error) {
+      console.error(error);
+      showToast(error.message || "Sunucu hatası oluştu.", "error");
+    }
+  };
 
-        try {
-            const result = isEditing
-                ? await lessonService.update({
-                    id: editingLessonId,
-                    ...preparedLesson,
-                })
-                : await lessonService.create(preparedLesson);
+  const handleExportLessonsPdf = () => {
+    showToast("PDF indirme işlemi daha sonra bağlanacak.", "info");
+  };
 
-            if (!result.isSuccess) {
-                setErrors({
-                    general: result.message || "İşlem başarısız.",
-                });
-                return;
-            }
-
-            await getLessons();
-
-            setFormData(emptyLessonForm);
-            setEditingLessonId(null);
-            setErrors({});
-            closeModal(modalId);
-
-            showToast(
-                isEditing
-                    ? "Ders başarıyla güncellendi."
-                    : "Yeni ders başarıyla eklendi."
-            );
-        } catch (error) {
-            console.error(error);
-
-            setErrors({
-                general:
-                    error.response?.data?.message ||
-                    error.response?.data?.Message ||
-                    error.response?.data?.title ||
-                    error.message ||
-                    "Sunucu hatası oluştu.",
-            });
-        }
-    };
-
-    const handleDelete = async (modalId) => {
-        try {
-            const result = await lessonService.delete(deletingLessonId);
-
-            if (!result.isSuccess) {
-                showToast(result.message || "Ders silinemedi.", "error");
-                return;
-            }
-
-            await getLessons();
-
-            setDeletingLessonId(null);
-            closeModal(modalId);
-            showToast("Ders başarıyla silindi.");
-        } catch (error) {
-            console.error(error);
-            showToast(error.message || "Sunucu hatası oluştu.", "error");
-        }
-    };
-
-    const handleExportLessonsPdf = () => {
-        showToast("PDF indirme işlemi daha sonra bağlanacak.", "info");
-    };
-
-    return {
-        lessons,
-        filteredLessons,
-        formData,
-        setFormData,
-        errors,
-        isEditing,
-        toast,
-        search,
-        setSearch,
-        statusFilter,
-        setStatusFilter,
-        handleOpenCreateModal,
-        handleOpenEditModal,
-        handleCloseLessonModal,
-        handleOpenDeleteModal,
-        handleCloseDeleteModal,
-        handleSubmit,
-        handleDelete,
-        handleExportLessonsPdf,
-    };
+  return {
+    lessons,
+    filteredLessons,
+    formData,
+    setFormData,
+    errors,
+    isEditing,
+    toast,
+    search,
+    setSearch,
+    handleOpenCreateModal,
+    handleOpenEditModal,
+    handleCloseLessonModal,
+    handleOpenDeleteModal,
+    handleCloseDeleteModal,
+    handleSubmit,
+    handleDelete,
+    handleExportLessonsPdf,
+  };
 }
 
 export default useLessonsPage;

@@ -2,12 +2,10 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 import Card from "../../../components/ui/Card";
 import TableActions from "../../../components/ui/TableActions";
-import StatusBadge from "../../../components/ui/StatusBadge";
 
 function LessonTableRow({ lesson, index = 0, onEdit, onDelete, onDetail }) {
   const lessonId = lesson.id || lesson.Id;
   const lessonName = lesson.name || lesson.Name || "İsimsiz Ders";
-  const isActive = lesson.isActive !== false && lesson.IsActive !== false;
 
   const accentColors = [
     "bg-primary/70",
@@ -60,11 +58,6 @@ function LessonTableRow({ lesson, index = 0, onEdit, onDelete, onDetail }) {
               </h3>
             </div>
           </div>
-
-          <StatusBadge
-            status={isActive ? "Aktif" : "Pasif"}
-            variant="soft"
-          />
         </div>
 
         <div className="mt-5 flex items-center justify-between border-t border-base-300/60 pt-4">
