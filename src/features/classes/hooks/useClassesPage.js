@@ -19,7 +19,6 @@ import {
   getBackendFieldErrors,
   getClassGrade,
   getClassId,
-  getClassIsActive,
   getClassSection,
   getClassTeacherId,
   getErrorMessage,
@@ -150,7 +149,6 @@ export function useClassesPage() {
       grade: String(getClassGrade(classItem) || ""),
       section: getClassSection(classItem) || "",
       teacherId: getClassTeacherId(classItem) || "",
-      isActive: String(getClassIsActive(classItem)),
     });
     setErrors({});
     openModal(modalId);
@@ -174,17 +172,11 @@ export function useClassesPage() {
   };
 
   const prepareClassPayload = () => {
-    const payload = {
+    return {
       grade: Number(formData.grade),
       section: formData.section.trim().toUpperCase(),
       teacherId: formData.teacherId || null,
     };
-
-    if (editingClassId) {
-      payload.isActive = formData.isActive === "true";
-    }
-
-    return payload;
   };
 
   const handleSubmit = async (modalId) => {

@@ -24,10 +24,6 @@ export const getClassStudentCount = (classItem) => {
   );
 };
 
-export const getClassIsActive = (classItem) => {
-  return classItem?.isActive ?? classItem?.IsActive ?? true;
-};
-
 export const getClassName = (classItem) => {
   const backendName =
     classItem?.name ||
